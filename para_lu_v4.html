@@ -231,6 +231,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     <div class="ce-titulo">JOGAR</div>
     <div class="ce-info" id="info-entrada">Mundo 1 — Clareira</div>
   </div>
+  <button class="btn-voltar" id="btn-recomecar" onclick="apagarProgresso()" style="display:none;font-size:9px;opacity:0.55">↩ Recomeçar do início</button>
+  <div id="save-flash" style="font-size:9px;color:#5dda7d;opacity:0;transition:opacity 0.5s;letter-spacing:2px">💾 SALVO</div>
 </div>
 
 <!-- ====== MAPA ====== -->
@@ -468,6 +470,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   };
   // começa todos os personagens no nível 1
   PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
+  // sobrepõe com progresso salvo (se houver)
+  carregarProgresso();
 
   // posições dos personagens no canvas da batalha
   const POS_JOG = { x: 148, y: 192 };
@@ -506,6 +510,9 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     const cfg = MUNDOS[E.mundoIdx];
     document.getElementById('info-entrada').textContent =
       'Mundo ' + cfg.num + ' — ' + cfg.nome + '  ' + cfg.est;
+    var btnRec = document.getElementById('btn-recomecar');
+    if (btnRec) btnRec.style.display =
+      (E.concluidos.length > 0 || E.mundoIdx > 0) ? 'block' : 'none';
   }
 
   function mostrarMapa() {
@@ -581,10 +588,11 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   function proximoMundo() {
     if (!E.concluidos.includes(E.mundoIdx)) E.concluidos.push(E.mundoIdx);
     var prox = E.mundoIdx + 1;
-    if (prox >= MUNDOS.length) { mostrarEntrada(); return; }
+    if (prox >= MUNDOS.length) { salvarProgresso(); mostrarEntrada(); return; }
     E.capMundo = new Set();
     E.fusao    = null;
     mostrarMundo(prox);
+    salvarProgresso();
   }
 
   // =====================================================
@@ -1179,6 +1187,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
           // sobe de nível (somente se não for fusão)
           if (nomeJog) {
             E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
+            salvarProgresso();
             var novoNv = E.niveis[nomeJog];
             aoSairNivel = mostrarGameOverVitoria;
             setTimeout(function() { mostrarNivelUp(nomeJog, novoNv); }, 700);
@@ -1341,6 +1350,52 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     ctx.fillStyle = '#ff6d00'; ctx.strokeStyle = '#bf360c'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(x+60, y);    ctx.lineTo(x+87, y-15); ctx.lineTo(x+83, y+1);  ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x+60, y+11); ctx.lineTo(x+87, y+26); ctx.lineTo(x+83, y+11); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+
+  // =====================================================
+  // PROGRESSO — salvar e carregar via localStorage
+  // =====================================================
+
+  function salvarProgresso() {
+    var dados = {
+      mundoIdx:   E.mundoIdx,
+      concluidos: E.concluidos,
+      niveis:     E.niveis
+    };
+    localStorage.setItem('paralu_progresso', JSON.stringify(dados));
+    // pisca o indicador de save
+    var flash = document.getElementById('save-flash');
+    if (flash) {
+      flash.style.opacity = '1';
+      setTimeout(function() { flash.style.opacity = '0'; }, 1200);
+    }
+  }
+
+  function carregarProgresso() {
+    var json = localStorage.getItem('paralu_progresso');
+    if (!json) return;
+    try {
+      var dados = JSON.parse(json);
+      if (typeof dados.mundoIdx === 'number')
+        E.mundoIdx = Math.min(dados.mundoIdx, MUNDOS.length - 1);
+      if (Array.isArray(dados.concluidos))
+        E.concluidos = dados.concluidos.filter(function(i) { return typeof i === 'number'; });
+      if (dados.niveis && typeof dados.niveis === 'object') {
+        Object.keys(dados.niveis).forEach(function(k) {
+          if (Object.prototype.hasOwnProperty.call(E.niveis, k))
+            E.niveis[k] = dados.niveis[k];
+        });
+      }
+    } catch(e) {}
+  }
+
+  function apagarProgresso() {
+    if (!confirm('Apagar todo o progresso e recomeçar do início?')) return;
+    localStorage.removeItem('paralu_progresso');
+    E.mundoIdx   = 0;
+    E.concluidos = [];
+    PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
+    mostrarEntrada();
   }
 
   // =====================================================
