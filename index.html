@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Para Lú!</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #08101e; font-family: monospace; color: white;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 12px;
+}
+.tela { display: none; flex-direction: column; align-items: center; gap: 10px; }
+.btn-voltar {
+  background: none; border: 1px solid #1a3a5c; color: #6a9ab8;
+  padding: 5px 12px; border-radius: 5px; cursor: pointer;
+  font-family: monospace; font-size: 11px; letter-spacing: 1px;
+}
+.btn-voltar:hover { border-color: #4a7aa0; color: #aac4d8; }
+.topo { width: 600px; display: flex; justify-content: space-between; align-items: center; }
+.topo-label { font-size: 11px; letter-spacing: 2px; color: #7dcfff; }
+
+/* ===== ENTRADA ===== */
+#tela-entrada { gap: 18px; }
+.titulo { font-size: 46px; color: #a8ff8c; letter-spacing: 5px; animation: brilhar 2.2s ease-in-out infinite; }
+@keyframes brilhar {
+  0%,100% { text-shadow: 0 0 20px #7dff9b, 0 0 45px #3dba5d; }
+  50%      { text-shadow: 0 0 35px #c8ffb0, 0 0 80px #5dda7d; }
+}
+.sub { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #445; }
+.cartao-entrada {
+  background: #060e1c; border: 2px solid #1a3a5c; border-radius: 14px;
+  padding: 24px 60px; display: flex; flex-direction: column;
+  align-items: center; gap: 14px; cursor: pointer; transition: all 0.15s;
+}
+.cartao-entrada:hover { border-color: #5dda7d; background: #07140e; transform: scale(1.03); }
+.ce-icone  { font-size: 44px; }
+.ce-titulo { font-size: 14px; letter-spacing: 3px; color: #a8ff8c; }
+.ce-info   { font-size: 10px; color: #5dda7d; }
+
+/* ===== MAPA ===== */
+#mapa-dims { display: flex; flex-direction: column; gap: 10px; width: 600px; }
+.dim-bloco { background: #06101e; border: 2px solid #1a3a5c; border-radius: 10px; padding: 12px; }
+.dim-titulo { font-size: 10px; letter-spacing: 2px; color: #7dcfff; margin-bottom: 10px; text-transform: uppercase; }
+.dim-mundos { display: flex; gap: 10px; }
+.mundo-card {
+  flex: 1; background: #08182e; border: 2px solid #1a3a5c; border-radius: 8px;
+  padding: 10px 6px; text-align: center; transition: all 0.15s;
+}
+.mundo-card.disponivel { cursor: pointer; }
+.mundo-card.disponivel:hover { border-color: #5dda7d; }
+.mundo-card.atual      { border-color: #a8ff8c; box-shadow: 0 0 12px rgba(168,255,140,0.3); cursor: pointer; }
+.mundo-card.concluido  { border-color: #43a047; opacity: 0.8; cursor: pointer; }
+.mundo-card.bloqueado  { opacity: 0.28; }
+.mc-ico  { font-size: 18px; margin-bottom: 3px; }
+.mc-num  { font-size: 9px; color: #7dcfff; letter-spacing: 1px; }
+.mc-nome { font-size: 8px; color: #7a9ab0; margin-top: 1px; }
+.mc-dif  { font-size: 9px; color: #ffd700; margin-top: 4px; }
+
+/* ===== DENTRO DO MUNDO ===== */
+.mundo-header {
+  width: 600px; background: #06101e; border: 2px solid #1a3a5c;
+  border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+}
+.mh-nome { font-size: 14px; color: #a8ff8c; font-weight: bold; }
+.mh-dif  { font-size: 10px; color: #ffd700; }
+.mundo-acoes { display: flex; gap: 10px; width: 600px; }
+.btn-acao {
+  flex: 1; padding: 14px 8px; border-radius: 9px; border: 2px solid;
+  font-family: monospace; font-size: 10px; cursor: pointer; text-align: center;
+  line-height: 1.7; transition: all 0.15s; background: #06101e;
+}
+.btn-acao:hover { filter: brightness(1.3); transform: scale(1.04); }
+.btn-acao.verde    { border-color: #5dda7d; color: #a8ff8c; }
+.btn-acao.roxo     { border-color: #9c27b0; color: #ce93d8; }
+.btn-acao.vermelho { border-color: #ff5252; color: #ef9a9a; }
+.btn-acao .ai { font-size: 26px; display: block; margin-bottom: 3px; }
+.btn-acao .an { font-size: 11px; letter-spacing: 1px; font-weight: bold; }
+.btn-acao .ad { font-size: 8px; color: #556; }
+.colecao-mundo {
+  width: 600px; background: rgba(0,0,0,0.2); border: 2px solid #1a3a5c;
+  border-radius: 8px; padding: 9px 12px;
+}
+.col-titulo { font-size: 8px; letter-spacing: 2px; color: #7dcfff; margin-bottom: 7px; text-transform: uppercase; }
+.col-grid   { display: flex; flex-wrap: wrap; gap: 5px; min-height: 36px; align-items: center; }
+.card-cap   {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 7px; border-radius: 5px; text-align: center;
+}
+.cc-em { font-size: 17px; display: block; }
+.cc-nm { font-size: 7px; color: #aaa; }
+.col-vazia { font-size: 9px; opacity: 0.4; font-style: italic; }
+
+/* ===== CAPTURA ===== */
+canvas#canvas-captura { border: 3px solid #5a7d2a; border-radius: 8px; }
+.cap-info {
+  width: 600px; background: #06101e; border: 2px solid #1a3a5c;
+  border-radius: 8px; padding: 7px 14px; display: flex; align-items: center; gap: 8px;
+}
+.cap-num  { font-size: 11px; color: #7dcfff; min-width: 75px; }
+.cap-stat { font-size: 9px; color: #a8ff8c; flex: 1; }
+
+/* ===== FUSÃO ===== */
+.fusao-painel { width: 600px; background: #06101e; border: 2px solid #9c27b0; border-radius: 10px; padding: 14px; }
+.fusao-slots { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.fusao-slot {
+  flex: 1; background: #0d1929; border: 2px dashed #2a4a7c; border-radius: 8px;
+  padding: 12px; text-align: center; cursor: pointer; min-height: 68px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: border-color 0.15s;
+}
+.fusao-slot.ativo { border-color: #9c27b0; border-style: solid; }
+.fusao-slot.cheio { border-style: solid; }
+.fusao-slot:hover { border-color: #7b1fa2; }
+.fs-em   { font-size: 28px; }
+.fs-nm   { font-size: 9px; color: #ce93d8; margin-top: 4px; }
+.fs-hint { font-size: 9px; color: #556; }
+.fusao-mais { font-size: 22px; color: #9c27b0; flex-shrink: 0; }
+.fusao-disp-titulo { font-size: 8px; color: #556; letter-spacing: 1px; margin-bottom: 6px; }
+.fusao-disp { display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; }
+.btn-fundir {
+  width: 100%; padding: 10px; background: #7b1fa2; border: none; border-radius: 7px;
+  color: white; font-family: monospace; font-size: 12px; font-weight: bold;
+  cursor: pointer; letter-spacing: 2px; margin-top: 10px; transition: all 0.15s;
+}
+.btn-fundir:hover:not(:disabled) { background: #9c27b0; box-shadow: 0 0 14px rgba(156,39,176,0.5); }
+.btn-fundir:disabled { opacity: 0.3; cursor: not-allowed; }
+.fusao-res {
+  background: #0a1020; border: 2px solid #7b1fa2; border-radius: 8px;
+  padding: 12px; text-align: center; display: none; margin-top: 10px;
+}
+.fr-em { font-size: 38px; }
+.fr-nm { font-size: 13px; color: #ce93d8; margin: 4px 0; font-weight: bold; }
+.fr-st { font-size: 10px; color: #9cb4c8; }
+.fr-ok { font-size: 9px; color: #9c27b0; margin-top: 6px; }
+
+/* ===== SELEÇÃO ===== */
+.sel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; width: 600px; }
+.sel-card {
+  background: #060e1c; border: 2px solid #1a3a5c; border-radius: 8px;
+  padding: 9px 4px 7px; cursor: pointer; text-align: center; transition: all 0.15s;
+}
+.sel-card:hover  { transform: scale(1.04); }
+.sel-card.ativo  { box-shadow: 0 0 14px rgba(170,196,255,0.4); }
+.sc-em { font-size: 28px; }
+.sc-nm { font-size: 7px; color: #aac4ff; margin-top: 3px; line-height: 1.3; }
+.sc-nv { font-size: 8px; color: #ffd700; margin-top: 2px; }
+.sel-preview {
+  width: 600px; background: #06101e; border: 2px solid #2a4a7c;
+  border-radius: 10px; padding: 12px 16px; display: none;
+}
+.sp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.sp-nome   { font-size: 14px; font-weight: bold; color: #aac4ff; }
+.sp-cien   { font-size: 8px; color: #445; font-style: italic; margin-top: 2px; }
+.sp-golpes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.gp-card { background: #0a1929; border: 1px solid #1a3a5c; border-radius: 6px; padding: 6px 9px; }
+.gp-nm   { font-size: 10px; color: #dce8f5; }
+.gp-st   { font-size: 8px; color: #6cb0e8; margin-top: 2px; }
+.btn-bat {
+  background: #b71c1c; color: white; border: 2px solid #ff5252; border-radius: 7px;
+  padding: 8px 16px; font-family: monospace; font-size: 11px; font-weight: bold;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-bat:hover { background: #e53935; }
+
+/* ===== BATALHA ===== */
+#tela-batalha { gap: 0; }
+.painel { width: 600px; padding: 8px 14px; background: #06101e; border: 2px solid #1a3a5c; }
+.painel-ini { border-radius: 10px 10px 0 0; border-bottom: none; }
+.painel-jog { border-top: none; }
+.painel-nome { font-size: 10px; letter-spacing: 2px; color: #7dcfff; margin-bottom: 4px; text-transform: uppercase; }
+.barra-linha { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.barra-label { font-size: 8px; color: #7a8fa0; width: 28px; flex-shrink: 0; }
+.trilha { flex: 1; height: 8px; background: #0e1e30; border-radius: 5px; overflow: hidden; }
+.preench { height: 100%; border-radius: 5px; transition: width 0.35s; }
+.preench.vida  { background: #43a047; }
+.preench.vida.perigo { background: #e53935; }
+.preench.mana  { background: #1e88e5; }
+.valor-barra { font-size: 9px; color: #9cb4c8; width: 55px; text-align: right; flex-shrink: 0; }
+canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px solid #1a3a5c; }
+.area-acao { width: 600px; background: #06101e; border: 2px solid #1a3a5c; border-top: 1px solid #0d2035; border-radius: 0 0 10px 10px; }
+#log { padding: 7px 14px; font-size: 11px; color: #dce8f5; min-height: 30px; border-bottom: 1px solid #0d2035; }
+.botoes { display: flex; flex-wrap: wrap; }
+.btn-golpe {
+  width: 50%; padding: 8px 7px; background: #060e1c; border: none;
+  border-right: 1px solid #1a3a5c; border-top: 1px solid #0d2035;
+  color: #dce8f5; font-family: monospace; font-size: 10px;
+  cursor: pointer; text-align: left; line-height: 1.5; transition: background 0.1s;
+}
+.btn-golpe:nth-child(even) { border-right: none; }
+.btn-golpe:hover:not(:disabled) { background: #0d1e30; }
+.btn-golpe:disabled { opacity: 0.3; cursor: not-allowed; }
+.custo { font-size: 8px; color: #6cb0e8; display: block; }
+.btn-desc {
+  width: 100%; padding: 8px 14px; background: #060e1c; border: none;
+  border-top: 1px solid #0d2035; color: #9cb4c8;
+  font-family: monospace; font-size: 10px; cursor: pointer; text-align: left;
+}
+.btn-desc:hover { background: #0d1e30; }
+.area-go { padding: 8px 14px; display: none; gap: 8px; flex-wrap: wrap; border-top: 1px solid #0d2035; }
+.btn-go { padding: 7px 14px; border-radius: 6px; font-family: monospace; font-size: 10px; cursor: pointer; letter-spacing: 1px; border: 1px solid; }
+.go-v { background: #1b3a1e; border-color: #5dda7d; color: #81c784; }
+.go-a { background: #1a2030; border-color: #4a6a8a; color: #9cb4c8; }
+
+/* ===== NÍVEL ===== */
+#tela-nivel { gap: 16px; }
+.nivel-caixa {
+  background: #06101e; border: 3px solid #ffd700; border-radius: 14px;
+  padding: 32px 56px; text-align: center; box-shadow: 0 0 40px rgba(255,215,0,0.2);
+}
+.nv-emoji  { font-size: 60px; margin-bottom: 8px; }
+.nv-titulo { font-size: 11px; color: #ffd700; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 4px; }
+.nv-num    { font-size: 40px; color: #fff176; font-weight: bold; margin-bottom: 10px; }
+.nv-stats  { font-size: 12px; color: #a8ff8c; line-height: 2.1; }
+.btn-continuar {
+  background: #ffd700; color: #1a1200; border: none; border-radius: 8px;
+  padding: 12px 40px; font-family: monospace; font-size: 13px; font-weight: bold;
+  cursor: pointer; letter-spacing: 2px; transition: all 0.15s;
+}
+.btn-continuar:hover { background: #ffee58; box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+</style>
+</head>
+<body>
+
+<!-- ====== ENTRADA ====== -->
+<div class="tela" id="tela-entrada" style="display:flex">
+  <div class="titulo">Para Lú! 🌿</div>
+  <div class="sub">Batalha de Insetos &amp; Peixes</div>
+  <div class="cartao-entrada" onclick="mostrarMapa()">
+    <div class="ce-icone">🗺️</div>
+    <div class="ce-titulo">JOGAR</div>
+    <div class="ce-info" id="info-entrada">Mundo 1 — Clareira</div>
+  </div>
+  <button class="btn-voltar" id="btn-recomecar" onclick="apagarProgresso()" style="display:none;font-size:9px;opacity:0.55">↩ Recomeçar do início</button>
+  <div id="save-flash" style="font-size:9px;color:#5dda7d;opacity:0;transition:opacity 0.5s;letter-spacing:2px">💾 SALVO</div>
+</div>
+
+<!-- ====== MAPA ====== -->
+<div class="tela" id="tela-mapa">
+  <div class="topo">
+    <button class="btn-voltar" onclick="mostrarEntrada()">← Início</button>
+    <span class="topo-label">🗺️ MAPA DOS MUNDOS</span>
+    <span style="font-size:9px;color:#556;min-width:80px;text-align:right" id="mapa-info"></span>
+  </div>
+  <div id="mapa-dims"></div>
+</div>
+
+<!-- ====== DENTRO DO MUNDO ====== -->
+<div class="tela" id="tela-mundo">
+  <div class="topo">
+    <button class="btn-voltar" onclick="mostrarMapa()">← Mapa</button>
+    <span class="topo-label" id="mundo-titulo-label">Mundo 1</span>
+    <span style="font-size:9px;color:#7a9ab0" id="mundo-dif-label"></span>
+  </div>
+  <div class="mundo-header">
+    <div class="mh-nome" id="mundo-nome-grande"></div>
+    <div class="mh-dif"  id="mundo-dif-grande"></div>
+  </div>
+  <div class="mundo-acoes">
+    <div class="btn-acao verde" onclick="mostrarCaptura()">
+      <span class="ai">🌿</span><span class="an">Capturar</span>
+      <span class="ad" id="btn-cap-desc">Insetos e peixes</span>
+    </div>
+    <div class="btn-acao roxo" onclick="mostrarFusao()">
+      <span class="ai">⚗️</span><span class="an">Fusão</span>
+      <span class="ad">Misture criaturas!</span>
+    </div>
+    <div class="btn-acao vermelho" onclick="mostrarSelecao()">
+      <span class="ai">⚔️</span><span class="an">Batalha!</span>
+      <span class="ad">Escolha e lute!</span>
+    </div>
+  </div>
+  <div class="colecao-mundo">
+    <div class="col-titulo">🎒 Capturadas neste mundo</div>
+    <div class="col-grid" id="col-mundo"><span class="col-vazia">Nenhuma ainda...</span></div>
+  </div>
+</div>
+
+<!-- ====== CAPTURA ====== -->
+<div class="tela" id="tela-captura">
+  <div class="topo">
+    <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
+    <span class="topo-label">🌿 CAPTURAR CRIATURAS</span>
+    <span style="font-size:9px;color:#556">Setas do teclado para andar</span>
+  </div>
+  <canvas id="canvas-captura" width="600" height="380"></canvas>
+  <div class="cap-info">
+    <div class="cap-num" id="cap-num">0 capturas</div>
+    <div class="cap-stat" id="cap-stat">Insetos na grama 🌿 — Peixes no lago 💧</div>
+  </div>
+  <div class="colecao-mundo" id="cap-colecao" style="display:none">
+    <div class="col-titulo">🎒 Capturadas</div>
+    <div class="col-grid" id="cap-col-grid"></div>
+  </div>
+</div>
+
+<!-- ====== FUSÃO ====== -->
+<div class="tela" id="tela-fusao">
+  <div class="topo">
+    <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
+    <span class="topo-label">⚗️ MÁQUINA DE FUSÃO</span>
+    <span style="font-size:9px;color:#9c27b0">Misture 2 criaturas!</span>
+  </div>
+  <div class="fusao-painel">
+    <div class="fusao-slots">
+      <div class="fusao-slot ativo" id="slot1" onclick="ativarSlot(1)">
+        <span class="fs-hint">← Clique aqui primeiro</span>
+      </div>
+      <div class="fusao-mais">⚗️</div>
+      <div class="fusao-slot" id="slot2" onclick="ativarSlot(2)">
+        <span class="fs-hint">← Clique aqui depois</span>
+      </div>
+    </div>
+    <div class="fusao-disp-titulo">CRIATURAS CAPTURADAS NESTE MUNDO (clique para colocar no slot ativo):</div>
+    <div class="fusao-disp" id="fusao-disp"></div>
+    <button class="btn-fundir" id="btn-fundir" onclick="realizarFusao()" disabled>⚗️ FUNDIR!</button>
+    <div class="fusao-res" id="fusao-res">
+      <div class="fr-em" id="fr-em"></div>
+      <div class="fr-nm" id="fr-nm"></div>
+      <div class="fr-st" id="fr-st"></div>
+      <div class="fr-ok">✓ Fusão pronta! Use na tela de batalha.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SELEÇÃO ====== -->
+<div class="tela" id="tela-selecao">
+  <div class="topo">
+    <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
+    <span class="topo-label">⚔️ ESCOLHA SUA CRIATURA</span>
+    <span style="font-size:9px;color:#a8ff8c" id="sel-bonus-txt"></span>
+  </div>
+  <div class="sel-grid" id="sel-grid"></div>
+  <div class="sel-preview" id="sel-preview">
+    <div class="sp-header">
+      <div>
+        <div class="sp-nome" id="sp-nome"></div>
+        <div class="sp-cien" id="sp-cien"></div>
+      </div>
+      <button class="btn-bat" onclick="confirmarBatalha()">⚔️ Batalhar!</button>
+    </div>
+    <div class="sp-golpes" id="sp-golpes"></div>
+  </div>
+</div>
+
+<!-- ====== BATALHA ====== -->
+<div class="tela" id="tela-batalha">
+  <div class="topo" style="padding-bottom:5px">
+    <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
+    <span style="font-size:10px;color:#ff7070;letter-spacing:2px">⚔️ BATALHA</span>
+    <span style="font-size:9px;color:#a8ff8c" id="bat-info"></span>
+  </div>
+  <div class="painel painel-ini">
+    <div class="painel-nome" id="nome-ini">Inimigo</div>
+    <div class="barra-linha">
+      <span class="barra-label">VIDA</span>
+      <div class="trilha"><div class="preench vida" id="bv-ini" style="width:100%"></div></div>
+      <span class="valor-barra" id="bv-ini-txt">100/100</span>
+    </div>
+    <div class="barra-linha">
+      <span class="barra-label">MANA</span>
+      <div class="trilha"><div class="preench mana" id="bm-ini" style="width:100%"></div></div>
+      <span class="valor-barra" id="bm-ini-txt">100/100</span>
+    </div>
+  </div>
+  <canvas id="campo" width="600" height="256"></canvas>
+  <div class="painel painel-jog">
+    <div class="painel-nome" id="nome-jog">Jogador</div>
+    <div class="barra-linha">
+      <span class="barra-label">VIDA</span>
+      <div class="trilha"><div class="preench vida" id="bv-jog" style="width:100%"></div></div>
+      <span class="valor-barra" id="bv-jog-txt">100/100</span>
+    </div>
+    <div class="barra-linha">
+      <span class="barra-label">MANA</span>
+      <div class="trilha"><div class="preench mana" id="bm-jog" style="width:100%"></div></div>
+      <span class="valor-barra" id="bm-jog-txt">100/100</span>
+    </div>
+  </div>
+  <div class="area-acao">
+    <div id="log">Escolha um golpe!</div>
+    <div class="botoes" id="botoes"></div>
+    <button class="btn-desc" id="btn-desc" onclick="descansar()" style="display:none">💤 Descansar — recupera 20 de mana</button>
+    <div class="area-go" id="area-go">
+      <button class="btn-go go-v" id="btn-proximo">✨ Próximo Mundo!</button>
+      <button class="btn-go go-a" onclick="voltarMundo()">↩ Tentar de novo</button>
+      <button class="btn-go go-a" onclick="mostrarMapa()">🗺️ Mapa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== NÍVEL ====== -->
+<div class="tela" id="tela-nivel">
+  <div class="nivel-caixa">
+    <div class="nv-emoji" id="nv-emoji">🌟</div>
+    <div class="nv-titulo">Subiu de Nível!</div>
+    <div class="nv-num"   id="nv-num">Nível 2</div>
+    <div class="nv-stats" id="nv-stats"></div>
+  </div>
+  <button class="btn-continuar" onclick="continuarNivel()">▶ Continuar!</button>
+</div>
+
+<script>
+
+  // =====================================================
+  // OS 16 PERSONAGENS — 11 insetos + 5 peixes
+  // Campos: emoji, nome, cien (nome científico), tipo, cor, golpes[4]
+  // Cada golpe: n=nome, i=ícone, d=dano, m=mana, t=texto do ataque
+  // =====================================================
+  const PERS = [
+    // ===== INSETOS =====
+    { emoji:'🦋', nome:'Borboleta-monarca',  cien:'Danaus plexippus',          tipo:'inseto', cor:'#ce93d8',
+      golpes:[{n:'Asas Coloridas',i:'✨',d:10,m:8, t:'A Borboleta confundiu com suas asas!'},{n:'Pólen Dourado',i:'🌸',d:16,m:15,t:'A Borboleta lançou nuvem de pólen!'},{n:'Veneno Monarca',i:'☠️',d:23,m:22,t:'A Borboleta liberou seu veneno!'},{n:'Tempestade',i:'🌪️',d:33,m:32,t:'Uma tempestade de escamas brilhantes!'}] },
+    { emoji:'🐝', nome:'Abelha-europeia',    cien:'Apis mellifera',             tipo:'inseto', cor:'#ffca28',
+      golpes:[{n:'Picada Rápida',i:'💛',d:10,m:8, t:'A Abelha picou rapidinho!'},{n:'Ferroada',i:'⚡',d:18,m:15,t:'A Abelha cravou o ferrão!'},{n:'Veneno',i:'🧪',d:23,m:23,t:'A Abelha injetou todo o veneno!'},{n:'Enxame Furioso',i:'🌪️',d:33,m:35,t:'O enxame inteiro atacou!'}] },
+    { emoji:'🐞', nome:'Joaninha',           cien:'Coccinella septempunctata',  tipo:'inseto', cor:'#ef5350',
+      golpes:[{n:'Casco Duro',i:'🛡️',d:9, m:7, t:'A Joaninha bateu o casco!'},{n:'Mancha Venenosa',i:'🔴',d:15,m:14,t:'As manchas tóxicas atacaram!'},{n:'Spray Químico',i:'💨',d:21,m:20,t:'O spray defensivo foi lançado!'},{n:'Armadura Total',i:'⚔️',d:30,m:30,t:'O golpe supremo da armadura!'}] },
+    { emoji:'🦗', nome:'Gafanhoto-verde',    cien:'Tettigonia viridissima',     tipo:'inseto', cor:'#66bb6a',
+      golpes:[{n:'Salto Relâmpago',i:'🏃',d:11,m:8, t:'O Gafanhoto saltou veloz!'},{n:'Patas Gigantes',i:'🦵',d:17,m:15,t:'As patas traseiras chutaram!'},{n:'Estridulação',i:'🔊',d:21,m:21,t:'O barulho ensurdecedor atordoou!'},{n:'Enxame Verde',i:'🌿',d:32,m:33,t:'O enxame verde atacou junto!'}] },
+    { emoji:'🪲', nome:'Besouro-hércules',   cien:'Dynastes hercules',          tipo:'inseto', cor:'#8d6e63',
+      golpes:[{n:'Chifrada',i:'🦏',d:12,m:9, t:'O chifre poderoso atacou!'},{n:'Pinça Esmagadora',i:'💢',d:19,m:17,t:'As mandíbulas esmagaram!'},{n:'Carga de Titã',i:'💪',d:25,m:25,t:'Uma carga devastadora!'},{n:'Força de Hércules',i:'🏋️',d:37,m:38,t:'A força lendária no golpe supremo!'}] },
+    { emoji:'🐛', nome:'Lagarta-da-couve',   cien:'Pieris brassicae',           tipo:'inseto', cor:'#aed581',
+      golpes:[{n:'Fio de Seda',i:'🕸️',d:10,m:8, t:'O fio de seda pegajoso acertou!'},{n:'Bocadão',i:'😤',d:15,m:14,t:'A mordida enorme acertou!'},{n:'Casulo Explosivo',i:'💥',d:22,m:22,t:'O casulo explodiu no inimigo!'},{n:'Transformação',i:'🦋',d:33,m:35,t:'A borboleta gigante atacou!'}] },
+    { emoji:'🦟', nome:'Mosquito-da-dengue', cien:'Aedes aegypti',              tipo:'inseto', cor:'#78909c',
+      golpes:[{n:'Picada Veloz',i:'⚡',d:9, m:7, t:'O Mosquito picou rapidinho!'},{n:'Zumbido',i:'🔊',d:13,m:12,t:'O zumbido atordoou!'},{n:'Sugador',i:'🩸',d:21,m:20,t:'A energia vital foi sugada!'},{n:'Praga Furiosa',i:'☠️',d:29,m:30,t:'A praga devastadora chegou!'}] },
+    { emoji:'🪰', nome:'Mosca-doméstica',    cien:'Musca domestica',            tipo:'inseto', cor:'#90a4ae',
+      golpes:[{n:'Pouso Relâmpago',i:'⚡',d:9, m:7, t:'A Mosca atacou num flash!'},{n:'Zigue-Zague',i:'〰️',d:13,m:13,t:'O voo confundiu o inimigo!'},{n:'Visão Composta',i:'👁️',d:19,m:18,t:'Os olhos compostos guiaram!'},{n:'Nuvem de Moscas',i:'🌪️',d:28,m:30,t:'Milhares de moscas atacaram!'}] },
+    { emoji:'🐜', nome:'Formiga-saúva',      cien:'Atta sexdens',               tipo:'inseto', cor:'#a1887f',
+      golpes:[{n:'Mandíbula',i:'🦷',d:10,m:8, t:'A mandíbula afiada mordeu!'},{n:'Ácido Fórmico',i:'🧪',d:17,m:14,t:'O ácido corrosivo foi lançado!'},{n:'Força da Colônia',i:'👥',d:23,m:22,t:'A colônia atacou em conjunto!'},{n:'Carregadora',i:'💪',d:34,m:35,t:'A força lendária jogou o inimigo!'}] },
+    { emoji:'🪳', nome:'Barata-americana',   cien:'Periplaneta americana',      tipo:'inseto', cor:'#558b2f',
+      golpes:[{n:'Corrida Furtiva',i:'🏃',d:9, m:7, t:'A Barata atacou de surpresa!'},{n:'Antenas',i:'📡',d:14,m:13,t:'As antenas guiaram o ataque!'},{n:'Casco Invencível',i:'🛡️',d:21,m:20,t:'O contra-ataque foi forte!'},{n:'Sobrevivente',i:'💀',d:31,m:32,t:'O golpe final devastador!'}] },
+    { emoji:'🔵', nome:'Voador Azul',        cien:'Fictícius azulensis',        tipo:'inseto', cor:'#1e88e5', ehVoador:true,
+      golpes:[{n:'Mordida',i:'🦷',d:12,m:10,t:'As presas laranjas morderam!'},{n:'Golpe do Ar',i:'🌀',d:20,m:20,t:'O Voador voou alto e atacou!'},{n:'Raio de Energia',i:'⚡',d:27,m:26,t:'Um raio de energia azul!'},{n:'Chamado da Floresta',i:'🌿',d:36,m:35,t:'Todos os insetos atacaram juntos!'}] },
+    // ===== PEIXES =====
+    { emoji:'🐠', nome:'Peixe-palhaço',  cien:'Amphiprion ocellaris',    tipo:'peixe', cor:'#ff6d00',
+      golpes:[{n:'Toque de Anêmona',i:'🌸',d:10,m:8, t:'O veneno da anêmona acertou!'},{n:'Dança Venenosa',i:'💃',d:16,m:15,t:'A dança entre anêmonas atacou!'},{n:'Nuvem de Toxinas',i:'☁️',d:23,m:22,t:'Uma nuvem de toxinas!'},{n:'Fúria da Anêmona',i:'🌊',d:33,m:33,t:'Toda a fúria da anêmona explodiu!'}] },
+    { emoji:'🦈', nome:'Piranha',         cien:'Pygocentrus nattereri',   tipo:'peixe', cor:'#e53935',
+      golpes:[{n:'Mordida Veloz',i:'🦷',d:11,m:8, t:'A Piranha mordeu num flash!'},{n:'Bando Furioso',i:'👥',d:18,m:16,t:'O bando de Piranhas atacou!'},{n:'Frenesi',i:'🩸',d:25,m:24,t:'O frenesi de sangue começou!'},{n:'Ataque do Cardume',i:'🌪️',d:36,m:36,t:'Todo o cardume atacou!'}] },
+    { emoji:'🐡', nome:'Baiacu',          cien:'Tetraodon nigroviridis',  tipo:'peixe', cor:'#ffd600',
+      golpes:[{n:'Inflar',i:'💨',d:9, m:7, t:'O Baiacu se inflou e espetou!'},{n:'Espinhos Venenosos',i:'🌵',d:16,m:14,t:'Os espinhos venenosos atacaram!'},{n:'Explosão Aquática',i:'💥',d:23,m:22,t:'O Baiacu explodiu em água!'},{n:'Veneno Total',i:'☠️',d:33,m:32,t:'Todo o veneno foi liberado!'}] },
+    { emoji:'🐟', nome:'Peixe-espada',    cien:'Xiphias gladius',         tipo:'peixe', cor:'#1e88e5',
+      golpes:[{n:'Espadada Rápida',i:'⚔️',d:12,m:9, t:'A espada cortou o ar!'},{n:'Mergulho Veloz',i:'💨',d:18,m:16,t:'O mergulho veloz atacou!'},{n:'Perfuração',i:'🗡️',d:25,m:24,t:'O inimigo foi perfurado!'},{n:'Tornado Aquático',i:'🌀',d:36,m:35,t:'Um tornado de água!'}] },
+    { emoji:'🪼', nome:'Arraia',          cien:'Potamotrygon motoro',     tipo:'peixe', cor:'#7b1fa2',
+      golpes:[{n:'Choque Elétrico',i:'⚡',d:11,m:9, t:'O choque elétrico acertou!'},{n:'Cauda Venenosa',i:'☠️',d:17,m:15,t:'A cauda venenosa chicoteou!'},{n:'Descarga Total',i:'🔋',d:24,m:23,t:'A descarga elétrica liberada!'},{n:'Raio das Profundezas',i:'⚡',d:35,m:34,t:'O raio das profundezas atacou!'}] },
+  ];
+
+  // =====================================================
+  // CONFIGURAÇÃO DOS 6 MUNDOS — 2 dimensões × 3 mundos
+  // vidaIni/manaIni = stats do inimigo naquele mundo
+  // golpesIni = quantos golpes o inimigo pode usar (dificuldade)
+  // =====================================================
+  const MUNDOS = [
+    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:1, nome:'Clareira',        vidaIni:100, manaIni:100, golpesIni:2, est:'⭐' },
+    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:2, nome:'Floresta Densa',  vidaIni:135, manaIni:135, golpesIni:3, est:'⭐⭐' },
+    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:3, nome:'Pântano',         vidaIni:170, manaIni:170, golpesIni:4, est:'⭐⭐⭐' },
+    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:4, nome:'Margem do Lago',  vidaIni:210, manaIni:210, golpesIni:4, est:'⭐⭐⭐⭐' },
+    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:5, nome:'Águas Fundas',    vidaIni:260, manaIni:260, golpesIni:4, est:'⭐⭐⭐⭐⭐' },
+    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:6, nome:'Fundo do Abismo', vidaIni:320, manaIni:320, golpesIni:4, est:'⭐⭐⭐⭐⭐⭐' },
+  ];
+
+  // =====================================================
+  // ESTADO GLOBAL DO JOGO
+  // =====================================================
+  const E = {
+    mundoIdx:   0,           // mundo ativo (0..5)
+    concluidos: [],          // índices dos mundos já vencidos
+    niveis:     {},          // {nomePersonagem: numero_nivel}
+    capMundo:   new Set(),   // criaturas capturadas neste mundo (reseta ao avançar)
+    fusao:      null,        // objeto fusão ou null
+    jogIdx:     null,        // índice em PERS ou a string 'fusao'
+    slotAtivo:  1,           // slot ativo na máquina de fusão (1 ou 2)
+    slot1:      null,        // nome no slot 1
+    slot2:      null,        // nome no slot 2
+  };
+  // começa todos os personagens no nível 1
+  PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
+  // sobrepõe com progresso salvo (se houver)
+  carregarProgresso();
+
+  // posições dos personagens no canvas da batalha
+  const POS_JOG = { x: 148, y: 192 };
+  const POS_INI = { x: 440, y: 128 };
+
+  // =====================================================
+  // ÁRVORES DO MINI GAME — posição + raio de colisão
+  // ficam todas na área de grama (y < LAGO_Y)
+  // =====================================================
+  const ARVORES = [
+    {x: 88,  y: 58,  r: 20},
+    {x: 238, y: 128, r: 20},
+    {x: 420, y: 68,  r: 20},
+    {x: 528, y: 152, r: 20},
+    {x: 158, y: 195, r: 20},
+    {x: 472, y: 188, r: 20},
+  ];
+  const LAGO_Y = 244; // linha y que separa grama e lago no mini game
+
+  // modo atual (controla qual loop está rodando)
+  let modoAtual = null;
+  // callback executado ao sair da tela de nível
+  let aoSairNivel = null;
+
+  // =====================================================
+  // NAVEGAÇÃO ENTRE TELAS
+  // =====================================================
+
+  function esconder() {
+    document.querySelectorAll('.tela').forEach(function(t) { t.style.display = 'none'; });
+  }
+
+  function mostrarEntrada() {
+    modoAtual = null; pararCaptura(); esconder();
+    document.getElementById('tela-entrada').style.display = 'flex';
+    const cfg = MUNDOS[E.mundoIdx];
+    document.getElementById('info-entrada').textContent =
+      'Mundo ' + cfg.num + ' — ' + cfg.nome + '  ' + cfg.est;
+    var btnRec = document.getElementById('btn-recomecar');
+    if (btnRec) btnRec.style.display =
+      (E.concluidos.length > 0 || E.mundoIdx > 0) ? 'block' : 'none';
+  }
+
+  function mostrarMapa() {
+    modoAtual = null; pararCaptura(); esconder();
+    document.getElementById('tela-mapa').style.display = 'flex';
+    renderMapa();
+  }
+
+  // abre a tela de ações de um mundo específico
+  function mostrarMundo(idx) {
+    E.mundoIdx = idx; esconder();
+    const cfg = MUNDOS[idx];
+    document.getElementById('tela-mundo').style.display = 'flex';
+    document.getElementById('mundo-titulo-label').textContent = 'Mundo ' + cfg.num + ' — ' + cfg.nome;
+    document.getElementById('mundo-dif-label').textContent    = cfg.est;
+    document.getElementById('mundo-nome-grande').textContent  = cfg.nome;
+    document.getElementById('mundo-dif-grande').textContent   =
+      cfg.est + '  Inimigo: ' + cfg.vidaIni + ' vida';
+    const n = E.capMundo.size;
+    document.getElementById('btn-cap-desc').textContent =
+      n > 0 ? n + ' capturada' + (n > 1 ? 's' : '') : 'Insetos e peixes';
+    renderColecaoMundo();
+  }
+
+  // volta para a tela do mundo atual
+  function voltarMundo() { pararCaptura(); mostrarMundo(E.mundoIdx); }
+
+  function mostrarCaptura() {
+    modoAtual = 'captura'; esconder();
+    document.getElementById('tela-captura').style.display = 'flex';
+    iniciarCaptura();
+  }
+
+  function mostrarFusao() {
+    modoAtual = 'fusao'; pararCaptura(); esconder();
+    document.getElementById('tela-fusao').style.display = 'flex';
+    iniciarFusao();
+  }
+
+  function mostrarSelecao() {
+    modoAtual = 'selecao'; pararCaptura(); esconder();
+    document.getElementById('tela-selecao').style.display = 'flex';
+    iniciarSelecao();
+  }
+
+  function confirmarBatalha() {
+    if (E.jogIdx === null) return;
+    modoAtual = 'batalha'; esconder();
+    document.getElementById('tela-batalha').style.display = 'flex';
+    iniciarBatalha();
+  }
+
+  // exibe a tela de nível após vitória
+  function mostrarNivelUp(nomeP, nivelNovo) {
+    esconder();
+    document.getElementById('tela-nivel').style.display = 'flex';
+    const p = PERS.find(function(x) { return x.nome === nomeP; });
+    document.getElementById('nv-emoji').textContent = p ? p.emoji : '🌟';
+    document.getElementById('nv-num').textContent   = 'Nível ' + nivelNovo;
+    const bonusVida = (nivelNovo - 1) * 10;
+    const bonusMana = (nivelNovo - 1) * 10;
+    document.getElementById('nv-stats').innerHTML  =
+      '+' + bonusVida + ' de vida máxima<br>' +
+      '+' + bonusMana + ' de mana máxima<br>' +
+      'Golpe especial ficou +3 mais forte!';
+  }
+
+  function continuarNivel() {
+    if (aoSairNivel) { var fn = aoSairNivel; aoSairNivel = null; fn(); }
+  }
+
+  // avança para o próximo mundo após vitória
+  function proximoMundo() {
+    if (!E.concluidos.includes(E.mundoIdx)) E.concluidos.push(E.mundoIdx);
+    var prox = E.mundoIdx + 1;
+    if (prox >= MUNDOS.length) { salvarProgresso(); mostrarEntrada(); return; }
+    E.capMundo = new Set();
+    E.fusao    = null;
+    mostrarMundo(prox);
+    salvarProgresso();
+  }
+
+  // =====================================================
+  // MAPA DE MUNDOS
+  // =====================================================
+  function renderMapa() {
+    var cont = document.getElementById('mapa-dims');
+    cont.innerHTML = '';
+    // agrupa mundos por dimensão
+    var dims = {};
+    MUNDOS.forEach(function(cfg, i) {
+      if (!dims[cfg.dim]) dims[cfg.dim] = { nome: cfg.dimNome, cor: cfg.dimCor, lista: [] };
+      dims[cfg.dim].lista.push({ cfg: cfg, i: i });
+    });
+    Object.values(dims).forEach(function(dim) {
+      var bloco = document.createElement('div');
+      bloco.className = 'dim-bloco';
+      bloco.style.borderColor = dim.cor + '80';
+      bloco.innerHTML = '<div class="dim-titulo">' + dim.nome + '</div>';
+      var row = document.createElement('div');
+      row.className = 'dim-mundos';
+      dim.lista.forEach(function(m) {
+        var maxConc  = E.concluidos.length > 0 ? Math.max.apply(null, E.concluidos) : -1;
+        var concluido = E.concluidos.includes(m.i);
+        var atual     = m.i === E.mundoIdx;
+        var bloqueado = !concluido && !atual && m.i > maxConc + 1;
+        var card = document.createElement('div');
+        card.className = 'mundo-card ' + (bloqueado ? 'bloqueado' : concluido ? 'concluido' : atual ? 'atual' : 'disponivel');
+        card.innerHTML =
+          '<div class="mc-ico">' + (concluido ? '✅' : m.cfg.est[0]) + '</div>' +
+          '<div class="mc-num">Mundo ' + m.cfg.num + '</div>' +
+          '<div class="mc-nome">' + m.cfg.nome + '</div>' +
+          '<div class="mc-dif">' + m.cfg.est + '</div>';
+        if (!bloqueado) (function(ii) { card.onclick = function() { mostrarMundo(ii); }; })(m.i);
+        row.appendChild(card);
+      });
+      bloco.appendChild(row); cont.appendChild(bloco);
+    });
+  }
+
+  // =====================================================
+  // MINI GAME DE CAPTURA
+  // =====================================================
+  var telaCap, pincelCap;
+  var capPers   = { x: 300, y: 110, vel: 3 };
+  var capCriat  = [];
+  var capTeclas = {};
+  var capTimer  = null;
+  var capAtivo  = false;
+
+  document.addEventListener('keydown', function(e) {
+    capTeclas[e.key] = true;
+    if (modoAtual === 'captura' && e.key.startsWith('Arrow')) e.preventDefault();
+  });
+  document.addEventListener('keyup', function(e) { capTeclas[e.key] = false; });
+
+  function pararCaptura() {
+    capAtivo = false;
+    if (capTimer) { clearInterval(capTimer); capTimer = null; }
+  }
+
+  function iniciarCaptura() {
+    telaCap   = document.getElementById('canvas-captura');
+    pincelCap = telaCap.getContext('2d');
+    capPers   = { x: 300, y: 110, vel: 3 };
+    capCriat  = [];
+    capAtivo  = true;
+    // popula o campo com insetos (grama) e peixes (lago)
+    for (var i = 0; i < 4; i++) criarInsetoNoCampo();
+    for (var j = 0; j < 3; j++) criarPeixeNoCampo();
+    if (capTimer) clearInterval(capTimer);
+    capTimer = setInterval(function() {
+      if (modoAtual !== 'captura') return;
+      Math.random() > 0.5 ? criarInsetoNoCampo() : criarPeixeNoCampo();
+    }, 2200);
+    atualizarUICaptura();
+    loopCaptura();
+  }
+
+  function criarInsetoNoCampo() {
+    var lista = PERS.filter(function(p) { return p.tipo === 'inseto'; });
+    var esp   = lista[Math.floor(Math.random() * lista.length)];
+    capCriat.push({
+      esp: esp, tipo: 'inseto',
+      x:  Math.random() * 556 + 22,
+      y:  Math.random() * (LAGO_Y - 60) + 22,
+      vx: (Math.random() - 0.5) * 1.4,
+      vy: (Math.random() - 0.5) * 1.4,
+    });
+  }
+
+  function criarPeixeNoCampo() {
+    var lista = PERS.filter(function(p) { return p.tipo === 'peixe'; });
+    var esp   = lista[Math.floor(Math.random() * lista.length)];
+    capCriat.push({
+      esp: esp, tipo: 'peixe',
+      x:  Math.random() * 556 + 22,
+      y:  LAGO_Y + 12 + Math.random() * (370 - LAGO_Y - 30),
+      vx: (Math.random() - 0.5) * 1.3,
+      vy: (Math.random() - 0.5) * 1.3,
+    });
+  }
+
+  function loopCaptura() {
+    if (!capAtivo || modoAtual !== 'captura') return;
+
+    // velocidade reduzida dentro do lago
+    var noLago = capPers.y > LAGO_Y;
+    var vel    = capPers.vel * (noLago ? 0.55 : 1);
+
+    if (capTeclas['ArrowUp'])    capPers.y -= vel;
+    if (capTeclas['ArrowDown'])  capPers.y += vel;
+    if (capTeclas['ArrowLeft'])  capPers.x -= vel;
+    if (capTeclas['ArrowRight']) capPers.x += vel;
+    capPers.x = Math.max(16, Math.min(584, capPers.x));
+    capPers.y = Math.max(16, Math.min(364, capPers.y));
+
+    // colisão com árvores — empurra o personagem pra fora
+    for (var a = 0; a < ARVORES.length; a++) {
+      var arv  = ARVORES[a];
+      var dx   = capPers.x - arv.x, dy = capPers.y - arv.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < arv.r + 14) {
+        var ang = Math.atan2(dy, dx);
+        capPers.x = arv.x + Math.cos(ang) * (arv.r + 15);
+        capPers.y = arv.y + Math.sin(ang) * (arv.r + 15);
+      }
+    }
+
+    // move as criaturas e aplica limites de zona
+    for (var ci = 0; ci < capCriat.length; ci++) {
+      var c = capCriat[ci];
+      c.x += c.vx; c.y += c.vy;
+      if (c.tipo === 'inseto') {
+        // inseto fica na grama
+        if (c.x < 16 || c.x > 584) c.vx *= -1;
+        if (c.y < 16 || c.y > LAGO_Y - 20) c.vy *= -1;
+        // inseto desvia das árvores
+        for (var ai = 0; ai < ARVORES.length; ai++) {
+          var av = ARVORES[ai];
+          var ex = c.x - av.x, ey = c.y - av.y;
+          if (Math.sqrt(ex*ex + ey*ey) < av.r + 16) {
+            c.vx = (Math.abs(c.vx) || 1) * (ex >= 0 ? 1 : -1);
+            c.vy = (Math.abs(c.vy) || 1) * (ey >= 0 ? 1 : -1);
+          }
+        }
+      } else {
+        // peixe fica no lago
+        if (c.x < 16 || c.x > 584) c.vx *= -1;
+        if (c.y < LAGO_Y + 10 || c.y > 370) c.vy *= -1;
+      }
+    }
+
+    // verifica capturas (jogador encostou na criatura)
+    var novidade = false;
+    for (var ki = capCriat.length - 1; ki >= 0; ki--) {
+      var kc = capCriat[ki];
+      var kdx = capPers.x - kc.x, kdy = capPers.y - kc.y;
+      if (Math.sqrt(kdx*kdx + kdy*kdy) < 28) {
+        if (!E.capMundo.has(kc.esp.nome)) { E.capMundo.add(kc.esp.nome); novidade = true; }
+        capCriat.splice(ki, 1);
+      }
+    }
+    if (novidade) atualizarUICaptura();
+
+    desenharCampoCap();
+    requestAnimationFrame(loopCaptura);
+  }
+
+  function desenharCampoCap() {
+    var ctx = pincelCap, W = 600, H = 380;
+
+    // fundo de grama
+    ctx.fillStyle = '#7cb342';
+    ctx.fillRect(0, 0, W, LAGO_Y);
+
+    // margem suave grama-lago
+    ctx.fillStyle = '#a5d6a7';
+    ctx.fillRect(0, LAGO_Y - 10, W, 16);
+
+    // lago com gradiente azul
+    var gLago = ctx.createLinearGradient(0, LAGO_Y, 0, H);
+    gLago.addColorStop(0, '#42a5f5');
+    gLago.addColorStop(1, '#1565c0');
+    ctx.fillStyle = gLago;
+    ctx.fillRect(0, LAGO_Y, W, H - LAGO_Y);
+
+    // texto decorativo do lago
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.font = 'bold 24px monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('~ LAGO ~', 300, LAGO_Y + (H - LAGO_Y) / 2);
+
+    // florezinhas decorativas na grama (fillStyle opaco para emoji aparecer)
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '15px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    for (var fi = 0; fi < 10; fi++)
+      ctx.fillText('🌼', (fi * 71 + 20) % 576 + 12, (fi * 43 + 18) % (LAGO_Y - 24) + 12);
+
+    // árvores (obstáculos)
+    ctx.font = '40px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (var ti = 0; ti < ARVORES.length; ti++)
+      ctx.fillText('🌳', ARVORES[ti].x, ARVORES[ti].y);
+
+    // criaturas — fillStyle opaco garante que o alpha 0.12 do texto do lago não vaze aqui
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '28px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    for (var cdi = 0; cdi < capCriat.length; cdi++)
+      ctx.fillText(capCriat[cdi].esp.emoji, capCriat[cdi].x, capCriat[cdi].y);
+
+    // personagem (sprite pixel art do Ash)
+    desenharAsh(ctx, capPers.x, capPers.y);
+
+    // dica visual quando está na água
+    if (capPers.y > LAGO_Y) {
+      ctx.fillStyle = 'rgba(100,180,255,0.6)';
+      ctx.font = '9px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('💧 devagar na água', capPers.x, capPers.y - 22);
+    }
+  }
+
+  function atualizarUICaptura() {
+    var n = E.capMundo.size;
+    document.getElementById('cap-num').textContent  = n + ' de ' + PERS.length + ' capturada' + (n !== 1 ? 's' : '');
+    document.getElementById('cap-stat').textContent = n === 0
+      ? 'Insetos na grama 🌿 — Peixes no lago 💧'
+      : 'bônus de +' + (n*5) + '❤️ +' + (n*5) + '💧 na batalha!';
+    var colecao = document.getElementById('cap-colecao');
+    var grid    = document.getElementById('cap-col-grid');
+    colecao.style.display = n > 0 ? 'block' : 'none';
+    grid.innerHTML = '';
+    E.capMundo.forEach(function(nome) {
+      var p = PERS.find(function(x) { return x.nome === nome; });
+      if (!p) return;
+      var d = document.createElement('div');
+      d.className = 'card-cap';
+      d.innerHTML = '<span class="cc-em">' + p.emoji + '</span>' +
+                    '<span class="cc-nm">' + nome.split('-')[0] + '</span>';
+      grid.appendChild(d);
+    });
+  }
+
+  function renderColecaoMundo() {
+    var grid = document.getElementById('col-mundo');
+    if (E.capMundo.size === 0) {
+      grid.innerHTML = '<span class="col-vazia">Nenhuma ainda...</span>'; return;
+    }
+    grid.innerHTML = '';
+    E.capMundo.forEach(function(nome) {
+      var p = PERS.find(function(x) { return x.nome === nome; });
+      if (!p) return;
+      var d = document.createElement('div');
+      d.className = 'card-cap';
+      d.innerHTML = '<span class="cc-em">' + p.emoji + '</span>' +
+                    '<span class="cc-nm">' + nome.split('-')[0] + '</span>';
+      grid.appendChild(d);
+    });
+  }
+
+  // sprite pixel art do Ash — 2px por quadradinho
+  function desenharAsh(ctx, cx, cy) {
+    var sp = [
+      "...rrrrrr...","..rrrrrrrr..","..rrrrwwrrrr.","rrrrrrrrrrrr",
+      "kkppppppppkk",".pppkppkppp.",".pppppppppp.","..pppppppp..",
+      "..cccccccc..","..cccccccccc",".cccwwwwcccc",".cccccccccc.",
+      "..cccccccc..","...aaaaaa...","...aa..aa...","...kk..kk..."
+    ];
+    var cr = {r:'#d72b1f',w:'#ffffff',k:'#1a1a1a',p:'#f5c896',c:'#2c5fb3',a:'#233c75'};
+    var px = 2, ox = Math.round(cx - 6*px), oy = Math.round(cy - 8*px);
+    for (var l = 0; l < sp.length; l++) {
+      for (var col = 0; col < sp[l].length; col++) {
+        var lt = sp[l][col];
+        if (lt !== '.') { ctx.fillStyle = cr[lt]; ctx.fillRect(ox + col*px, oy + l*px, px, px); }
+      }
+    }
+  }
+
+  // =====================================================
+  // MÁQUINA DE FUSÃO
+  // =====================================================
+  function iniciarFusao() {
+    E.slotAtivo = 1; E.slot1 = null; E.slot2 = null;
+    document.getElementById('fusao-res').style.display = 'none';
+    document.getElementById('btn-fundir').disabled = true;
+    renderFusao();
+    ativarSlot(1);
+  }
+
+  function ativarSlot(num) {
+    E.slotAtivo = num;
+    document.getElementById('slot1').classList.toggle('ativo', num === 1);
+    document.getElementById('slot2').classList.toggle('ativo', num === 2);
+  }
+
+  function renderFusao() {
+    var disp = document.getElementById('fusao-disp');
+    disp.innerHTML = '';
+    if (E.capMundo.size === 0) {
+      disp.innerHTML = '<span style="font-size:9px;color:#556;font-style:italic">Capture criaturas primeiro!</span>';
+      return;
+    }
+    E.capMundo.forEach(function(nome) {
+      var p = PERS.find(function(x) { return x.nome === nome; });
+      if (!p) return;
+      var btn = document.createElement('div');
+      btn.className = 'card-cap';
+      btn.style.cursor = 'pointer';
+      btn.innerHTML = '<span class="cc-em">' + p.emoji + '</span>' +
+                      '<span class="cc-nm">' + nome.split('-')[0] + '</span>';
+      (function(np) { btn.onclick = function() { colocarSlot(np); }; })(nome);
+      disp.appendChild(btn);
+    });
+    atualizarSlotsUI();
+  }
+
+  function colocarSlot(nome) {
+    if (E.slotAtivo === 1) E.slot1 = nome;
+    else                    E.slot2 = nome;
+    atualizarSlotsUI();
+    document.getElementById('btn-fundir').disabled =
+      !(E.slot1 && E.slot2 && E.slot1 !== E.slot2);
+  }
+
+  function atualizarSlotsUI() {
+    function setSlot(id, nome) {
+      var el = document.getElementById(id);
+      if (nome) {
+        var p = PERS.find(function(x) { return x.nome === nome; });
+        el.innerHTML = '<span class="fs-em">' + p.emoji + '</span>' +
+                       '<span class="fs-nm">' + p.nome + '</span>';
+        el.classList.add('cheio');
+      } else {
+        el.innerHTML = '<span class="fs-hint">← Clique para escolher</span>';
+        el.classList.remove('cheio');
+      }
+    }
+    setSlot('slot1', E.slot1);
+    setSlot('slot2', E.slot2);
+  }
+
+  function realizarFusao() {
+    if (!E.slot1 || !E.slot2 || E.slot1 === E.slot2) return;
+    var p1 = PERS.find(function(x) { return x.nome === E.slot1; });
+    var p2 = PERS.find(function(x) { return x.nome === E.slot2; });
+    var nm1 = p1.nome.split('-')[0], nm2 = p2.nome.split('-')[0];
+    // a fusão tem stats combinadas e 2 golpes de cada um
+    E.fusao = {
+      ehFusao:  true,
+      emoji:    p1.emoji + p2.emoji,
+      nome:     nm1 + '-' + nm2,
+      cien:     'Fusão especial do Raul!',
+      cor:      '#9c27b0',
+      maxVida:  120,
+      maxMana:  120,
+      golpes:   [ p1.golpes[0], p1.golpes[1], p2.golpes[0], p2.golpes[1] ]
+    };
+    var res = document.getElementById('fusao-res');
+    res.style.display = 'block';
+    document.getElementById('fr-em').textContent = E.fusao.emoji;
+    document.getElementById('fr-nm').textContent = E.fusao.nome;
+    document.getElementById('fr-st').textContent =
+      '❤️ 120 vida  |  💧 120 mana  |  4 golpes combinados';
+  }
+
+  // =====================================================
+  // SELEÇÃO DE PERSONAGEM
+  // =====================================================
+  var selIdx = null; // índice em PERS ou a string 'fusao'
+
+  function iniciarSelecao() {
+    selIdx = null;
+    var bonus = E.capMundo.size * 5;
+    document.getElementById('sel-bonus-txt').textContent =
+      bonus > 0 ? E.capMundo.size + ' capturadas → +' + bonus + '❤️ +' + bonus + '💧' : '';
+    document.getElementById('sel-preview').style.display = 'none';
+    gerarGridSel();
+  }
+
+  function gerarGridSel() {
+    var grid = document.getElementById('sel-grid');
+    grid.innerHTML = '';
+    // card da fusão (se foi criada neste mundo)
+    if (E.fusao) {
+      grid.appendChild(mkCardSel('fusao', E.fusao.emoji, E.fusao.nome, null, E.fusao.cor));
+    }
+    // todos os 16 personagens
+    PERS.forEach(function(p, i) {
+      var nv = E.niveis[p.nome] || 1;
+      grid.appendChild(mkCardSel(i, p.emoji, p.nome, nv, p.cor));
+    });
+  }
+
+  function mkCardSel(idx, emoji, nome, nivel, cor) {
+    var card = document.createElement('div');
+    card.className = 'sel-card';
+    card.id = 'sc-' + idx;
+    card.style.borderColor = (cor || '#1a3a5c') + '60';
+    card.innerHTML =
+      '<div class="sc-em">' + emoji + '</div>' +
+      '<div class="sc-nm">' + nome + '</div>' +
+      (nivel ? '<div class="sc-nv">Nv.' + nivel + '</div>' : '');
+    (function(ii) { card.onclick = function() { selecionarPers(ii); }; })(idx);
+    return card;
+  }
+
+  function selecionarPers(idx) {
+    selIdx = idx;
+    document.querySelectorAll('.sel-card').forEach(function(c) { c.classList.remove('ativo'); });
+    var card = document.getElementById('sc-' + idx);
+    if (card) card.classList.add('ativo');
+
+    var p     = idx === 'fusao' ? E.fusao : PERS[idx];
+    var nv    = idx === 'fusao' ? null : (E.niveis[p.nome] || 1);
+    var bonus = E.capMundo.size * 5;
+
+    document.getElementById('sel-preview').style.display = 'block';
+    document.getElementById('sel-preview').style.borderColor = (p.cor || '#2a4a7c') + '80';
+    document.getElementById('sp-nome').textContent = p.emoji + '  ' + p.nome +
+      (nv ? '  [Nv.' + nv + ']' : '  [Fusão]');
+    document.getElementById('sp-cien').textContent = p.cien || '';
+
+    var gDiv = document.getElementById('sp-golpes');
+    gDiv.innerHTML = '';
+    p.golpes.forEach(function(g, gi) {
+      // último golpe recebe bônus de dano por nível
+      var ext = (nv && gi === p.golpes.length - 1) ? (nv - 1) * 3 : 0;
+      var d = document.createElement('div');
+      d.className = 'gp-card';
+      d.innerHTML =
+        '<div class="gp-nm">' + g.i + ' ' + g.n +
+          (ext > 0 ? ' <span style="color:#ffd700">(+' + ext + ')</span>' : '') + '</div>' +
+        '<div class="gp-st">💥 ' + (g.d + ext) + ' | 💧 ' + g.m + '</div>';
+      gDiv.appendChild(d);
+    });
+  }
+
+  // =====================================================
+  // BATALHA POR TURNOS
+  // =====================================================
+  var telaBat, pincelBat;
+  var combJog = {}, combIni = {};
+  var faseBat    = 'escolha'; // 'escolha' | 'animando' | 'fim'
+  var animAtq    = null;      // animação de ataque em andamento
+  var animPisc   = null;      // animação de piscar (dano recebido)
+  var iniPersIdx = null;      // índice do inimigo em PERS
+  var nomeJog    = null;      // nome do personagem do jogador (pra atualizar nível)
+
+  function iniciarBatalha() {
+    E.jogIdx = selIdx;
+    // escolhe inimigo aleatório diferente do jogador
+    do { iniPersIdx = Math.floor(Math.random() * PERS.length); }
+    while (E.jogIdx !== 'fusao' && iniPersIdx === E.jogIdx);
+
+    var pJ  = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+    var pI  = PERS[iniPersIdx];
+    var cfg = MUNDOS[E.mundoIdx];
+
+    nomeJog = E.jogIdx === 'fusao' ? null : pJ.nome;
+    var nv    = nomeJog ? (E.niveis[nomeJog] || 1) : 1;
+    var bonus = E.capMundo.size * 5;
+    var bonNv = (nv - 1) * 10;
+    var maxV  = (pJ.maxVida || 100) + bonus + bonNv;
+    var maxM  = (pJ.maxMana || 100) + bonus + bonNv;
+
+    combJog = { vida: maxV, mana: maxM, maxVida: maxV, maxMana: maxM };
+    combIni = { vida: cfg.vidaIni, mana: cfg.manaIni, maxVida: cfg.vidaIni, maxMana: cfg.manaIni };
+
+    faseBat = 'escolha'; animAtq = null; animPisc = null;
+    telaBat   = document.getElementById('campo');
+    pincelBat = telaBat.getContext('2d');
+
+    document.getElementById('nome-ini').textContent = '⚔ ' + pI.emoji + ' ' + pI.nome;
+    document.getElementById('nome-jog').textContent = '🎮 ' + pJ.emoji + ' ' + pJ.nome +
+      (nomeJog ? '  [Nv.' + nv + ']' : '  [Fusão]');
+
+    var inf = [];
+    if (bonus > 0)  inf.push('+' + bonus + '❤️💧 captura');
+    if (bonNv > 0)  inf.push('+' + bonNv + '❤️💧 nível');
+    document.getElementById('bat-info').textContent = inf.join(' | ');
+
+    criarBotoesGolpe(pJ, nv);
+    document.getElementById('area-go').style.display  = 'none';
+    document.getElementById('btn-desc').style.display = 'none';
+    atualizarBarras(); atualizarBotoes();
+
+    var msg = (bonus > 0 || bonNv > 0)
+      ? pJ.nome + ' está mais forte! Vida: ' + maxV + '  Mana: ' + maxM
+      : 'A batalha começou! Escolha um golpe!';
+    mostrarLog(msg);
+    loopBatalha();
+  }
+
+  function criarBotoesGolpe(pJ, nv) {
+    var div = document.getElementById('botoes');
+    div.innerHTML = '';
+    pJ.golpes.forEach(function(g, i) {
+      // último golpe recebe bônus de dano por nível
+      var ext = (i === pJ.golpes.length - 1 && nv > 1) ? (nv - 1) * 3 : 0;
+      var btn = document.createElement('button');
+      btn.className = 'btn-golpe'; btn.id = 'bg' + i;
+      btn.innerHTML = g.i + ' ' + g.n + '<span class="custo">💥' + (g.d+ext) + ' | 💧' + g.m + '</span>';
+      (function(ii, ee) { btn.onclick = function() { usarGolpe(ii, ee); }; })(i, ext);
+      div.appendChild(btn);
+    });
+  }
+
+  function loopBatalha() {
+    if (modoAtual !== 'batalha') return;
+    desenharBatalha();
+    requestAnimationFrame(loopBatalha);
+  }
+
+  function desenharBatalha() {
+    var W = 600, H = 256;
+    var grad = pincelBat.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#07102a'); grad.addColorStop(1, '#1a2855');
+    pincelBat.fillStyle = grad; pincelBat.fillRect(0, 0, W, H);
+
+    // plataformas
+    function plat(cx, cy, rx, ry, c1, c2) {
+      var g = pincelBat.createRadialGradient(cx, cy, 4, cx, cy, rx);
+      g.addColorStop(0, c1); g.addColorStop(1, c2);
+      pincelBat.fillStyle = g;
+      pincelBat.beginPath(); pincelBat.ellipse(cx, cy+2, rx, ry, 0, 0, Math.PI*2); pincelBat.fill();
+    }
+    plat(440, 155, 82, 16, '#4a7c59', '#1b5e20');
+    plat(148, 220, 110, 20, '#388e3c', '#1b5e20');
+
+    // calcula deslocamentos da animação de ataque
+    var offJ = 0, offI = 0;
+    if (animAtq) {
+      var t   = Math.min((Date.now() - animAtq.inicio) / 600, 1);
+      var off = (t < 0.5 ? t * 2 : (1 - t) * 2) * 74;
+      if (animAtq.quem === 'jogador') offJ = off; else offI = -off;
+    }
+    // piscar quando recebe dano (alterna visível/invisível)
+    var pvJ = animPisc && animPisc.alvo === 'jogador' &&
+              Math.floor((Date.now() - animPisc.inicio) / 85) % 2 === 0;
+    var pvI = animPisc && animPisc.alvo === 'inimigo' &&
+              Math.floor((Date.now() - animPisc.inicio) / 85) % 2 === 0;
+
+    var pI = PERS[iniPersIdx];
+    var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+    desenharPers(pincelBat, pI, POS_INI.x, POS_INI.y, offI, pvI, 0.8, true);
+    desenharPers(pincelBat, pJ, POS_JOG.x, POS_JOG.y, offJ, pvJ, 1.0, false);
+  }
+
+  function desenharPers(ctx, p, cx, cy, offX, pisca, esc, ehIni) {
+    if (pisca) return;
+    var x = cx + offX, y = cy;
+
+    // Voador Azul tem sprite próprio
+    if (p.ehVoador) {
+      if (ehIni) {
+        ctx.save(); ctx.translate(x, 0); ctx.scale(-1, 1); ctx.translate(-x, 0);
+        desenharVoador(ctx, x, y); ctx.restore();
+      } else { desenharVoador(ctx, x, y); }
+      return;
+    }
+    // sombra
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath(); ctx.ellipse(x+2, y+Math.round(30*esc), Math.round(26*esc), Math.round(7*esc), 0, 0, Math.PI*2); ctx.fill();
+
+    if (p.ehFusao) {
+      // fusão: dois emojis lado a lado
+      ctx.font = Math.round(44*esc) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      var ems = Array.from(p.emoji); // separa os dois emojis corretamente
+      ctx.fillText(ems[0] || '', x - Math.round(16*esc), y);
+      ctx.fillText(ems[1] || '', x + Math.round(16*esc), y);
+    } else {
+      ctx.font = Math.round(58*esc) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.emoji, x, y);
+    }
+  }
+
+  // ===== TURNO DO JOGADOR =====
+
+  function usarGolpe(idx, ext) {
+    if (faseBat !== 'escolha') return;
+    var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+    var g  = pJ.golpes[idx];
+    if (!g || combJog.mana < g.m) return;
+
+    faseBat = 'animando'; atualizarBotoes(); mostrarLog('...');
+    animAtq = { quem: 'jogador', inicio: Date.now() };
+
+    setTimeout(function() {
+      combJog.mana -= g.m;
+      var dano = g.d + (ext || 0);
+      combIni.vida = Math.max(0, combIni.vida - dano);
+      atualizarBarras();
+      mostrarLog(g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
+    }, 300);
+
+    setTimeout(function() {
+      animAtq  = null;
+      animPisc = { alvo: 'inimigo', inicio: Date.now() };
+      setTimeout(function() {
+        animPisc = null;
+        if (combIni.vida <= 0) {
+          faseBat = 'fim';
+          var pJn = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+          mostrarLog('🎉 ' + pJn.nome + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
+          // sobe de nível (somente se não for fusão)
+          if (nomeJog) {
+            E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
+            salvarProgresso();
+            var novoNv = E.niveis[nomeJog];
+            aoSairNivel = mostrarGameOverVitoria;
+            setTimeout(function() { mostrarNivelUp(nomeJog, novoNv); }, 700);
+          } else {
+            setTimeout(mostrarGameOverVitoria, 700);
+          }
+          return;
+        }
+        setTimeout(turnoInimigo, 400);
+      }, 650);
+    }, 600);
+  }
+
+  function descansar() {
+    if (faseBat !== 'escolha') return;
+    faseBat = 'animando'; atualizarBotoes();
+    combJog.mana = Math.min(combJog.maxMana, combJog.mana + 20);
+    atualizarBarras();
+    var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+    mostrarLog(pJ.nome + ' descansou e recuperou 20 de mana...');
+    setTimeout(turnoInimigo, 900);
+  }
+
+  // ===== TURNO DO INIMIGO (NPC) =====
+
+  function turnoInimigo() {
+    var pI   = PERS[iniPersIdx];
+    var max  = MUNDOS[E.mundoIdx].golpesIni; // limite de golpes conforme o mundo
+    var disp = pI.golpes.slice(0, max).filter(function(g) { return g.m <= combIni.mana; });
+
+    if (disp.length === 0) {
+      // sem mana: descansa
+      combIni.mana = Math.min(combIni.maxMana, combIni.mana + 20);
+      atualizarBarras();
+      mostrarLog(pI.nome + ' descansou e recuperou forças...');
+      setTimeout(function() { faseBat = 'escolha'; atualizarBotoes(); }, 800);
+      return;
+    }
+    var g = disp[Math.floor(Math.random() * disp.length)];
+    animAtq = { quem: 'inimigo', inicio: Date.now() };
+    mostrarLog('...');
+
+    setTimeout(function() {
+      combIni.mana -= g.m;
+      combJog.vida  = Math.max(0, combJog.vida - g.d);
+      atualizarBarras();
+      var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+      mostrarLog(g.t + ' ' + pJ.nome + ' perdeu ' + g.d + ' de vida!');
+    }, 300);
+
+    setTimeout(function() {
+      animAtq  = null;
+      animPisc = { alvo: 'jogador', inicio: Date.now() };
+      setTimeout(function() {
+        animPisc = null;
+        if (combJog.vida <= 0) {
+          faseBat = 'fim';
+          var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+          mostrarLog('💀 ' + pJ.nome + ' foi derrotado! Tente de novo!');
+          atualizarBotoes();
+          var ago = document.getElementById('area-go');
+          ago.style.display = 'flex';
+          document.getElementById('btn-proximo').textContent = '↩ Tentar de novo';
+          document.getElementById('btn-proximo').onclick     = voltarMundo;
+          return;
+        }
+        faseBat = 'escolha'; atualizarBotoes();
+      }, 650);
+    }, 600);
+  }
+
+  function mostrarGameOverVitoria() {
+    faseBat = 'fim'; atualizarBotoes();
+    var ago  = document.getElementById('area-go');
+    var btnP = document.getElementById('btn-proximo');
+    ago.style.display = 'flex';
+    if (E.mundoIdx + 1 >= MUNDOS.length) {
+      btnP.textContent = '🏆 Você completou todos os mundos!';
+      btnP.onclick     = mostrarEntrada;
+    } else {
+      btnP.textContent = '✨ Próximo Mundo!';
+      btnP.onclick     = proximoMundo;
+    }
+  }
+
+  function atualizarBarras() {
+    function sb(ib, it, v, m, tp) {
+      var pct = (v / m) * 100;
+      var el  = document.getElementById(ib);
+      el.style.width = pct + '%';
+      if (tp === 'vida') el.className = 'preench vida' + (pct < 25 ? ' perigo' : '');
+      document.getElementById(it).textContent = v + '/' + m;
+    }
+    sb('bv-ini','bv-ini-txt', combIni.vida, combIni.maxVida, 'vida');
+    sb('bm-ini','bm-ini-txt', combIni.mana, combIni.maxMana, 'mana');
+    sb('bv-jog','bv-jog-txt', combJog.vida, combJog.maxVida, 'vida');
+    sb('bm-jog','bm-jog-txt', combJog.mana, combJog.maxMana, 'mana');
+  }
+
+  function atualizarBotoes() {
+    var pJ   = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+    if (!pJ) return;
+    var pode = faseBat === 'escolha';
+    pJ.golpes.forEach(function(g, i) {
+      var btn = document.getElementById('bg' + i);
+      if (btn) btn.disabled = !pode || combJog.mana < g.m;
+    });
+    var temMana = pJ.golpes.some(function(g) { return g.m <= combJog.mana; });
+    var desc    = document.getElementById('btn-desc');
+    desc.style.display = pode && !temMana ? 'block' : 'none';
+  }
+
+  function mostrarLog(txt) { document.getElementById('log').textContent = txt; }
+
+  // =====================================================
+  // SPRITE DO VOADOR AZUL — centopeia azul com asas e presas
+  // =====================================================
+  function desenharVoador(ctx, cx, cy) {
+    var x = cx, y = cy;
+    // asas translúcidas
+    ctx.save(); ctx.globalAlpha = 0.62;
+    ctx.fillStyle = '#5ab4f7'; ctx.strokeStyle = '#1976d2'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(x-20, y-33, 35, 13, -0.25, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x-6,  y-19, 22, 9,  -0.15, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    // segmentos do corpo (5 segmentos)
+    var cs = ['#1565c0','#1e88e5','#1565c0','#1e88e5','#1565c0'];
+    for (var i = 4; i >= 0; i--) {
+      var sx = x - 48 + i*18, sy = y + 9 + Math.sin(i*0.9)*3;
+      // sombra do segmento
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath(); ctx.ellipse(sx+2, sy+2, 11, 8, 0, 0, Math.PI*2); ctx.fill();
+      // segmento
+      ctx.fillStyle = cs[i];
+      ctx.beginPath(); ctx.ellipse(sx, sy, 11, 8, 0, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#0d47a1'; ctx.lineWidth = 1; ctx.stroke();
+      // pernas
+      ctx.strokeStyle = '#1976d2'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(sx-4, sy+7); ctx.lineTo(sx-11, sy+17); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx+4, sy+7); ctx.lineTo(sx+11, sy+17); ctx.stroke();
+    }
+    // pescoço
+    ctx.fillStyle = '#1565c0'; ctx.fillRect(x+25, y+5, 13, 8);
+    // cabeça
+    ctx.fillStyle = '#0d47a1';
+    ctx.beginPath(); ctx.arc(x+44, y+5, 19, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1565c0';
+    ctx.beginPath(); ctx.arc(x+44, y+5, 17, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#0a3880'; ctx.lineWidth = 2; ctx.stroke();
+    // presa laranja
+    ctx.fillStyle = '#ff6d00';
+    ctx.beginPath(); ctx.arc(x+53, y-2, 7, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#e65100'; ctx.lineWidth = 1.5; ctx.stroke();
+    // olho
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(x+55, y-3, 3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath(); ctx.arc(x+51, y-5, 1.8, 0, Math.PI*2); ctx.fill();
+    // garras / presas
+    ctx.fillStyle = '#ff6d00'; ctx.strokeStyle = '#bf360c'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x+60, y);    ctx.lineTo(x+87, y-15); ctx.lineTo(x+83, y+1);  ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+60, y+11); ctx.lineTo(x+87, y+26); ctx.lineTo(x+83, y+11); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+
+  // =====================================================
+  // PROGRESSO — salvar e carregar via localStorage
+  // =====================================================
+
+  function salvarProgresso() {
+    var dados = {
+      mundoIdx:   E.mundoIdx,
+      concluidos: E.concluidos,
+      niveis:     E.niveis
+    };
+    localStorage.setItem('paralu_progresso', JSON.stringify(dados));
+    // pisca o indicador de save
+    var flash = document.getElementById('save-flash');
+    if (flash) {
+      flash.style.opacity = '1';
+      setTimeout(function() { flash.style.opacity = '0'; }, 1200);
+    }
+  }
+
+  function carregarProgresso() {
+    var json = localStorage.getItem('paralu_progresso');
+    if (!json) return;
+    try {
+      var dados = JSON.parse(json);
+      if (typeof dados.mundoIdx === 'number')
+        E.mundoIdx = Math.min(dados.mundoIdx, MUNDOS.length - 1);
+      if (Array.isArray(dados.concluidos))
+        E.concluidos = dados.concluidos.filter(function(i) { return typeof i === 'number'; });
+      if (dados.niveis && typeof dados.niveis === 'object') {
+        Object.keys(dados.niveis).forEach(function(k) {
+          if (Object.prototype.hasOwnProperty.call(E.niveis, k))
+            E.niveis[k] = dados.niveis[k];
+        });
+      }
+    } catch(e) {}
+  }
+
+  function apagarProgresso() {
+    if (!confirm('Apagar todo o progresso e recomeçar do início?')) return;
+    localStorage.removeItem('paralu_progresso');
+    E.mundoIdx   = 0;
+    E.concluidos = [];
+    PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
+    mostrarEntrada();
+  }
+
+  // =====================================================
+  // INÍCIO DO JOGO
+  // =====================================================
+  mostrarEntrada();
+
+</script>
+</body>
+</html>
