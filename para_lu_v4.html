@@ -288,6 +288,10 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     <div class="cap-num" id="cap-num">0 capturas</div>
     <div class="cap-stat" id="cap-stat">Insetos na grama 🌿 — Peixes no lago 💧</div>
   </div>
+  <div class="colecao-mundo" id="cap-colecao" style="display:none">
+    <div class="col-titulo">🎒 Capturadas</div>
+    <div class="col-grid" id="cap-col-grid"></div>
+  </div>
 </div>
 
 <!-- ====== FUSÃO ====== -->
@@ -817,10 +821,23 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
   function atualizarUICaptura() {
     var n = E.capMundo.size;
-    document.getElementById('cap-num').textContent  = n + ' capturada' + (n !== 1 ? 's' : '');
+    document.getElementById('cap-num').textContent  = n + ' de ' + PERS.length + ' capturada' + (n !== 1 ? 's' : '');
     document.getElementById('cap-stat').textContent = n === 0
       ? 'Insetos na grama 🌿 — Peixes no lago 💧'
-      : n + ' capturada' + (n > 1 ? 's' : '') + ' → bônus de +' + (n*5) + '❤️ +' + (n*5) + '💧 na batalha!';
+      : 'bônus de +' + (n*5) + '❤️ +' + (n*5) + '💧 na batalha!';
+    var colecao = document.getElementById('cap-colecao');
+    var grid    = document.getElementById('cap-col-grid');
+    colecao.style.display = n > 0 ? 'block' : 'none';
+    grid.innerHTML = '';
+    E.capMundo.forEach(function(nome) {
+      var p = PERS.find(function(x) { return x.nome === nome; });
+      if (!p) return;
+      var d = document.createElement('div');
+      d.className = 'card-cap';
+      d.innerHTML = '<span class="cc-em">' + p.emoji + '</span>' +
+                    '<span class="cc-nm">' + nome.split('-')[0] + '</span>';
+      grid.appendChild(d);
+    });
   }
 
   function renderColecaoMundo() {
