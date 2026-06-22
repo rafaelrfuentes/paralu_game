@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Para Lú!</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -109,6 +110,37 @@ canvas#canvas-captura { border: 3px solid #5a7d2a; border-radius: 8px; }
 }
 .dpad-btn:active, .dpad-btn.pressionado { background: #1a3a5c; border-color: #7dcfff; }
 .dpad-centro { width: 60px; height: 60px; }
+
+/* ===== LANDSCAPE MOBILE (captura) ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    padding: 0 6px;
+    height: 100vh;
+    min-height: 0;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+  #tela-captura {
+    display: grid !important;
+    grid-template-areas: "topo topo" "cnvs dpad" "info dpad";
+    grid-template-columns: 1fr 148px;
+    grid-template-rows: auto 1fr auto;
+    width: 100%;
+    height: 100vh;
+    gap: 4px;
+    padding: 4px 0;
+    align-items: start;
+  }
+  #tela-captura > .topo          { grid-area: topo; width: 100%; }
+  #tela-captura > canvas         { grid-area: cnvs; height: 100%; width: auto; aspect-ratio: 600/380; max-width: 100%; border-radius: 4px; }
+  #tela-captura > .cap-info      { grid-area: info; width: 100%; padding: 3px 8px; }
+  #tela-captura > .dpad          { grid-area: dpad; margin: 0; align-self: center; justify-self: center; }
+  #tela-captura > .colecao-mundo { display: none !important; }
+  .dpad        { gap: 4px; margin-top: 0; }
+  .dpad-row    { gap: 4px; }
+  .dpad-btn    { width: 44px; height: 44px; font-size: 20px; border-radius: 8px; }
+  .dpad-centro { width: 44px; height: 44px; }
+}
 
 /* ===== FUSÃO ===== */
 .fusao-painel { width: 600px; background: #06101e; border: 2px solid #9c27b0; border-radius: 10px; padding: 14px; }
