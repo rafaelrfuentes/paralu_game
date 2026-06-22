@@ -733,7 +733,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   }
 
   function confirmarBatalha() {
-    if (E.jogIdx === null) return;
+    if (selIdx === null) return;
     modoAtual = 'batalha'; esconder();
     document.getElementById('tela-batalha').style.display = 'flex';
     iniciarBatalha();
@@ -1161,6 +1161,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       bonus > 0 ? E.capMundo.size + ' capturadas → +' + bonus + '❤️ +' + bonus + '💧' : '';
     document.getElementById('sel-preview').style.display = 'none';
     gerarGridSel();
+    // pré-seleciona a primeira opção para que o botão Batalhar apareça de imediato
+    selecionarPers(E.fusao ? 'fusao' : 0);
   }
 
   function gerarGridSel() {
