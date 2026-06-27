@@ -118,6 +118,26 @@ Botão `⛶` fullscreen flutuante no canto superior direito (Fullscreen API).
 - `touch-action: none` no `.dpad-btn` evita scroll/zoom acidental
 - Demais botões usam `onclick` que dispara naturalmente em tap mobile
 
+## Licenciamento de dependências externas (MANDATÓRIO)
+
+**Regra:** somente bibliotecas e fontes com licença open-source genuína são permitidas.
+Freemium, licença dual (open-core + plano pago), "free for non-commercial", Creative Commons
+NC ou ND, e qualquer modelo que exija conta/chave/pagamento para uso em produção são
+**proibidos**, mesmo que exista tier gratuito.
+
+Licenças aceitas: MIT, Apache 2.0, OFL (SIL Open Font License), GPL, LGPL, CC0, CC BY, CC BY-SA.
+
+Verificar antes de incluir qualquer CDN, fonte ou pacote:
+1. Confirmar a licença no repositório oficial (não confiar só na landing page).
+2. Registrar aqui, na seção "Dependências externas aprovadas" abaixo, com licença e fonte.
+
+### Dependências externas aprovadas
+
+| Biblioteca | Licença | Fonte |
+|---|---|---|
+| RPG Awesome | MIT | github.com/nagoshiashumari/Rpg-Awesome |
+| OpenMoji Color | CC BY-SA 4.0 | github.com/hfg-gmuend/openmoji |
+
 ## O que NÃO fazer
 
 - Não adicionar dependências (framework, build, npm)
@@ -125,3 +145,4 @@ Botão `⛶` fullscreen flutuante no canto superior direito (Fullscreen API).
 - Não comentar o óbvio — comentário só quando o porquê não é evidente do código
 - Não usar `--no-verify` em commits
 - Não mexer no Drive ou outras cópias — git é canônico (regra global)
+- Não incluir biblioteca freemium ou com licença restritiva — ver seção de licenciamento acima
