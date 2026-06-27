@@ -204,7 +204,12 @@ canvas#canvas-captura {
     justify-content: flex-start;
     align-items: flex-start;
   }
-  #tela-captura[style*="display: flex"] {
+  body:has(#tela-captura[style*="display: flex"]),
+  body:has(#tela-captura[style*="display:flex"]) {
+    overflow: hidden !important;
+  }
+  #tela-captura[style*="display: flex"],
+  #tela-captura[style*="display:flex"] {
     display: grid !important;
     grid-template-areas: "topo topo" "cnvs dpad" "info dpad";
     grid-template-columns: 1fr 148px;
@@ -215,9 +220,10 @@ canvas#canvas-captura {
     gap: 4px;
     padding: 4px 0;
     align-items: start;
+    overflow: hidden !important;
   }
   #tela-captura > .topo          { grid-area: topo; width: 100%; }
-  #tela-captura > canvas         { grid-area: cnvs; height: 100%; width: auto; aspect-ratio: 600/380; max-width: 100%; border-radius: 4px; }
+  #tela-captura > canvas         { grid-area: cnvs; height: 100%; width: auto; aspect-ratio: 600/380; max-width: 100%; min-height: 0; border-radius: 4px; }
   #tela-captura > .cap-info      { grid-area: info; width: 100%; padding: 3px 8px; }
   #tela-captura > .dpad          { grid-area: dpad; margin: 0; align-self: center; justify-self: center; }
   #tela-captura > .colecao-mundo { display: none !important; }
@@ -444,6 +450,18 @@ canvas#campo {
   .nv-num      { font-size: 24px; margin-bottom: 6px; }
   .nv-stats    { font-size: 10px; line-height: 1.6; }
   .btn-continuar { padding: 8px 28px; font-size: 11px; }
+
+  /* -- POKÉDEX -- */
+  #tela-pokedex { gap: 6px; }
+  .pdk-grid     { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .pdk-card     { padding: 5px 2px 4px; border-radius: 5px; }
+  .pdk-em       { font-size: 18px; }
+  .pdk-nm       { font-size: 5px; }
+  .pdk-detalhe  { padding: 8px 12px; }
+  .pdk-det-emoji { font-size: 28px; }
+  .pdk-det-nome { font-size: 10px; }
+  .pdk-det-cien { font-size: 7px; }
+  .sp-golpes.pdk-golpes { gap: 4px; }
 }
 
 /* ===== DEFESA ESPECIAL ===== */
@@ -573,6 +591,42 @@ canvas#campo {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-20px) scale(1.1); }
 }
+
+/* ===== POKÉDEX ===== */
+.btn-acao.ciano     { border-color: #00bcd4; color: #80deea; }
+.btn-acao.ciano:hover { border-color: #80deea; box-shadow: 0 0 14px rgba(0,188,212,0.4); }
+.btn-acao.ciano .ra { color: #80deea; filter: drop-shadow(0 0 8px rgba(0,188,212,0.7)); }
+
+#tela-pokedex { gap: 10px; }
+.pdk-contador { font-size: 10px; color: #7dcfff; letter-spacing: 2px; }
+.pdk-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 600px;
+}
+.pdk-card {
+  background: #060e1c; border: 2px solid #00f0ff44; border-radius: 8px;
+  padding: 8px 4px 6px; text-align: center; transition: all 0.12s;
+}
+.pdk-card.descoberta { border-color: #00f0ff66; cursor: pointer; }
+.pdk-card.descoberta:hover { transform: scale(1.04); border-color: #00f0ff; }
+.pdk-card.descoberta:active { transform: scale(0.95); }
+.pdk-card.nao-descoberta { opacity: 0.38; cursor: default; }
+.pdk-em { font-size: 26px; display: block; }
+.pdk-card.nao-descoberta .pdk-em { filter: grayscale(1) brightness(0.25); }
+.pdk-nm { font-size: 6px; color: #aac4ff; margin-top: 2px; line-height: 1.3; }
+.pdk-card.nao-descoberta .pdk-nm { color: #333; }
+.pdk-tp { font-size: 6px; color: #556; margin-top: 1px; }
+.pdk-nv { font-size: 6px; color: #ffd700; margin-top: 1px; }
+.pdk-detalhe {
+  width: 600px; background: #06101e; border: 2px solid #00f0ff;
+  border-radius: 10px; padding: 12px 16px;
+}
+.pdk-det-header { display: flex; align-items: flex-start; margin-bottom: 10px; gap: 12px; }
+.pdk-det-emoji { font-size: 44px; line-height: 1; flex-shrink: 0; }
+.pdk-det-info { flex: 1; }
+.pdk-det-nome { font-size: 12px; font-weight: bold; color: #aac4ff; }
+.pdk-det-cien { font-size: 8px; color: #445; font-style: italic; margin-top: 2px; }
+.pdk-det-tipo { font-size: 8px; margin-top: 4px; }
+.pdk-det-nv   { font-size: 9px; color: #ffd700; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -605,6 +659,10 @@ canvas#campo {
     <span style="font-size:9px;color:#556;min-width:80px;text-align:right" id="mapa-info"></span>
   </div>
   <div id="mapa-dims"></div>
+  <div class="btn-acao ciano" onclick="mostrarPokedex()" style="width:600px;flex:none;text-align:center;">
+    <span class="ai">📖</span><span class="an">Pokédex</span>
+    <span class="ad" id="pdk-btn-desc">Veja todas as 21 criaturas</span>
+  </div>
 </div>
 
 <!-- ====== DENTRO DO MUNDO ====== -->
@@ -824,6 +882,17 @@ canvas#campo {
     <div class="nv-stats" id="nv-stats"></div>
   </div>
   <button class="btn-continuar" onclick="continuarNivel()">▶ Continuar!</button>
+</div>
+
+<!-- ====== POKÉDEX ====== -->
+<div class="tela" id="tela-pokedex">
+  <div class="topo">
+    <button class="btn-voltar" onclick="mostrarMapa()">← Mapa</button>
+    <span class="topo-label">📖 POKÉDEX</span>
+    <span class="pdk-contador" id="pdk-contador"></span>
+  </div>
+  <div class="pdk-grid" id="pdk-grid"></div>
+  <div class="pdk-detalhe" id="pdk-detalhe" style="display:none"></div>
 </div>
 
 <!-- ====== VITÓRIA FINAL ====== -->
@@ -1131,6 +1200,7 @@ canvas#campo {
     concluidos:  [],          // índices dos mundos já vencidos
     niveis:      {},          // {nomePersonagem: numero_nivel}
     capMundo:    new Set(),   // criaturas capturadas neste mundo (reseta ao avançar)
+    descobertas: new Set(),   // nomes de criaturas já capturadas alguma vez (persiste)
     fusao:       null,        // objeto fusão ou null
     jogIdx:      null,        // índice em PERS ou a string 'fusao'
     slotAtivo:   1,           // slot ativo na máquina de fusão (1 ou 2)
@@ -1242,6 +1312,70 @@ canvas#campo {
   }
 
   // abre a tela de ações de um mundo específico
+  function mostrarPokedex() {
+    modoAtual = null; pararCaptura(); esconder();
+    document.getElementById('tela-pokedex').style.display = 'flex';
+    renderPokedex(null);
+  }
+
+  var _pdkSel = null; // índice da criatura selecionada no detalhe
+
+  function renderPokedex(selPersIdx) {
+    _pdkSel = selPersIdx;
+    var total = PERS.length;
+    var desc = E.descobertas.size;
+    document.getElementById('pdk-contador').textContent = desc + ' / ' + total + ' descobertas';
+
+    var grid = document.getElementById('pdk-grid');
+    grid.innerHTML = '';
+    PERS.forEach(function(p, i) {
+      var descoberta = E.descobertas.has(p.nome);
+      var nv = E.niveis[p.nome] || 1;
+      var card = document.createElement('div');
+      card.className = 'pdk-card ' + (descoberta ? 'descoberta' : 'nao-descoberta');
+      if (descoberta) {
+        card.onclick = function() { renderPokedex(selPersIdx === i ? null : i); };
+        card.innerHTML =
+          '<span class="pdk-em sc-em">' + p.emoji + '</span>' +
+          '<div class="pdk-nm">' + p.nome + '</div>' +
+          '<div class="pdk-tp">' + (p.tipo === 'inseto' ? '🦋 inseto' : '🐟 peixe') + '</div>' +
+          '<div class="pdk-nv">Nv ' + nv + '</div>';
+      } else {
+        card.innerHTML =
+          '<span class="pdk-em">?</span>' +
+          '<div class="pdk-nm" style="color:#222">???</div>' +
+          '<div class="pdk-tp"></div>';
+      }
+      grid.appendChild(card);
+    });
+
+    var detDiv = document.getElementById('pdk-detalhe');
+    if (selPersIdx === null || selPersIdx === undefined) {
+      detDiv.style.display = 'none';
+      detDiv.innerHTML = '';
+      return;
+    }
+    var p = PERS[selPersIdx];
+    if (!p || !E.descobertas.has(p.nome)) { detDiv.style.display = 'none'; return; }
+    var nv = E.niveis[p.nome] || 1;
+    var golpesHtml = p.golpes.map(function(g) {
+      return '<div class="gp-card"><div class="gp-nm">' + g.i + ' ' + g.n + '</div>' +
+             '<div class="gp-st">Dano ' + g.d + ' · Mana ' + g.m + '</div></div>';
+    }).join('');
+    detDiv.style.display = 'block';
+    detDiv.innerHTML =
+      '<div class="pdk-det-header">' +
+        '<div class="pdk-det-emoji sc-em">' + p.emoji + '</div>' +
+        '<div class="pdk-det-info">' +
+          '<div class="pdk-det-nome">' + p.nome + '</div>' +
+          '<div class="pdk-det-cien">' + p.cien + '</div>' +
+          '<div class="pdk-det-tipo">' + (p.tipo === 'inseto' ? '🦋 Inseto' : '🐟 Peixe') + '</div>' +
+          '<div class="pdk-det-nv">Nível ' + nv + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sp-golpes pdk-golpes">' + golpesHtml + '</div>';
+  }
+
   function mostrarMundo(idx) {
     E.mundoIdx = idx; esconder();
     const cfg = MUNDOS[idx];
@@ -1389,6 +1523,13 @@ canvas#campo {
       });
       bloco.appendChild(row); cont.appendChild(bloco);
     });
+    var pdkDesc = document.getElementById('pdk-btn-desc');
+    if (pdkDesc) {
+      var d = E.descobertas.size;
+      pdkDesc.textContent = d > 0
+        ? d + ' / ' + PERS.length + ' criaturas descobertas'
+        : 'Veja todas as ' + PERS.length + ' criaturas';
+    }
   }
 
   // =====================================================
@@ -1549,6 +1690,7 @@ canvas#campo {
       var kdx = capPers.x - kc.x, kdy = capPers.y - kc.y;
       if (Math.sqrt(kdx*kdx + kdy*kdy) < cfgCap.capRaio) {
         if (!E.capMundo.has(kc.esp.nome)) { E.capMundo.add(kc.esp.nome); novidade = true; }
+        if (!E.descobertas.has(kc.esp.nome)) { E.descobertas.add(kc.esp.nome); salvarProgresso(); }
         capCriat.splice(ki, 1);
       }
     }
@@ -2868,7 +3010,8 @@ canvas#campo {
       niveis:      E.niveis,
       superpoderes: E.superpoderes,
       defesas:      E.defesas,
-      nomeTreinador: E.nomeTreinador
+      nomeTreinador: E.nomeTreinador,
+      descobertas: Array.from(E.descobertas)
     };
     localStorage.setItem('paralu_progresso', JSON.stringify(dados));
     // pisca o indicador de save
@@ -2900,6 +3043,8 @@ canvas#campo {
         E.defesas = dados.defesas;
       if (typeof dados.nomeTreinador === 'string')
         E.nomeTreinador = dados.nomeTreinador;
+      if (Array.isArray(dados.descobertas))
+        E.descobertas = new Set(dados.descobertas.filter(function(s) { return typeof s === 'string'; }));
     } catch(e) {}
   }
 
@@ -2911,6 +3056,7 @@ canvas#campo {
     E.superpoderes = 0;
     E.defesas      = 0;
     E.nomeTreinador = 'Raul';
+    E.descobertas   = new Set();
     PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
     mostrarEntrada();
   }
