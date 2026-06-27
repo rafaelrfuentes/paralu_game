@@ -97,6 +97,8 @@ body {
 .btn-acao.roxo     { border-color: #9c27b0; color: #ce93d8; }
 .btn-acao.vermelho { border-color: #ff5252; color: #ef9a9a; }
 .btn-acao.dourado  { border-color: #ffd700; color: #ffe566; }
+.btn-acao.azul     { border-color: #2196f3; color: #90caf9; }
+.mundo-extras { display: flex; gap: 10px; width: 600px; }
 .btn-acao .ai { font-size: 26px; display: block; margin-bottom: 3px; }
 .btn-acao .an { font-size: 11px; letter-spacing: 1px; font-weight: bold; }
 .btn-acao .ad { font-size: 8px; color: #556; }
@@ -346,6 +348,14 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   .btn-desc    { padding: 5px 10px; font-size: 9px; }
   .btn-go      { padding: 5px 10px; font-size: 9px; }
 
+  /* -- DEFESA -- */
+  #tela-defesa  { gap: 6px; }
+  .def-conta    { font-size: 20px; }
+  .def-display  { font-size: 24px; min-height: 38px; padding: 2px 12px; }
+  .def-teclado  { gap: 5px; width: 200px; }
+  .def-tecla    { height: 40px; font-size: 18px; border-radius: 6px; }
+  .mundo-extras { gap: 6px; }
+
   /* -- ANAGRAMA -- */
   #tela-anagrama { gap: 8px; }
   .ana-emoji  { font-size: 36px; }
@@ -363,6 +373,50 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   .nv-num      { font-size: 24px; margin-bottom: 6px; }
   .nv-stats    { font-size: 10px; line-height: 1.6; }
   .btn-continuar { padding: 8px 28px; font-size: 11px; }
+}
+
+/* ===== DEFESA ESPECIAL ===== */
+#tela-defesa { gap: 12px; }
+.def-conta {
+  font-size: 26px; color: #90caf9; letter-spacing: 3px;
+  font-weight: bold; text-align: center;
+}
+.def-display {
+  font-size: 32px; font-weight: bold; color: #fff;
+  border-bottom: 3px solid #2196f3; min-width: 90px;
+  text-align: center; padding: 4px 16px; min-height: 48px;
+  letter-spacing: 2px;
+}
+.def-display.vazio { color: #2a4a7f; }
+.def-teclado {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; width: 240px;
+}
+.def-tecla {
+  height: 54px; font-size: 22px; font-weight: bold;
+  background: #0e2240; border: 2px solid #2196f3;
+  border-radius: 8px; color: #90caf9; cursor: pointer;
+  touch-action: manipulation; transition: all 0.1s;
+  font-family: monospace;
+}
+.def-tecla:active { background: #163a6a; transform: scale(0.93); }
+.def-tecla.apagar { border-color: #ff7070; color: #ff7070; font-size: 18px; }
+.def-tecla.confirmar { border-color: #a8ff8c; color: #a8ff8c; font-size: 18px; }
+.def-tecla.confirmar:disabled { opacity: 0.3; cursor: default; }
+.def-msg { font-size: 13px; letter-spacing: 2px; min-height: 22px; text-align: center; }
+.def-msg.ok  { color: #a8ff8c; }
+.def-msg.err { color: #ff7070; }
+#btn-def {
+  background: #001a33; border: 2px solid #2196f3; color: #90caf9;
+  border-radius: 8px; padding: 8px 18px; font-family: monospace;
+  font-size: 11px; cursor: pointer; letter-spacing: 1px;
+  animation: brilhar-def 1.5s ease-in-out infinite;
+}
+#btn-def:disabled { opacity: 0.35; animation: none; cursor: default; }
+#btn-def.ativa { border-color: #a8ff8c; color: #a8ff8c; animation: none; }
+@keyframes brilhar-def {
+  0%,100% { box-shadow: 0 0 8px rgba(33,150,243,0.3); }
+  50%      { box-shadow: 0 0 22px rgba(33,150,243,0.7); }
 }
 
 /* ===== ANAGRAMA ===== */
@@ -484,9 +538,15 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       <span class="ai">⚔️</span><span class="an">Batalha!</span>
       <span class="ad">Escolha e lute!</span>
     </div>
+  </div>
+  <div class="mundo-extras">
     <div class="btn-acao dourado" onclick="mostrarSuperpoderes()">
       <span class="ai">⚡</span><span class="an">Super Poderes</span>
       <span class="ad" id="btn-sp-desc">3 nomes = 1 poder</span>
+    </div>
+    <div class="btn-acao azul" onclick="mostrarDefesa()">
+      <span class="ai">🛡️</span><span class="an">Defesa Especial</span>
+      <span class="ad" id="btn-def-desc">3 contas = 1 defesa</span>
     </div>
   </div>
   <div class="colecao-mundo">
@@ -587,6 +647,33 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   <div class="ana-slots" id="ana-slots"></div>
   <div class="ana-pool"  id="ana-pool"></div>
   <div class="ana-msg"   id="ana-msg"></div>
+</div>
+
+<!-- ====== DEFESA ESPECIAL ====== -->
+<div class="tela" id="tela-defesa">
+  <div class="topo">
+    <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
+    <span class="topo-label">🛡️ DEFESA ESPECIAL</span>
+    <span style="font-size:9px;color:#90caf9" id="def-sp-count">🛡️ 0 defesas</span>
+  </div>
+  <div style="font-size:10px;color:#7dcfff;letter-spacing:2px" id="def-progresso">0 / 3 contas</div>
+  <div class="def-conta" id="def-conta">5 + 3 - 2 = ?</div>
+  <div class="def-display vazio" id="def-display">_</div>
+  <div class="def-teclado">
+    <button class="def-tecla" onclick="tocarTeclaNum(7)">7</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(8)">8</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(9)">9</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(4)">4</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(5)">5</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(6)">6</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(1)">1</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(2)">2</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(3)">3</button>
+    <button class="def-tecla apagar" onclick="apagarDigitoNum()">⌫</button>
+    <button class="def-tecla" onclick="tocarTeclaNum(0)">0</button>
+    <button class="def-tecla confirmar" id="def-btn-ok" onclick="confirmarDefesa()">✓</button>
+  </div>
+  <div class="def-msg" id="def-msg"></div>
 </div>
 
 <!-- ====== BATALHA ====== -->
@@ -778,6 +865,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     slot1:       null,        // nome no slot 1
     slot2:       null,        // nome no slot 2
     superpoderes: 0,          // poderes acumulados (3 nomes corretos = 1 poder)
+    defesas:      0,          // defesas acumuladas (3 contas corretas = 1 defesa)
   };
   // começa todos os personagens no nível 1
   PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
@@ -1545,6 +1633,120 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   }
 
   // =====================================================
+  // DEFESA ESPECIAL — mini game de contas matemáticas
+  // 3 acertos = +1 E.defesas → reduz 50% do próximo ataque inimigo
+  // =====================================================
+  var defAcertos  = 0;
+  var defResposta = '';
+  var defGabarito = 0;
+  var defesaAtiva = false; // true durante a batalha enquanto defesa está acionada
+
+  function mostrarDefesa() {
+    modoAtual = 'defesa'; esconder();
+    document.getElementById('tela-defesa').style.display = 'flex';
+    atualizarUIDefesa();
+    proximaConta();
+  }
+
+  function gerarConta() {
+    var a, b, c, op1, op2, result;
+    do {
+      a   = Math.floor(Math.random() * 10) + 1;
+      b   = Math.floor(Math.random() * 9)  + 1;
+      c   = Math.floor(Math.random() * 9)  + 1;
+      op1 = Math.random() < 0.5 ? '+' : '-';
+      op2 = Math.random() < 0.5 ? '+' : '-';
+      result = a + (op1 === '+' ? b : -b) + (op2 === '+' ? c : -c);
+    } while (result < 0 || result > 20);
+    defGabarito = result;
+    return a + ' ' + op1 + ' ' + b + ' ' + op2 + ' ' + c + ' = ?';
+  }
+
+  function proximaConta() {
+    defResposta = '';
+    document.getElementById('def-msg').textContent = '';
+    document.getElementById('def-msg').className = 'def-msg';
+    var conta = gerarConta();
+    document.getElementById('def-conta').textContent = conta;
+    renderDisplay();
+  }
+
+  function renderDisplay() {
+    var el = document.getElementById('def-display');
+    if (defResposta === '') {
+      el.textContent = '_';
+      el.className = 'def-display vazio';
+    } else {
+      el.textContent = defResposta;
+      el.className = 'def-display';
+    }
+  }
+
+  function tocarTeclaNum(d) {
+    if (defResposta.length >= 2) return; // máx 2 dígitos (resultado ≤ 20)
+    defResposta += String(d);
+    renderDisplay();
+  }
+
+  function apagarDigitoNum() {
+    defResposta = defResposta.slice(0, -1);
+    renderDisplay();
+  }
+
+  function confirmarDefesa() {
+    if (defResposta === '') return;
+    var msg = document.getElementById('def-msg');
+    var resp = parseInt(defResposta, 10);
+    if (resp === defGabarito) {
+      defAcertos++;
+      atualizarUIDefesa();
+      if (defAcertos >= 3) {
+        defAcertos = 0;
+        E.defesas++;
+        salvarProgresso();
+        atualizarUIDefesa();
+        msg.className = 'def-msg ok';
+        msg.textContent = '🛡️ DEFESA DESBLOQUEADA! Total: ' + E.defesas;
+      } else {
+        msg.className = 'def-msg ok';
+        msg.textContent = '✓ ' + defAcertos + '/3! Continue!';
+      }
+      setTimeout(proximaConta, 900);
+    } else {
+      msg.className = 'def-msg err';
+      msg.textContent = '✗ Era ' + defGabarito + '! Tente outra.';
+      setTimeout(proximaConta, 1200);
+    }
+  }
+
+  function atualizarUIDefesa() {
+    document.getElementById('def-sp-count').textContent =
+      '🛡️ ' + E.defesas + ' defesa' + (E.defesas !== 1 ? 's' : '');
+    document.getElementById('def-progresso').textContent = defAcertos + ' / 3 contas';
+    document.getElementById('btn-def-desc').textContent = E.defesas > 0
+      ? '🛡️ ' + E.defesas + ' pronta(s)!'
+      : '3 contas = 1 defesa';
+  }
+
+  function ativarDefesa() {
+    if (faseBat !== 'escolha' || E.defesas <= 0) return;
+    E.defesas--;
+    salvarProgresso();
+    defesaAtiva = true;
+    var btnDef = document.getElementById('btn-def');
+    if (btnDef) {
+      if (E.defesas > 0) {
+        btnDef.textContent = '🛡️ DEFESA ATIVA! (' + E.defesas + ' restante' + (E.defesas !== 1 ? 's' : '') + ')';
+      } else {
+        btnDef.textContent = '🛡️ DEFESA ATIVA!';
+      }
+      btnDef.classList.add('ativa');
+      btnDef.disabled = true;
+    }
+    mostrarLog('🛡️ Defesa ativada! Próximo ataque inimigo reduzido em 50%!');
+  }
+
+  // =====================================================
   // BATALHA POR TURNOS
   // =====================================================
   var telaBat, pincelBat;
@@ -1698,6 +1900,15 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     document.getElementById('bat-info').textContent = inf.join(' | ');
 
     criarBotoesGolpe(pJ, nv);
+    // botão de defesa especial se há defesas acumuladas
+    defesaAtiva = false;
+    if (E.defesas > 0) {
+      var btnDef = document.createElement('button');
+      btnDef.id = 'btn-def';
+      btnDef.textContent = '🛡️ DEFENDER — dano -50%!' + (E.defesas > 1 ? ' (' + E.defesas + ' usos)' : '');
+      btnDef.onclick = ativarDefesa;
+      document.getElementById('botoes').appendChild(btnDef);
+    }
     // botão de golpe especial se há superpoderes acumulados
     if (E.superpoderes > 0) {
       var btnEsp = document.createElement('button');
@@ -1815,19 +2026,31 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     if (pisca) return;
     var x = cx + offX, y = cy;
 
+    var vida = ehIni ? combIni.vida : combJog.vida;
+    var derrotado = (vida === 0);
+
+    if (derrotado) {
+      ctx.save();
+      ctx.globalAlpha = 0.35;
+      y += 18;
+    }
+
     // Voador Azul tem sprite próprio
     if (p.ehVoador) {
       if (ehIni) {
         ctx.save(); ctx.translate(x, 0); ctx.scale(-1, 1); ctx.translate(-x, 0);
         desenharVoador(ctx, x, y); ctx.restore();
       } else { desenharVoador(ctx, x, y); }
+      if (derrotado) ctx.restore();
       return;
     }
-    // sombra (save/restore impede que o alpha do rgba vaze pro fillText do emoji)
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
-    ctx.beginPath(); ctx.ellipse(x+2, y+Math.round(30*esc), Math.round(26*esc), Math.round(7*esc), 0, 0, Math.PI*2); ctx.fill();
-    ctx.restore();
+    // sombra (apenas se vivo)
+    if (!derrotado) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.beginPath(); ctx.ellipse(x+2, y+Math.round(30*esc), Math.round(26*esc), Math.round(7*esc), 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
 
     if (p.ehFusao) {
       // fusão: dois emojis lado a lado
@@ -1840,6 +2063,10 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       ctx.font = Math.round(58*esc) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(p.emoji, x, y);
+    }
+
+    if (derrotado) {
+      ctx.restore();
     }
   }
 
@@ -1999,7 +2226,9 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       setTimeout(function() { faseBat = 'escolha'; atualizarBotoes(); }, 800);
       return;
     }
-    var g = disp[Math.floor(Math.random() * disp.length)];
+    // IA Inteligente: 70% de chance de priorizar o golpe de maior dano
+    disp.sort(function(a, b) { return b.d - a.d; });
+    var g = (Math.random() < 0.7) ? disp[0] : disp[Math.floor(Math.random() * disp.length)];
     
     var proj = ehProjetil(g);
     if (proj) {
@@ -2022,10 +2251,29 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     setTimeout(function() {
       projetilAtivo = null;
       combIni.mana -= g.m;
-      combJog.vida  = Math.max(0, combJog.vida - g.d);
+      var danoFinal = g.d;
+      var bloqueado = defesaAtiva;
+      if (defesaAtiva) {
+        danoFinal = Math.round(g.d * 0.5);
+        defesaAtiva = false;
+        var btnDef = document.getElementById('btn-def');
+        if (btnDef) btnDef.remove();
+        if (E.defesas > 0) {
+          var btnDefNovo = document.createElement('button');
+          btnDefNovo.id = 'btn-def';
+          btnDefNovo.textContent = '🛡️ DEFENDER — dano -50%!' + (E.defesas > 1 ? ' (' + E.defesas + ' usos)' : '');
+          btnDefNovo.onclick = ativarDefesa;
+          document.getElementById('botoes').appendChild(btnDefNovo);
+        }
+      }
+      combJog.vida = Math.max(0, combJog.vida - danoFinal);
       atualizarBarras();
       var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
-      mostrarLog(g.t + ' ' + pJ.nome + ' perdeu ' + g.d + ' de vida!');
+      if (bloqueado) {
+        mostrarLog('🛡️ DEFESA! ' + g.t + ' ' + pJ.nome + ' perdeu só ' + danoFinal + ' de vida! (bloqueou 50%)');
+      } else {
+        mostrarLog(g.t + ' ' + pJ.nome + ' perdeu ' + danoFinal + ' de vida!');
+      }
       
       // EFEITOS DE IMPACTO NO JOGADOR
       var corFx = pI.cor || '#ff5252';
@@ -2096,6 +2344,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     desc.style.display = pode && !temMana ? 'block' : 'none';
     var esp = document.getElementById('btn-esp');
     if (esp) { esp.disabled = !pode || E.superpoderes <= 0; }
+    var def = document.getElementById('btn-def');
+    if (def && !defesaAtiva) { def.disabled = !pode || E.defesas <= 0; }
   }
 
   function mostrarLog(txt) { document.getElementById('log').textContent = txt; }
@@ -2159,7 +2409,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       mundoIdx:    E.mundoIdx,
       concluidos:  E.concluidos,
       niveis:      E.niveis,
-      superpoderes: E.superpoderes
+      superpoderes: E.superpoderes,
+      defesas:      E.defesas
     };
     localStorage.setItem('paralu_progresso', JSON.stringify(dados));
     // pisca o indicador de save
@@ -2187,6 +2438,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       }
       if (typeof dados.superpoderes === 'number')
         E.superpoderes = dados.superpoderes;
+      if (typeof dados.defesas === 'number')
+        E.defesas = dados.defesas;
     } catch(e) {}
   }
 
@@ -2196,6 +2449,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     E.mundoIdx    = 0;
     E.concluidos  = [];
     E.superpoderes = 0;
+    E.defesas      = 0;
     PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
     mostrarEntrada();
   }
