@@ -75,6 +75,7 @@ body {
 .btn-acao.verde    { border-color: #5dda7d; color: #a8ff8c; }
 .btn-acao.roxo     { border-color: #9c27b0; color: #ce93d8; }
 .btn-acao.vermelho { border-color: #ff5252; color: #ef9a9a; }
+.btn-acao.dourado  { border-color: #ffd700; color: #ffe566; }
 .btn-acao .ai { font-size: 26px; display: block; margin-bottom: 3px; }
 .btn-acao .an { font-size: 11px; letter-spacing: 1px; font-weight: bold; }
 .btn-acao .ad { font-size: 8px; color: #556; }
@@ -455,6 +456,10 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       <span class="ai">⚔️</span><span class="an">Batalha!</span>
       <span class="ad">Escolha e lute!</span>
     </div>
+    <div class="btn-acao dourado" onclick="mostrarSuperpoderes()">
+      <span class="ai">⚡</span><span class="an">Super Poderes</span>
+      <span class="ad" id="btn-sp-desc">3 nomes = 1 poder</span>
+    </div>
   </div>
   <div class="colecao-mundo">
     <div class="col-titulo">🎒 Capturadas neste mundo</div>
@@ -542,13 +547,14 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   </div>
 </div>
 
-<!-- ====== ANAGRAMA ====== -->
+<!-- ====== ANAGRAMA / SUPER PODERES ====== -->
 <div class="tela" id="tela-anagrama">
   <div class="topo">
-    <button class="btn-voltar" onclick="pularAnagrama()">→ Pular</button>
-    <span class="topo-label">🔤 DECIFRE O NOME!</span>
-    <span style="font-size:9px;color:#ffd700">⚡ acerte = golpe 2×</span>
+    <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
+    <span class="topo-label">⚡ SUPER PODERES</span>
+    <span style="font-size:9px;color:#ffd700" id="ana-sp-count">⚡ 0 poderes</span>
   </div>
+  <div style="font-size:10px;color:#7dcfff;letter-spacing:2px" id="ana-progresso">0 / 3 nomes</div>
   <div class="ana-emoji" id="ana-emoji">🦋</div>
   <div class="ana-slots" id="ana-slots"></div>
   <div class="ana-pool"  id="ana-pool"></div>
@@ -690,15 +696,16 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   // ESTADO GLOBAL DO JOGO
   // =====================================================
   const E = {
-    mundoIdx:   0,           // mundo ativo (0..5)
-    concluidos: [],          // índices dos mundos já vencidos
-    niveis:     {},          // {nomePersonagem: numero_nivel}
-    capMundo:   new Set(),   // criaturas capturadas neste mundo (reseta ao avançar)
-    fusao:      null,        // objeto fusão ou null
-    jogIdx:     null,        // índice em PERS ou a string 'fusao'
-    slotAtivo:  1,           // slot ativo na máquina de fusão (1 ou 2)
-    slot1:      null,        // nome no slot 1
-    slot2:      null,        // nome no slot 2
+    mundoIdx:    0,           // mundo ativo (0..5)
+    concluidos:  [],          // índices dos mundos já vencidos
+    niveis:      {},          // {nomePersonagem: numero_nivel}
+    capMundo:    new Set(),   // criaturas capturadas neste mundo (reseta ao avançar)
+    fusao:       null,        // objeto fusão ou null
+    jogIdx:      null,        // índice em PERS ou a string 'fusao'
+    slotAtivo:   1,           // slot ativo na máquina de fusão (1 ou 2)
+    slot1:       null,        // nome no slot 1
+    slot2:       null,        // nome no slot 2
+    superpoderes: 0,          // poderes acumulados (3 nomes corretos = 1 poder)
   };
   // começa todos os personagens no nível 1
   PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
@@ -792,7 +799,9 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
   function confirmarBatalha() {
     if (selIdx === null) return;
-    mostrarAnagrama();
+    modoAtual = 'batalha'; esconder();
+    document.getElementById('tela-batalha').style.display = 'flex';
+    iniciarBatalha();
   }
 
   // exibe a tela de nível após vitória
@@ -1282,22 +1291,46 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   }
 
   // =====================================================
-  // ANAGRAMA — mini game pré-batalha
+  // SUPER PODERES — anagrama de nomes de insetos
+  // 3 acertos = +1 E.superpoderes (persiste até usar na batalha)
   // =====================================================
-  var anaPool          = [];    // [{letra, usada}]
-  var anaResposta      = [];    // [poolIdx | null] por posição de letra
-  var anaAlvo          = '';    // nome completo do personagem
-  var golpeEspecialDisp = false; // true se Raul acertou o anagrama
+  var anaPool     = [];    // [{letra, usada}]
+  var anaResposta = [];    // [poolIdx | null] por posição de letra
+  var anaAlvo     = '';    // nome completo do inseto atual
+  var anaAcertos  = 0;    // contador de acertos (reseta ao acumular poder)
 
-  function mostrarAnagrama() {
+  var INSETOS = null; // lista filtrada (carregada na primeira chamada)
+
+  function mostrarSuperpoderes() {
+    if (!INSETOS) INSETOS = PERS.filter(function(p) { return p.tipo === 'inseto'; });
     modoAtual = 'anagrama'; esconder();
     document.getElementById('tela-anagrama').style.display = 'flex';
+    atualizarUISuperpoderes();
+    proximoInseto();
+  }
+
+  function atualizarUISuperpoderes() {
+    document.getElementById('ana-sp-count').textContent = '⚡ ' + E.superpoderes + ' poder' + (E.superpoderes !== 1 ? 'es' : '');
+    document.getElementById('ana-progresso').textContent = anaAcertos + ' / 3 nomes';
+    document.getElementById('btn-sp-desc').textContent = E.superpoderes > 0 ? '⚡ ' + E.superpoderes + ' pronto(s)!' : '3 nomes = 1 poder';
+  }
+
+  function proximoInseto() {
     document.getElementById('ana-msg').textContent = '';
     document.getElementById('ana-msg').className = 'ana-msg';
+    var p = INSETOS[Math.floor(Math.random() * INSETOS.length)];
+    anaAlvo = p.nome;
+    document.getElementById('ana-emoji').textContent = p.emoji;
+    iniciarAnagrama();
+  }
 
-    var pJ = selIdx === 'fusao' ? E.fusao : PERS[selIdx];
-    anaAlvo = pJ.nome;
-    document.getElementById('ana-emoji').textContent = pJ.emoji;
+  function mostrarAnagrama() {
+    // compatibilidade: chamado quando selIdx está definido (pré-batalha removida,
+    // mas a função ainda existe caso seja chamada de outro lugar)
+    mostrarSuperpoderes();
+  }
+
+  function iniciarAnagrama() {
 
     // letras sem hífens/espaços, embaralhadas
     var letras = anaAlvo.toLowerCase().replace(/[-\s]/g, '').split('');
@@ -1381,14 +1414,20 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     var alvo = anaAlvo.toLowerCase().replace(/[-\s]/g, '');
     var msg = document.getElementById('ana-msg');
     if (resposta === alvo) {
-      golpeEspecialDisp = true;
-      msg.className = 'ana-msg ok';
-      msg.textContent = '✓ ACERTOU! Golpe especial liberado!';
-      setTimeout(function() {
-        modoAtual = 'batalha'; esconder();
-        document.getElementById('tela-batalha').style.display = 'flex';
-        iniciarBatalha();
-      }, 1000);
+      anaAcertos++;
+      atualizarUISuperpoderes();
+      if (anaAcertos >= 3) {
+        anaAcertos = 0;
+        E.superpoderes++;
+        salvarProgresso();
+        atualizarUISuperpoderes();
+        msg.className = 'ana-msg ok';
+        msg.textContent = '🎉 +1 SUPER PODER! Total: ' + E.superpoderes;
+      } else {
+        msg.className = 'ana-msg ok';
+        msg.textContent = '✓ ' + anaAcertos + '/3! Continue!';
+      }
+      setTimeout(proximoInseto, 1100);
     } else {
       msg.className = 'ana-msg err';
       msg.textContent = '✗ Tente de novo!';
@@ -1400,13 +1439,6 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
         renderAnagrama();
       }, 900);
     }
-  }
-
-  function pularAnagrama() {
-    golpeEspecialDisp = false;
-    modoAtual = 'batalha'; esconder();
-    document.getElementById('tela-batalha').style.display = 'flex';
-    iniciarBatalha();
   }
 
   // =====================================================
@@ -1454,11 +1486,11 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     document.getElementById('bat-info').textContent = inf.join(' | ');
 
     criarBotoesGolpe(pJ, nv);
-    // botão de golpe especial se Raul acertou o anagrama
-    if (golpeEspecialDisp) {
+    // botão de golpe especial se há superpoderes acumulados
+    if (E.superpoderes > 0) {
       var btnEsp = document.createElement('button');
       btnEsp.id = 'btn-esp';
-      btnEsp.textContent = '⚡ GOLPE ESPECIAL — dano 2×!';
+      btnEsp.textContent = '⚡ GOLPE ESPECIAL — dano 2×!' + (E.superpoderes > 1 ? ' (' + E.superpoderes + ' usos)' : '');
       btnEsp.onclick = usarGolpeEspecial;
       document.getElementById('botoes').appendChild(btnEsp);
     }
@@ -1616,10 +1648,17 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   }
 
   function usarGolpeEspecial() {
-    if (faseBat !== 'escolha' || !golpeEspecialDisp) return;
-    golpeEspecialDisp = false;
+    if (faseBat !== 'escolha' || E.superpoderes <= 0) return;
+    E.superpoderes--;
+    salvarProgresso();
     var btnEsp = document.getElementById('btn-esp');
-    if (btnEsp) btnEsp.remove();
+    if (btnEsp) {
+      if (E.superpoderes > 0) {
+        btnEsp.textContent = '⚡ GOLPE ESPECIAL — dano 2×!' + (E.superpoderes > 1 ? ' (' + E.superpoderes + ' usos)' : '');
+      } else {
+        btnEsp.remove();
+      }
+    }
 
     var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
     var g  = pJ.golpes[pJ.golpes.length - 1]; // golpe mais forte
@@ -1746,7 +1785,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     var desc    = document.getElementById('btn-desc');
     desc.style.display = pode && !temMana ? 'block' : 'none';
     var esp = document.getElementById('btn-esp');
-    if (esp) esp.disabled = !pode;
+    if (esp) { esp.disabled = !pode || E.superpoderes <= 0; }
   }
 
   function mostrarLog(txt) { document.getElementById('log').textContent = txt; }
@@ -1807,9 +1846,10 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
   function salvarProgresso() {
     var dados = {
-      mundoIdx:   E.mundoIdx,
-      concluidos: E.concluidos,
-      niveis:     E.niveis
+      mundoIdx:    E.mundoIdx,
+      concluidos:  E.concluidos,
+      niveis:      E.niveis,
+      superpoderes: E.superpoderes
     };
     localStorage.setItem('paralu_progresso', JSON.stringify(dados));
     // pisca o indicador de save
@@ -1835,14 +1875,17 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
             E.niveis[k] = dados.niveis[k];
         });
       }
+      if (typeof dados.superpoderes === 'number')
+        E.superpoderes = dados.superpoderes;
     } catch(e) {}
   }
 
   function apagarProgresso() {
     if (!confirm('Apagar todo o progresso e recomeçar do início?')) return;
     localStorage.removeItem('paralu_progresso');
-    E.mundoIdx   = 0;
-    E.concluidos = [];
+    E.mundoIdx    = 0;
+    E.concluidos  = [];
+    E.superpoderes = 0;
     PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
     mostrarEntrada();
   }
