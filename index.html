@@ -873,6 +873,8 @@ canvas#campo {
       golpes:[{n:'Espadada Rápida',i:'⚔️',d:12,m:9, t:'A espada cortou o ar!'},{n:'Mergulho Veloz',i:'💨',d:18,m:16,t:'O mergulho veloz atacou!'},{n:'Perfuração',i:'🗡️',d:25,m:24,t:'O inimigo foi perfurado!'},{n:'Tornado Aquático',i:'🌀',d:36,m:35,t:'Um tornado de água!'}] },
     { emoji:'🪼', nome:'Água-viva',        cien:'Physalia physalis',       tipo:'peixe', cor:'#7b1fa2',
       golpes:[{n:'Choque Elétrico',i:'⚡',d:11,m:9, t:'O choque elétrico acertou!'},{n:'Tentáculo Venenoso',i:'☠️',d:17,m:15,t:'O tentáculo venenoso chicoteou!'},{n:'Descarga Total',i:'🔋',d:24,m:23,t:'A descarga elétrica foi liberada!'},{n:'Veneno das Profundezas',i:'⚡',d:35,m:34,t:'O veneno das profundezas atacou!'}] },
+    { emoji:'🐟', nome:'Piranha',         cien:'Pygocentrus nattereri',   tipo:'peixe', cor:'#ff5252',
+      golpes:[{n:'Mordida Rápida',i:'🦷',d:10,m:8, t:'A Piranha mordeu com suas presas afiadas!'},{n:'Bando de Caça',i:'🐟',d:17,m:15,t:'O bando de Piranhas atacou em grupo!'},{n:'Frenesi Vermelho',i:'🩸',d:24,m:23,t:'O cheiro de sangue aumentou a fúria da Piranha!'},{n:'Mandíbula Trituradora',i:'🦷',d:34,m:34,t:'As mandíbulas trituradoras morderam com força máxima!'}] },
   ];
 
   // =====================================================
@@ -1456,7 +1458,7 @@ canvas#campo {
     if (E.fusao) {
       grid.appendChild(mkCardSel('fusao', E.fusao.emoji, E.fusao.nome, null, E.fusao.cor));
     }
-    // todos os 20 personagens
+    // todos os 21 personagens
     PERS.forEach(function(p, i) {
       var nv = E.niveis[p.nome] || 1;
       grid.appendChild(mkCardSel(i, p.emoji, p.nome, nv, p.cor));

@@ -42,7 +42,7 @@ Ao vencer a batalha, o jogador avança para o próximo mundo (e o personagem usa
 
 ---
 
-## Personagens (20 no total)
+## Personagens (21 no total)
 
 ### Insetos (15)
 
@@ -64,7 +64,7 @@ Ao vencer a batalha, o jogador avança para o próximo mundo (e o personagem usa
 | 💡 | Vaga-lume | *Lampyris noctiluca* |
 | 🐌 | Caracol-de-jardim | *Cornu aspersum* |
 
-### Peixes (5)
+### Peixes (6)
 
 | Emoji | Nome popular | Nome científico |
 |---|---|---|
@@ -73,6 +73,7 @@ Ao vencer a batalha, o jogador avança para o próximo mundo (e o personagem usa
 | 🐡 | Baiacu | *Tetraodon nigroviridis* |
 | 🐟 | Peixe-espada | *Xiphias gladius* |
 | 🪼 | Água-viva | *Physalia physalis* |
+| 🐟 | Piranha | *Pygocentrus nattereri* |
 
 ### Voador Azul — personagem especial
 
