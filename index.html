@@ -772,6 +772,82 @@ canvas#campo {
 </div>
 
 <script>
+  /*
+   * ================================================================
+   *  PARALU — aventura criada por Rafa e Raul Fuentes
+   * ================================================================
+   *
+   *  Jogo de batalha estilo Pokémon GameBoy, feito para o Raul (6 anos).
+   *  HTML + CSS + JS vanilla, arquivo único, sem build, sem dependências.
+   *  Deploy: git push main → GitHub Pages serve index.html em ~1 min.
+   *
+   * ----------------------------------------------------------------
+   *  ARQUITETURA
+   * ----------------------------------------------------------------
+   *  Telas (.tela): o JS alterna entre elas via style.display.
+   *  esconder() oculta todas; cada mostrar*() exibe uma específica.
+   *  ATENÇÃO: nunca usar display:flex no CSS sem seletor de atributo —
+   *  o inline 'none' do JS precisa ganhar. Ver CLAUDE.md armadilha #1.
+   *
+   *  modoAtual (string | null): indica qual tela/loop está ativo,
+   *  usado para parar o loop de captura ao navegar para outra tela.
+   *
+   *  Canvas: dois canvases separados.
+   *    canvas-captura  — mini game de captura (requestAnimationFrame)
+   *    canvas-batalha  — batalha por turnos (requestAnimationFrame)
+   *
+   *  localStorage: persiste E.mundoIdx, concluidos, niveis, superpoderes, defesas.
+   *
+   * ----------------------------------------------------------------
+   *  DADOS PRINCIPAIS
+   * ----------------------------------------------------------------
+   *  PERS[21]   — personagens: 15 insetos + 5 peixes + 1 criatura fusão
+   *               emoji, nome, cien, tipo, cor, golpes[4]
+   *               golpe: { n, i=ícone, d=dano, m=custo_mana, t=texto }
+   *
+   *  MUNDOS[6]  — 6 mundos em 2 dimensões (Floresta / Lago)
+   *               vidaIni/manaIni: stats do inimigo
+   *               golpesIni: quantos golpes do array o inimigo pode usar
+   *               capVel/capRaio/capSpawn/capFuga: parâmetros de captura
+   *               manaRegen: mana passiva do inimigo por turno (mundos 3-6)
+   *               danoMult: multiplicador de dano do inimigo (mundos 4-6)
+   *
+   *  E           — estado global (parcialmente persistido)
+   *               mundoIdx, concluidos, niveis, capMundo, fusao,
+   *               jogIdx, slotAtivo, slot1, slot2, superpoderes, defesas
+   *
+   * ----------------------------------------------------------------
+   *  FLUXO
+   * ----------------------------------------------------------------
+   *  Entrada → Mapa → Mundo → Capturar | Fusão | Batalha!
+   *                          | Super Poderes | Defesa Especial
+   *                          → Batalha por turnos
+   *                          → Nível Up → próximo mundo
+   *
+   * ----------------------------------------------------------------
+   *  MINI GAMES
+   * ----------------------------------------------------------------
+   *  Captura:        D-pad move personagem; encostar = captura.
+   *                  Dificuldade escala por mundo (vel, raio, fuga).
+   *
+   *  Super Poderes:  Raul soletra nome de inseto com letras embaralhadas.
+   *                  3 acertos = 1 poder. N poderes = 2^N × dano (gasta tudo).
+   *
+   *  Defesa Especial: Conta de adição/subtração com 3 operandos,
+   *                   teclado numérico on-screen. 3 acertos = 1 defesa.
+   *                   Ativar na batalha = próximo ataque inimigo -50%.
+   *
+   * ----------------------------------------------------------------
+   *  BATALHA — MÁQUINA DE ESTADOS (faseBat)
+   * ----------------------------------------------------------------
+   *  'escolha'  → jogador pode apertar botões de golpe
+   *  'animando' → animação em curso; botões desabilitados (atualizarBotoes)
+   *  'fim'      → batalha encerrada; exibe resultado
+   *
+   *  Turno do jogador: golpear() → animação → turnoInimigo()
+   *  Turno do inimigo: sorteio de golpe → animação → faseBat='escolha'
+   * ================================================================
+   */
 
   // ===== WAKE LOCK — impede a tela de apagar durante o jogo =====
   var wakeLock = null;
@@ -1191,7 +1267,10 @@ canvas#campo {
     for (var ci = 0; ci < capCriat.length; ci++) {
       var c = capCriat[ci];
 
-      // fuga: mundo 3+ — criatura acelera para longe quando jogador chega perto
+      // fuga (mundos 3+): ao entrar no raio de 80px, a criatura redefine
+      // a velocidade diretamente para longe do jogador a 1.6× capVel.
+      // Aplicado ANTES do c.x+=c.vx para que os limites de zona
+      // ainda valham no mesmo frame (bounce nas bordas funciona normal).
       if (cfgCap.capFuga) {
         var fdx = c.x - capPers.x, fdy = c.y - capPers.y;
         var fdist = Math.sqrt(fdx * fdx + fdy * fdy);
@@ -1515,6 +1594,8 @@ canvas#campo {
   // N poderes acumulados = dano 2^N × (tudo liberado de uma vez)
   // =====================================================
 
+  // Ícone e nome sobem conforme poderes acumulados. Índice 0 = sem poder.
+  // Acima do índice 6 (DIVINO): clamp no topo — multiplicador continua crescendo.
   var NIVEIS_PODER = [
     null,
     { ico: '⚡',  nome: 'PODER',     cor: '#ffd700' },
@@ -1525,6 +1606,8 @@ canvas#campo {
     { ico: '👑',  nome: 'DIVINO',    cor: '#ffffff' },
   ];
 
+  // mult = 2^n: 1 poder=×2, 2=×4, 3=×8...
+  // IMPORTANTE: capturar infoPoder() ANTES de zerar E.superpoderes em usarGolpeEspecial().
   function infoPoder(n) {
     if (n <= 0) return null;
     var idx  = Math.min(n, NIVEIS_PODER.length - 1);
@@ -1807,14 +1890,22 @@ canvas#campo {
 
   // =====================================================
   // BATALHA POR TURNOS
+  // faseBat controla o fluxo:
+  //   'escolha'  → botões ativos, jogador pode agir
+  //   'animando' → animação rolando, botões desabilitados
+  //   'fim'      → batalha encerrada, resultado exibido
+  //
+  // iniPersIdx: inimigo sorteado aleatoriamente em iniciarBatalha().
+  // nomeJog: salvo aqui para atualizar E.niveis ao final da batalha.
+  // (E.jogIdx só é definido dentro de iniciarBatalha — ver CLAUDE.md #2)
   // =====================================================
   var telaBat, pincelBat;
   var combJog = {}, combIni = {};
   var faseBat    = 'escolha'; // 'escolha' | 'animando' | 'fim'
   var animAtq    = null;      // animação de ataque em andamento
   var animPisc   = null;      // animação de piscar (dano recebido)
-  var iniPersIdx = null;      // índice do inimigo em PERS
-  var nomeJog    = null;      // nome do personagem do jogador (pra atualizar nível)
+  var iniPersIdx = null;      // índice do inimigo sorteado em PERS
+  var nomeJog    = null;      // nome do jogador (para atualizar E.niveis ao vencer)
 
   // ===== JUICE / EFEITOS VISUAIS DE BATALHA =====
   var shakeTempo = 0;
@@ -2318,10 +2409,12 @@ canvas#campo {
     setTimeout(function() {
       projetilAtivo = null;
       combIni.mana -= g.m;
+      // danoMult (mundos 4-6): multiplica o dano base antes de qualquer redução
       var danoFinal = Math.round(g.d * (cfg.danoMult || 1));
       var bloqueado = defesaAtiva;
       if (defesaAtiva) {
-        danoFinal = Math.round(g.d * 0.5);
+        // defesa halvia o danoFinal já multiplicado (não o g.d bruto)
+        danoFinal = Math.round(danoFinal * 0.5);
         defesaAtiva = false;
         var btnDef = document.getElementById('btn-def');
         if (btnDef) btnDef.remove();
