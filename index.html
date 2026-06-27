@@ -195,7 +195,7 @@ canvas#canvas-captura {
 
 /* ===== LANDSCAPE MOBILE (captura) ===== */
 @media (orientation: landscape) {
-  body {
+  body:has(#tela-captura:not([style*="display: none"]):not([style*="display:none"])) {
     padding: 0 max(6px, env(safe-area-inset-right));
     padding-left: max(6px, env(safe-area-inset-left));
     height: 100vh;
@@ -203,8 +203,6 @@ canvas#canvas-captura {
     min-height: 0;
     justify-content: flex-start;
     align-items: flex-start;
-  }
-  body:has(#tela-captura:not([style*="display: none"]):not([style*="display:none"])) {
     overflow: hidden !important;
   }
   #tela-captura[style*="display: flex"],
