@@ -15,13 +15,13 @@ Referência técnica: fórmulas, tabelas e fluxos. Para a visão narrativa do jo
 
 Curva de escalada do inimigo: +35 (1→2→3→4), depois +50 (4→5) e +60 (5→6). Número máximo de golpes do inimigo estaciona em 4.
 
-## Personagens (16 = 11 insetos + 5 peixes)
+## Personagens (20 = 15 insetos + 5 peixes)
 
 Cada um tem 4 golpes ordenados do mais fraco ao mais forte (último é o "especial" que ganha bônus por nível). Definidos no array `PERS[]` em `index.html`.
 
 | Tipo | Lista |
 |---|---|
-| Insetos 🐛 | Borboleta-monarca, Abelha-europeia, Joaninha, Gafanhoto-verde, Besouro-hércules, Lagarta-da-couve, Mosquito-da-dengue, Mosca-doméstica, Formiga-saúva, Barata-americana, Voador Azul (fictício) |
+| Insetos 🐛 | Borboleta-monarca, Abelha-europeia, Joaninha, Gafanhoto-verde, Besouro-hércules, Lagarta-da-couve, Mosquito-da-dengue, Mosca-doméstica, Formiga-saúva, Barata-americana, Voador Azul (fictício), Aranha-de-jardim, Escorpião-amarelo, Vaga-lume, Caracol-de-jardim |
 | Peixes 🐟 | Peixe-palhaço, Piranha, Baiacu, Peixe-espada, Arraia |
 
 Formato de cada golpe: `{n: nome, i: ícone, d: dano base, m: custo de mana, t: texto narrativo}`.

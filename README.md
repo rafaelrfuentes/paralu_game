@@ -42,9 +42,9 @@ Ao vencer a batalha, o jogador avança para o próximo mundo (e o personagem usa
 
 ---
 
-## Personagens (16 no total)
+## Personagens (20 no total)
 
-### Insetos (11)
+### Insetos (15)
 
 | Emoji | Nome popular | Nome científico |
 |---|---|---|
@@ -59,6 +59,10 @@ Ao vencer a batalha, o jogador avança para o próximo mundo (e o personagem usa
 | 🐜 | Formiga-saúva | *Atta sexdens* |
 | 🪳 | Barata-americana | *Periplaneta americana* |
 | 🔵 | Voador Azul | *Fictícius azulensis* |
+| 🕷️ | Aranha-de-jardim | *Lycosa erythrognatha* |
+| 🦂 | Escorpião-amarelo | *Tityus serrulatus* |
+| 💡 | Vaga-lume | *Lampyris noctiluca* |
+| 🐌 | Caracol-de-jardim | *Cornu aspersum* |
 
 ### Peixes (5)
 

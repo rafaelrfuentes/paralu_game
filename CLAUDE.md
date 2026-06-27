@@ -4,7 +4,7 @@ Doutrina específica deste projeto. Lê junto com o `~/.claude/CLAUDE.md` global
 
 ## O que é
 
-Jogo single-page de batalha estilo Pokémon GameBoy, feito com o filho (6 anos). 16 personagens (11 insetos + 5 peixes), 6 mundos em 2 dimensões. Roda no celular e desktop.
+Jogo single-page de batalha estilo Pokémon GameBoy, feito com o filho (6 anos). 20 personagens (15 insetos + 5 peixes), 6 mundos em 2 dimensões. Roda no celular e desktop.
 
 - Live: https://rafaelrfuentes.github.io/paralu_game/
 - Repo: https://github.com/rafaelrfuentes/paralu_game

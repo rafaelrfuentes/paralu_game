@@ -701,7 +701,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
 
   // =====================================================
-  // OS 16 PERSONAGENS — 11 insetos + 5 peixes
+  // OS 20 PERSONAGENS — 15 insetos + 5 peixes
   // Campos: emoji, nome, cien (nome científico), tipo, cor, golpes[4]
   // Cada golpe: n=nome, i=ícone, d=dano, m=mana, t=texto do ataque
   // =====================================================
@@ -1311,7 +1311,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     if (E.fusao) {
       grid.appendChild(mkCardSel('fusao', E.fusao.emoji, E.fusao.nome, null, E.fusao.cor));
     }
-    // todos os 16 personagens
+    // todos os 20 personagens
     PERS.forEach(function(p, i) {
       var nv = E.niveis[p.nome] || 1;
       grid.appendChild(mkCardSel(i, p.emoji, p.nome, nv, p.cor));
