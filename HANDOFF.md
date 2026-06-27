@@ -7,46 +7,47 @@
 - **URL pública:** https://rafaelrfuentes.github.io/paralu_game/
 - **Repo:** https://github.com/rafaelrfuentes/paralu_game (público)
 - **Local:** `~/code/paralu_game/`
-- **Branch main:** commit `2b0ab42` (mais recente)
+- **Branch main:** commit `53d8062`
 
 ---
 
 ## O que foi feito nesta sessão
 
-### 1. OpenMoji SVG no Canvas — ícones consistentes cross-platform
+### 1. Pokédex de criaturas — implementação completa
 
-Problema anterior: `ctx.fillText(emoji)` renderiza diferente por OS/browser.
-Solução: três funções que carregam SVGs do CDN e usam `ctx.drawImage`.
+Tela acessível pelo botão no mapa dos mundos.
 
-| Função | O que faz |
+**Funcionamento:**
+- Grid 5×5 com as 21 criaturas
+- Criatura revelada (emoji colorido + nome + tipo + nível) quando capturada no mini game
+- Antes de capturar: card escuro com `?`
+- Clicar numa criatura revelada abre painel de detalhe embaixo com borda dourada no card selecionado
+- Clicar novamente fecha o detalhe
+- Contador "X / 21 descobertas" no topo
+
+**Persistência:**
+- `E.descobertas` — Set com nomes das criaturas já capturadas alguma vez
+- Persiste em `localStorage` junto com o resto do progresso
+- Reseta com "Recomeçar do início"
+
+### 2. Pokédex enriquecida — dados científicos (museu de animais)
+
+Cada uma das 21 criaturas tem ficha completa no painel de detalhe:
+
+| Campo | Descrição |
 |---|---|
-| `_emojiCodigo(emoji)` | Converte emoji para codepoint hex (ex: `1F98B`, `1F577-FE0F`) |
-| `_carregarEmoji(emoji)` | Carrega SVG assíncrono com cache em `_emojiImgs` |
-| `_desenharEmoji(ctx, emoji, x, y, tamanho)` | `drawImage` se SVG pronto, `fillText` de fallback enquanto carrega |
+| 📍 Origem | Bandeira + região geográfica |
+| 🍽️ Dieta | O que a criatura come |
+| 📏 Tamanho | Dimensão real do animal |
+| 💡 Curiosidade | Fato científico divertido para criança |
 
-- Pré-carregamento de todos os 21 personagens + `🌼` `🌳` no boot
-- Canvas de captura: flores, árvores, criaturas migrados para `_desenharEmoji`
-- Canvas de batalha: personagens (inclui fusão) e projéteis migrados
-- `drawImage` não usa `fillStyle` → elimina definitivamente a armadilha #3 do CLAUDE.md
+Exemplo — Borboleta-monarca:
+- Origem: 🌎 América do Norte e Central
+- Dieta: Néctar de flores (larva: folhas de algodão-de-seda)
+- Tamanho: 9–10 cm de envergadura
+- Curiosidade: Migra até 4.500 km por ano entre o Canadá e o México!
 
-### 2. Sons de erro nos mini-games
-
-- `somErro()` adicionado em `verificarAnagrama()` quando anagrama errado
-- `somErro()` adicionado em `confirmarDefesa()` quando conta errada
-
-### 3. Bugs corrigidos
-
-| Bug | Localização | Correção |
-|---|---|---|
-| `var pJn` dead variable (×2) | `usarGolpe`, `usarGolpeEspecial` | removido |
-| `var novoNv` dead variable | `usarGolpe` | removido |
-| `var agora = Date.now()` não usado | `desenharBatalha` | removido |
-| `cien` hardcoded "Raul" | `realizarFusao` | usa `E.nomeTreinador` |
-| Comentário "20 personagens / 5 peixes" | header + data | corrigido para 21 / 6 |
-
-### 4. Deduplicação de lógica de vitória
-
-Extraída `_resolverFimTurno()` — o bloco `setTimeout(600ms → 650ms)` que ficava copiado em `usarGolpe` e `usarGolpeEspecial`. Ambas agora chamam `setTimeout(_resolverFimTurno, 600)`.
+**Design:** ficha em grid compacto + curiosidade com destaque verde (borda esquerda) estilo museu de história natural.
 
 ---
 
@@ -63,14 +64,14 @@ Extraída `_resolverFimTurno()` — o bloco `setTimeout(600ms → 650ms)` que fi
 
 ## Arquitetura atual (resumo)
 
-- `index.html` único (~2940 linhas) — HTML + CSS + JS vanilla, sem build
-- Personagens: **21** (15 insetos + 6 peixes — inclui Piranha)
+- `index.html` único (~3100 linhas) — HTML + CSS + JS vanilla, sem build
+- Personagens: **21** (15 insetos + 6 aquáticos: peixe-palhaço, tubarão, baiacu, caranguejo-azul, água-viva, polvo)
 - Mundos: 6 (2 dimensões), dificuldade escalada via array `MUNDOS`
 - Batalha: máquina de estados `faseBat` ('escolha' | 'animando' | 'fim')
 - Minigames: Captura (d-pad), Anagrama (super poder), Contas (defesa especial)
-- Persistência: `localStorage` (`paralu_progresso`)
+- Persistência: `localStorage` (`paralu_progresso`) — inclui `descobertas[]`
 - Canvas: captura (600×380) + batalha (600×256)
-- Música de fundo: Tone.js Transport + `scheduleRepeat`, toggle `🔊/🔇`
+- Música de fundo: Tone.js Transport + `scheduleRepeat`, toggle 🔊/🔇
 
 ---
 
@@ -82,4 +83,4 @@ Extraída `_resolverFimTurno()` — o bloco `setTimeout(600ms → 650ms)` que fi
 | Sprite Ash animado | Ciclo de caminhada (2-3 frames) com `setInterval` na captura |
 | Música por dimensão | Melodia diferente para Floresta Verde e Lago Profundo |
 | Dificuldade adaptativa | Reduzir `capVel` / aumentar `capRaio` se jogador errar muito |
-| Pokédex de criaturas | Tela listando os 21 com nome científico, desbloqueados ao capturar |
+| Filtro na Pokédex | Botão para alternar entre ver só insetos / só aquáticos / todos |
