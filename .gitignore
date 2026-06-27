@@ -14,3 +14,9 @@ build/
 Thumbs.db
 outputs/
 logs/
+
+# arquivos de referência local (mockups, sprites)
+.~lock.*
+*.jpg
+*.png
+*.jpeg

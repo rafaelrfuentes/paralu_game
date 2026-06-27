@@ -1,68 +1,120 @@
-# Handoff — Para Lú!
+# Handoff — Paralu
 
-Última sessão: **2026-06-21**
+Última sessão: **2026-06-27**
 
 ## Estado atual
 
-- **Versão:** v6 (`para_lu_v6.html` + `index.html` para Pages)
 - **URL pública:** https://rafaelrfuentes.github.io/paralu_game/
 - **Repo:** https://github.com/rafaelrfuentes/paralu_game (público)
 - **Local:** `~/code/paralu_game/`
+- **Branch main:** commit `0baca5f` (mais recente)
 
-## O que foi feito na sessão 2026-06-21
+---
 
-### Mobile (Galaxy S25 FE em landscape, em uso real com o Raul)
+## O que foi feito nesta sessão
 
-1. `<meta viewport>` no `<head>` — sem ele celular renderizava em modo desktop e encolhia tudo
-2. **D-pad touch** na captura: botões ▲◀▶▼ mapeados via `touchstart`/`touchend` para as mesmas `capTeclas` que o teclado usa
-3. **Layout landscape** da captura via CSS grid: canvas à esquerda + D-pad à direita (acionado com o polegar direito)
-4. **Botão `⛶` fullscreen** flutuante (Fullscreen API com prefixo webkit)
-5. **Media query landscape geral** cobre todas as telas (entrada, mapa, mundo, fusão, seleção, batalha, nível): reduz padding/fontes, escala canvas da batalha via `aspect-ratio: 600/256`, grid de seleção vira 8 colunas em 2 linhas
+### 1. RPG Awesome — ícones vetoriais (MIT)
 
-### Correções de bug
+CDN: `cdn.jsdelivr.net/gh/nagoshiashumari/Rpg-Awesome@master`
 
-| Bug | Causa raiz |
+- Menu mundo: `ra-leaf` (Capturar), `ra-crystals` (Fusão), `ra-crossed-swords` (Batalha), `ra-lightning-bolt` (Super Poderes), `ra-shield` (Defesa Especial)
+- Topo-labels: mesmos ícones em todas as telas
+- Botões de golpe: tier por posição — `ra-sword` / `ra-crossed-swords` / `ra-lightning-bolt` / `ra-skull`
+- Custo de golpe: `ra-fire` (dano) + `ra-droplet` (mana)
+- Botão Defender e Super Poder em batalha: RA icons via `innerHTML`
+
+### 2. OpenMoji Color — emojis flat-art (CC BY-SA 4.0)
+
+CDN: `cdn.jsdelivr.net/npm/openmoji@15.1.0/font/OpenMoji-Color.woff2`
+
+- `@font-face` com `font-display: swap`
+- Aplicado em `.sc-em`, `.fs-em`, `.fr-em`, `.cc-em`, `.ce-icone`, `.ana-emoji`, `.nv-emoji`, `.col-em`
+- Canvas: todas as 6 chamadas `ctx.font` prefixadas com `"OpenMoji"` (captura e batalha)
+
+### 3. Regra de licenciamento open-source (CLAUDE.md)
+
+- Licenças aceitas documentadas: MIT, Apache 2.0, OFL, GPL, LGPL, CC0, CC BY, CC BY-SA
+- Proibido: freemium, open-core, NC/ND, qualquer tier pago
+- Tabela de dependências aprovadas com licença verificada
+
+### 4. Tone.js — sons 8-bit chiptune (MIT)
+
+CDN: `cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js`
+
+- `_sfxMel`: PolySynth onda quadrada (timbre chiptune)
+- `_sfxHit`: NoiseSynth ruído branco (impactos)
+- Lazy init no primeiro click/touch (exigência da AudioContext API)
+- 12 funções de som hookadas nos eventos do jogo:
+
+| Função | Evento |
 |---|---|
-| Tela de captura aparecia sobreposta nas outras telas | `display: grid !important` na media query vencia o `display: none` que o JS aplica via `style` inline. Fix: usar seletor `[style*="display: flex"]` para o grid só ativar quando JS marcou visível |
-| Botão "⚔️ Batalhar!" não fazia nada na 1ª tentativa após carregar a página | `confirmarBatalha()` checava `E.jogIdx === null`, mas `E.jogIdx` só é setado DENTRO de `iniciarBatalha()`. Fix: checar `selIdx` (que é setado em `selecionarPers()`) |
-| Insetos quase invisíveis na batalha | `fillStyle = 'rgba(0,0,0,0.18)'` da sombra vazava pro `fillText` do emoji (mesma classe do bug v3→v4 da captura). Fix: `save()`/`restore()` cercando a sombra |
-| Continuar! na tela de nível travava o jogo sem voltar | `aoSairNivel = mostrarGameOverVitoria` mexia em `area-go` dentro de `tela-batalha`, mas `mostrarNivelUp()` tinha chamado `esconder()` antes. Fix: `aoSairNivel = proximoMundo` (UX mais simples — Continuar! vai direto pro próximo mundo) + fallback `mostrarMapa` em `continuarNivel()` |
+| `somGolpe()` | jogador ataca |
+| `somErro()` | mana insuficiente |
+| `somImpacto()` | impacto no inimigo |
+| `somDano()` | jogador recebe dano |
+| `somDefesaBloqueou()` | defesa reduz dano |
+| `somDerrota()` | vida do jogador chega a 0 |
+| `somVitoria()` | `mostrarGameOverVitoria()` |
+| `somNivelUp()` | `mostrarNivelUp()` |
+| `somCaptura()` | criatura capturada na captura |
+| `somFusao()` | `realizarFusao()` com sucesso |
+| `somSuperPoder()` | `usarGolpeEspecial()` |
+| `somDefesaAtivada()` | `ativarDefesa()` |
 
-### UX
+### 5. Estética Cyberpunk Neon Lo-Fi — `plano_cyberpunk_neon.md`
 
-- **Seleção de personagem auto-pré-seleciona** a primeira opção (ou a fusão, se existir) — basta um toque em "Batalhar!" para entrar na luta
-- Em landscape, nomes dos personagens ficam ocultos no grid de seleção (só emoji + nível) para caber 16 em 2 linhas
+- **Fonte:** Press Start 2P (OFL 1.1) via Google Fonts — aplicada globalmente, base 9px
+- **Fundo:** `#040914` (era `#08101e`) + meta theme-color
+- **`@keyframes brilhar`:** ciano `#00f0ff` ↔ magenta `#ff2a85` (era verde)
+- **Painéis:** `border: 2px solid #00f0ff` + `box-shadow` neon ciano
+- **Fusão painel:** `border: #ff2a85` magenta neon
+- **CRT scanlines:** `body::after` com grid 4px+3px, z-index 9999, pointer-events none
+- **Canvas gradiente:** `#040914 → #0a152d`
+- **Plataformas:** ciano `#00b8d4` (inimigo) + rosa `#c2185b` (jogador)
+- **Estrelas:** 28 estrelas piscando em ciano/rosa/branco — código existia mas nunca desenhava; loop adicionado
+- **Botão golpe hover:** glow ciano inset
 
-### Documentação
+### 6. Feedback visual de toque (commit Gemini `0baca5f`)
 
-- `CLAUDE.md` criado: doutrina do projeto + armadilhas conhecidas
-- `DESIGN.md` criado: referência técnica de fórmulas, tabelas e fluxos
-- `README.md` mantido como visão narrativa (foco no player)
+- `.card-cap:active`: scale 0.95 + glow ciano
+- `.fusao-slot:active`: scale 0.96
+- `.sel-card:active`: scale 0.95 + border ciano
 
-## Convenção de arquivos (lembrete)
+### 7. `.gitignore` — imagens de referência
 
-- `index.html` — versão viva, o que o Pages serve
-- `para_lu_vN.html` — snapshot imutável para WhatsApp; gerar `cp index.html para_lu_vN.html` ao final de versão estável
-- Detalhes de convenções e armadilhas: `CLAUDE.md`
+Adicionado `*.jpg`, `*.png`, `*.jpeg`, `.~lock.*` para não versionar mockups e sprites de referência local.
 
-## Próximos passos (roadmap)
+---
 
-Em ordem de impacto para o Raul:
+## Stack de dependências (todas open-source)
+
+| Biblioteca | Licença | Finalidade |
+|---|---|---|
+| RPG Awesome | MIT | Ícones vetoriais de RPG/fantasia |
+| OpenMoji Color | CC BY-SA 4.0 | Emojis flat-art para criaturas |
+| Tone.js 14.8.49 | MIT | Sons 8-bit via Web Audio API |
+| Press Start 2P | OFL 1.1 | Fonte pixelada arcade |
+
+---
+
+## Arquitetura atual (resumo)
+
+- `index.html` único (~2800 linhas) — HTML + CSS + JS vanilla, sem build
+- Personagens: 21 (15 insetos + 5 peixes + Piranha)
+- Mundos: 6 (2 dimensões), dificuldade escalada via array `MUNDOS`
+- Batalha: máquina de estados `faseBat` ('escolha' | 'animando' | 'fim')
+- Minigames: Captura (d-pad), Anagrama (super poder), Contas (defesa especial)
+- Persistência: `localStorage` (`paralu_progresso`)
+- Canvas: captura (600×380) + batalha (600×256)
+
+---
+
+## Próximos passos sugeridos
 
 | O que | Detalhe |
 |---|---|
-| Direção do sprite | Ash vira para o lado do movimento no mini game (já tem `desenharAsh`) |
-| Nome do jogador | Campo de texto na entrada; aparece no log da batalha e na tela de nível |
-| Tela de vitória final | Animação especial ao completar os 6 mundos (hoje volta direto pra entrada via `proximoMundo`) |
-| Reset de `mundoIdx` após zerar | Após terminar o mundo 6, `E.mundoIdx` fica em 6; idealmente o "JOGAR" volta pro mundo 1 ou abre o mapa |
-| Sons | Efeitos sonoros simples para captura, golpes, vitória (Web Audio API) |
-| Touch para fusão e seleção | Já funciona via `onclick` em mobile, mas pode ganhar feedback visual de press |
-
-## Stack / restrições
-
-- HTML + CSS + JS vanilla, single file
-- Sem framework, sem build step
-- Comentários e variáveis em português
-- Funções nomeadas pelo que fazem
-- Código sempre completo, nunca `...`
-- Tudo em `index.html` (~1500 linhas) — quebrar só quando crescer demais
+| Sprite artwork | Emojis no Canvas dependem do OS. Solução definitiva: sprites PNG base64 por personagem |
+| Tela de vitória final | Animação especial ao completar os 6 mundos |
+| Nome do jogador | Campo de texto na entrada; aparece no log da batalha |
+| Sons adicionais | Som de erro na defesa/anagrama, música de fundo com Tone.js |
+| Reset pós-zeramento | Após mundo 6 concluído, `E.mundoIdx` fica em 6; UX não fecha o loop |
