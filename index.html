@@ -729,6 +729,14 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       golpes:[{n:'Corrida Furtiva',i:'🏃',d:9, m:7, t:'A Barata atacou de surpresa!'},{n:'Antenas',i:'📡',d:14,m:13,t:'As antenas guiaram o ataque!'},{n:'Casco Invencível',i:'🛡️',d:21,m:20,t:'O contra-ataque foi forte!'},{n:'Sobrevivente',i:'💀',d:31,m:32,t:'O golpe final devastador!'}] },
     { emoji:'🔵', nome:'Voador Azul',        cien:'Fictícius azulensis',        tipo:'inseto', cor:'#1e88e5', ehVoador:true,
       golpes:[{n:'Mordida',i:'🦷',d:12,m:10,t:'As presas laranjas morderam!'},{n:'Golpe do Ar',i:'🌀',d:20,m:20,t:'O Voador voou alto e atacou!'},{n:'Raio de Energia',i:'⚡',d:27,m:26,t:'Um raio de energia azul!'},{n:'Chamado da Floresta',i:'🌿',d:36,m:35,t:'Todos os insetos atacaram juntos!'}] },
+    { emoji:'🕷️', nome:'Aranha-de-jardim',   cien:'Lycosa erythrognatha',       tipo:'inseto', cor:'#78909c',
+      golpes:[{n:'Teia Pegajosa',i:'🕸️',d:10,m:8, t:'A Aranha lançou teia pegajosa!'},{n:'Picada Rápida',i:'🦷',d:16,m:14,t:'A Aranha picou rapidamente!'},{n:'Veneno Cinzento',i:'🧪',d:22,m:21,t:'O veneno da Aranha começou a agir!'},{n:'Teia Esmagadora',i:'🕸️',d:32,m:32,t:'Uma teia gigante envolveu o inimigo!'}] },
+    { emoji:'🦂', nome:'Escorpião-amarelo',  cien:'Tityus serrulatus',          tipo:'inseto', cor:'#ffd54f',
+      golpes:[{n:'Pinçada',i:'✂️',d:11,m:8, t:'O Escorpião atacou com suas pinças!'},{n:'Picada Traseira',i:'⚡',d:17,m:15,t:'A cauda do Escorpião desferiu um golpe!'},{n:'Veneno Amarelo',i:'🧪',d:24,m:23,t:'O veneno injetado queima o inimigo!'},{n:'Ferroada Letal',i:'☠️',d:35,m:35,t:'O golpe supremo da cauda do Escorpião!'}] },
+    { emoji:'💡', nome:'Vaga-lume',          cien:'Lampyris noctiluca',         tipo:'inseto', cor:'#d4e157',
+      golpes:[{n:'Piscar',i:'✨',d:9, m:7, t:'O Vaga-lume piscou sua lanterna!'},{n:'Brilho Noturno',i:'🌟',d:15,m:14,t:'Uma luz misteriosa envolveu o oponente!'},{n:'Flash de Luz',i:'⚡',d:21,m:20,t:'Um clarão ofuscou os olhos do inimigo!'},{n:'Explosão Solar',i:'💥',d:31,m:31,t:'Toda a energia luminosa explodiu!'}] },
+    { emoji:'🐌', nome:'Caracol-de-jardim',  cien:'Cornu aspersum',             tipo:'inseto', cor:'#a1887f',
+      golpes:[{n:'Giro de Casco',i:'🛡️',d:9, m:7, t:'O Caracol girou no seu casco!'},{n:'Gosma Pegajosa',i:'💦',d:14,m:13,t:'A gosma reduziu a agilidade do inimigo!'},{n:'Carga Pesada',i:'🐌',d:21,m:20,t:'Uma investida lenta mas muito forte!'},{n:'Escudo de Pedra',i:'🛡️',d:30,m:30,t:'O casco supremo bloqueou e contra-atacou!'}] },
     // ===== PEIXES =====
     { emoji:'🐠', nome:'Peixe-palhaço',  cien:'Amphiprion ocellaris',    tipo:'peixe', cor:'#ff6d00',
       golpes:[{n:'Toque de Anêmona',i:'🌸',d:10,m:8, t:'O veneno da anêmona acertou!'},{n:'Dança Venenosa',i:'💃',d:16,m:15,t:'A dança entre anêmonas atacou!'},{n:'Nuvem de Toxinas',i:'☁️',d:23,m:22,t:'Uma nuvem de toxinas!'},{n:'Fúria da Anêmona',i:'🌊',d:33,m:33,t:'Toda a fúria da anêmona explodiu!'}] },
@@ -1357,7 +1365,32 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   // =====================================================
   // SUPER PODERES — anagrama de nomes de insetos
   // 3 acertos = +1 E.superpoderes (persiste até usar na batalha)
+  // N poderes acumulados = dano 2^N × (tudo liberado de uma vez)
   // =====================================================
+
+  var NIVEIS_PODER = [
+    null,
+    { ico: '⚡',  nome: 'PODER',     cor: '#ffd700' },
+    { ico: '🌟',  nome: 'MEGA',      cor: '#ffe566' },
+    { ico: '🔥',  nome: 'ULTRA',     cor: '#ff9800' },
+    { ico: '💥',  nome: 'HIPER',     cor: '#ff5722' },
+    { ico: '🌈',  nome: 'LENDÁRIO',  cor: '#e040fb' },
+    { ico: '👑',  nome: 'DIVINO',    cor: '#ffffff' },
+  ];
+
+  function infoPoder(n) {
+    if (n <= 0) return null;
+    var idx  = Math.min(n, NIVEIS_PODER.length - 1);
+    var niv  = NIVEIS_PODER[idx];
+    var mult = Math.pow(2, n);
+    return { ico: niv.ico, nome: niv.nome, cor: niv.cor, mult: mult, n: n };
+  }
+
+  function textoBotaoPoder(n) {
+    var p = infoPoder(n);
+    if (!p) return '';
+    return p.ico + ' ' + p.nome + ' — dano ' + p.mult + '×!';
+  }
   var anaPool     = [];    // [{letra, usada}]
   var anaResposta = [];    // [poolIdx | null] por posição de letra
   var anaAlvo     = '';    // nome completo do inseto atual
@@ -1374,9 +1407,14 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   }
 
   function atualizarUISuperpoderes() {
-    document.getElementById('ana-sp-count').textContent = '⚡ ' + E.superpoderes + ' poder' + (E.superpoderes !== 1 ? 'es' : '');
+    var p = infoPoder(E.superpoderes);
+    document.getElementById('ana-sp-count').textContent = p
+      ? p.ico + ' ' + p.nome + ' (' + p.mult + '×)'
+      : '⚡ 0 poderes';
     document.getElementById('ana-progresso').textContent = anaAcertos + ' / 3 nomes';
-    document.getElementById('btn-sp-desc').textContent = E.superpoderes > 0 ? '⚡ ' + E.superpoderes + ' pronto(s)!' : '3 nomes = 1 poder';
+    document.getElementById('btn-sp-desc').textContent = p
+      ? p.ico + ' ' + p.nome + ' pronto!'
+      : '3 nomes = 1 poder';
   }
 
   function proximoInseto() {
@@ -1485,8 +1523,9 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
         E.superpoderes++;
         salvarProgresso();
         atualizarUISuperpoderes();
+        var p = infoPoder(E.superpoderes);
         msg.className = 'ana-msg ok';
-        msg.textContent = '🎉 +1 SUPER PODER! Total: ' + E.superpoderes;
+        msg.textContent = '🎉 ' + p.ico + ' ' + p.nome + ' (' + p.mult + '×) desbloqueado!';
       } else {
         msg.className = 'ana-msg ok';
         msg.textContent = '✓ ' + anaAcertos + '/3! Continue!';
@@ -1554,7 +1593,9 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     if (E.superpoderes > 0) {
       var btnEsp = document.createElement('button');
       btnEsp.id = 'btn-esp';
-      btnEsp.textContent = '⚡ GOLPE ESPECIAL — dano 2×!' + (E.superpoderes > 1 ? ' (' + E.superpoderes + ' usos)' : '');
+      btnEsp.textContent = textoBotaoPoder(E.superpoderes);
+      var pCor = infoPoder(E.superpoderes);
+      if (pCor) btnEsp.style.borderColor = pCor.cor;
       btnEsp.onclick = usarGolpeEspecial;
       document.getElementById('botoes').appendChild(btnEsp);
     }
@@ -1713,16 +1754,11 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
   function usarGolpeEspecial() {
     if (faseBat !== 'escolha' || E.superpoderes <= 0) return;
-    E.superpoderes--;
+    var p = infoPoder(E.superpoderes); // captura antes de zerar
+    E.superpoderes = 0;                // consume tudo de uma vez
     salvarProgresso();
     var btnEsp = document.getElementById('btn-esp');
-    if (btnEsp) {
-      if (E.superpoderes > 0) {
-        btnEsp.textContent = '⚡ GOLPE ESPECIAL — dano 2×!' + (E.superpoderes > 1 ? ' (' + E.superpoderes + ' usos)' : '');
-      } else {
-        btnEsp.remove();
-      }
-    }
+    if (btnEsp) btnEsp.remove();
 
     var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
     var g  = pJ.golpes[pJ.golpes.length - 1]; // golpe mais forte
@@ -1731,10 +1767,10 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     animAtq = { quem: 'jogador', inicio: Date.now() };
 
     setTimeout(function() {
-      var dano = g.d * 2;
+      var dano = Math.round(g.d * p.mult);
       combIni.vida = Math.max(0, combIni.vida - dano);
       atualizarBarras();
-      mostrarLog('⚡ GOLPE ESPECIAL! ' + g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
+      mostrarLog(p.ico + ' ' + p.nome + '! ' + g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
     }, 300);
 
     setTimeout(function() {
