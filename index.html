@@ -1555,6 +1555,60 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   var iniPersIdx = null;      // índice do inimigo em PERS
   var nomeJog    = null;      // nome do personagem do jogador (pra atualizar nível)
 
+  // ===== JUICE / EFEITOS VISUAIS DE BATALHA =====
+  var shakeTempo = 0;
+  var shakeIntensidade = 0;
+  var particulas = [];
+  var projetilAtivo = null;
+
+  function dispararShake(intensidade, frames) {
+    shakeIntensidade = intensidade;
+    shakeTempo = frames;
+  }
+
+  function criarParticulas(x, y, cor) {
+    for (var i = 0; i < 22; i++) {
+      var ang = Math.random() * Math.PI * 2;
+      var vel = Math.random() * 4 + 1.5;
+      particulas.push({
+        x: x,
+        y: y,
+        vx: Math.cos(ang) * vel,
+        vy: Math.sin(ang) * vel,
+        vida: Math.random() * 12 + 14,
+        maxVida: 26,
+        cor: cor || '#ffd700',
+        tamanho: Math.random() * 3 + 2
+      });
+    }
+  }
+
+  function atualizarEDesenharParticulas(ctx) {
+    for (var i = particulas.length - 1; i >= 0; i--) {
+      var p = particulas[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vida--;
+      if (p.vida <= 0) {
+        particulas.splice(i, 1);
+        continue;
+      }
+      var alpha = p.vida / p.maxVida;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.cor;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.tamanho * alpha, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function ehProjetil(g) {
+    const iconesContato = ['⚔️', '🦷', '🏃', '🛡️', '🔴', '🦏', '😤', '💪', '🦵', '👊', '🦶', '🦟', '🐛', '🐜', '🐟', '🦈', '✂️', '🥊', '🥋', '🖐️', '👤'];
+    return !iconesContato.includes(g.i);
+  }
+
   function iniciarBatalha() {
     E.jogIdx = selIdx;
     // escolhe inimigo aleatório diferente do jogador
@@ -1576,6 +1630,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     combIni = { vida: cfg.vidaIni, mana: cfg.manaIni, maxVida: cfg.vidaIni, maxMana: cfg.manaIni };
 
     faseBat = 'escolha'; animAtq = null; animPisc = null;
+    projetilAtivo = null; particulas = []; shakeTempo = 0;
     telaBat   = document.getElementById('campo');
     pincelBat = telaBat.getContext('2d');
 
@@ -1636,6 +1691,15 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     grad.addColorStop(0, '#07102a'); grad.addColorStop(1, '#1a2855');
     pincelBat.fillStyle = grad; pincelBat.fillRect(0, 0, W, H);
 
+    pincelBat.save();
+    // tremor de tela (Screen Shake)
+    if (shakeTempo > 0) {
+      var dx = (Math.random() - 0.5) * shakeIntensidade;
+      var dy = (Math.random() - 0.5) * shakeIntensidade;
+      pincelBat.translate(dx, dy);
+      shakeTempo--;
+    }
+
     // plataformas
     function plat(cx, cy, rx, ry, c1, c2) {
       var g = pincelBat.createRadialGradient(cx, cy, 4, cx, cy, rx);
@@ -1649,9 +1713,14 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     // calcula deslocamentos da animação de ataque
     var offJ = 0, offI = 0;
     if (animAtq) {
-      var t   = Math.min((Date.now() - animAtq.inicio) / 600, 1);
-      var off = (t < 0.5 ? t * 2 : (1 - t) * 2) * 74;
-      if (animAtq.quem === 'jogador') offJ = off; else offI = -off;
+      if (animAtq.tipo === 'tremor') {
+        var tremor = (Math.random() - 0.5) * 6;
+        if (animAtq.quem === 'jogador') offJ = tremor; else offI = tremor;
+      } else {
+        var t   = Math.min((Date.now() - animAtq.inicio) / 600, 1);
+        var off = (t < 0.5 ? t * 2 : (1 - t) * 2) * 74;
+        if (animAtq.quem === 'jogador') offJ = off; else offI = -off;
+      }
     }
     // piscar quando recebe dano (alterna visível/invisível)
     var pvJ = animPisc && animPisc.alvo === 'jogador' &&
@@ -1663,6 +1732,27 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
     desenharPers(pincelBat, pI, POS_INI.x, POS_INI.y, offI, pvI, 0.8, true);
     desenharPers(pincelBat, pJ, POS_JOG.x, POS_JOG.y, offJ, pvJ, 1.0, false);
+    pincelBat.restore();
+
+    // desenha projétil ativo por cima dos personagens
+    if (projetilAtivo) {
+      var pt = Math.min((Date.now() - projetilAtivo.inicio) / projetilAtivo.duracao, 1);
+      var px = projetilAtivo.x + (projetilAtivo.tx - projetilAtivo.x) * pt;
+      var py = projetilAtivo.y + (projetilAtivo.ty - projetilAtivo.y) * pt;
+      pincelBat.save();
+      pincelBat.font = '28px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+      pincelBat.textAlign = 'center'; pincelBat.textBaseline = 'middle';
+      // sombra do projétil
+      pincelBat.fillStyle = 'rgba(0,0,0,0.2)';
+      pincelBat.fillText(projetilAtivo.emoji, px + 2, py + 2);
+      // corpo do projétil
+      pincelBat.fillStyle = '#ffffff';
+      pincelBat.fillText(projetilAtivo.emoji, px, py);
+      pincelBat.restore();
+    }
+
+    // desenha as partículas
+    atualizarEDesenharParticulas(pincelBat);
   }
 
   function desenharPers(ctx, p, cx, cy, offX, pisca, esc, ehIni) {
@@ -1706,14 +1796,35 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     if (!g || combJog.mana < g.m) return;
 
     faseBat = 'animando'; atualizarBotoes(); mostrarLog('...');
-    animAtq = { quem: 'jogador', inicio: Date.now() };
+    
+    var proj = ehProjetil(g);
+    if (proj) {
+      animAtq = { quem: 'jogador', tipo: 'tremor', inicio: Date.now() };
+      projetilAtivo = {
+        x: POS_JOG.x,
+        y: POS_JOG.y,
+        tx: POS_INI.x,
+        ty: POS_INI.y,
+        inicio: Date.now(),
+        duracao: 300,
+        emoji: g.i
+      };
+    } else {
+      animAtq = { quem: 'jogador', tipo: 'slide', inicio: Date.now() };
+    }
 
     setTimeout(function() {
+      projetilAtivo = null;
       combJog.mana -= g.m;
       var dano = g.d + (ext || 0);
       combIni.vida = Math.max(0, combIni.vida - dano);
       atualizarBarras();
       mostrarLog(g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
+      
+      // EFEITOS DE IMPACTO
+      var corFx = pJ.cor || '#a8ff8c';
+      criarParticulas(POS_INI.x, POS_INI.y, corFx);
+      dispararShake(dano > 25 ? 12 : 6, dano > 25 ? 20 : 10);
     }, 300);
 
     setTimeout(function() {
@@ -1730,7 +1841,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
             E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
             salvarProgresso();
             var novoNv = E.niveis[nomeJog];
-            aoSairNivel = proximoMundo;  // após Continuar!, avança direto pro próximo mundo (proximoMundo trata o caso do último mundo internamente)
+            aoSairNivel = proximoMundo;  // após Continuar!, avança direto pro próximo mundo
             setTimeout(function() { mostrarNivelUp(nomeJog, novoNv); }, 700);
           } else {
             setTimeout(mostrarGameOverVitoria, 700);
@@ -1755,7 +1866,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   function usarGolpeEspecial() {
     if (faseBat !== 'escolha' || E.superpoderes <= 0) return;
     var p = infoPoder(E.superpoderes); // captura antes de zerar
-    E.superpoderes = 0;                // consume tudo de uma vez
+    E.superpoderes = 0;                // consome tudo de uma vez
     salvarProgresso();
     var btnEsp = document.getElementById('btn-esp');
     if (btnEsp) btnEsp.remove();
@@ -1764,13 +1875,29 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     var g  = pJ.golpes[pJ.golpes.length - 1]; // golpe mais forte
 
     faseBat = 'animando'; atualizarBotoes(); mostrarLog('...');
-    animAtq = { quem: 'jogador', inicio: Date.now() };
+    
+    // Golpe especial sempre gera um projétil super carregado
+    animAtq = { quem: 'jogador', tipo: 'tremor', inicio: Date.now() };
+    projetilAtivo = {
+      x: POS_JOG.x,
+      y: POS_JOG.y,
+      tx: POS_INI.x,
+      ty: POS_INI.y,
+      inicio: Date.now(),
+      duracao: 300,
+      emoji: p.ico
+    };
 
     setTimeout(function() {
+      projetilAtivo = null;
       var dano = Math.round(g.d * p.mult);
       combIni.vida = Math.max(0, combIni.vida - dano);
       atualizarBarras();
       mostrarLog(p.ico + ' ' + p.nome + '! ' + g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
+      
+      // EFEITOS DE IMPACTO SUPREMO
+      criarParticulas(POS_INI.x, POS_INI.y, p.cor);
+      dispararShake(20, 32);
     }, 300);
 
     setTimeout(function() {
@@ -1813,15 +1940,37 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       return;
     }
     var g = disp[Math.floor(Math.random() * disp.length)];
-    animAtq = { quem: 'inimigo', inicio: Date.now() };
+    
+    var proj = ehProjetil(g);
+    if (proj) {
+      animAtq = { quem: 'inimigo', tipo: 'tremor', inicio: Date.now() };
+      projetilAtivo = {
+        x: POS_INI.x,
+        y: POS_INI.y,
+        tx: POS_JOG.x,
+        ty: POS_JOG.y,
+        inicio: Date.now(),
+        duracao: 300,
+        emoji: g.i
+      };
+    } else {
+      animAtq = { quem: 'inimigo', tipo: 'slide', inicio: Date.now() };
+    }
+    
     mostrarLog('...');
 
     setTimeout(function() {
+      projetilAtivo = null;
       combIni.mana -= g.m;
       combJog.vida  = Math.max(0, combJog.vida - g.d);
       atualizarBarras();
       var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
       mostrarLog(g.t + ' ' + pJ.nome + ' perdeu ' + g.d + ' de vida!');
+      
+      // EFEITOS DE IMPACTO NO JOGADOR
+      var corFx = pI.cor || '#ff5252';
+      criarParticulas(POS_JOG.x, POS_JOG.y, corFx);
+      dispararShake(g.d > 25 ? 12 : 6, g.d > 25 ? 20 : 10);
     }, 300);
 
     setTimeout(function() {

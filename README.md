@@ -166,7 +166,11 @@ Módulo intermediário entre captura e batalha.
 - Jogador escolhe entre os 4 golpes (botões na parte inferior)
 - Quando sem mana, aparece botão **Descansar** (+20 mana, mas passa o turno)
 - Inimigo é controlado por IA simples: escolhe golpes aleatórios dentro do limite do mundo
-- Animações: deslocamento do atacante + piscar do alvo ao receber dano
+- Animações (Game Juice):
+  - **Ataques Físicos vs Projétil**: Golpes com ícones de impacto físico (como `⚔️`, `🦷`, `💪`) fazem o atacante deslizar fisicamente até o defensor. Golpes de energia, veneno ou som (como `⚡`, `🧪`, `🔊`) disparam o ícone do golpe como projétil voador no Canvas.
+  - **Screen Shake (Tremor de Tela)**: Tremores no cenário proporcional ao dano causado (super tremor no Golpe Especial).
+  - **Partículas de Dano**: Explosão de partículas coloridas saindo do alvo atingido, correspondente à paleta de cores da criatura atacante.
+  - **Piscar de Dano**: O alvo pisca intermitentemente após receber o impacto.
 
 ### Combinação de bônus
 
