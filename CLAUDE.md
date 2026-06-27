@@ -32,11 +32,11 @@ Quebrar `index.html` em múltiplos arquivos é OK quando o jogo crescer, mas hoj
 
 ## Workflow padrão de uma alteração
 
-1. Editar `index.html` direto
-2. Testar abrindo o arquivo no browser (não há servidor, não há build)
-3. Para mobile: testar em `https://rafaelrfuentes.github.io/paralu_game/` após push
-4. `git commit` + `git push` → live em ~1 min
-5. Em versão estável marcante: `cp index.html para_lu_vN.html` e commitar junto
+1. O agente Antigravity (agy) desenvolve e comita sempre na branch `agy-dev-paralu`.
+2. Editar `index.html` direto.
+3. Testar abrindo o arquivo no browser (não há servidor, não há build).
+4. Após validação e solicitação do usuário, mesclar as modificações na branch principal (`git checkout main`, `git merge agy-dev-paralu`, `git push` → live em ~1 min) e retornar em seguida para a branch `agy-dev-paralu`.
+5. Em versão estável marcante: `cp index.html para_lu_vN.html` e commitar junto.
 
 ## Armadilhas conhecidas (cometi todas — não repetir)
 
