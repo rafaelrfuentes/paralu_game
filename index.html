@@ -877,16 +877,17 @@ canvas#campo {
 
   // =====================================================
   // CONFIGURAÇÃO DOS 6 MUNDOS — 2 dimensões × 3 mundos
-  // vidaIni/manaIni = stats do inimigo naquele mundo
-  // golpesIni = quantos golpes o inimigo pode usar (dificuldade)
+  // Captura: capVel=vel max criaturas · capRaio=raio colisão · capSpawn=ms entre spawns
+  //          capFuga=criaturas fogem quando jogador chega perto · capIniI/P=qtd inicial
+  // Batalha: manaRegen=mana passiva inimigo por turno · danoMult=multiplicador de dano
   // =====================================================
   const MUNDOS = [
-    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:1, nome:'Clareira',        vidaIni:100, manaIni:100, golpesIni:2, est:'⭐' },
-    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:2, nome:'Floresta Densa',  vidaIni:135, manaIni:135, golpesIni:3, est:'⭐⭐' },
-    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:3, nome:'Pântano',         vidaIni:170, manaIni:170, golpesIni:4, est:'⭐⭐⭐' },
-    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:4, nome:'Margem do Lago',  vidaIni:210, manaIni:210, golpesIni:4, est:'⭐⭐⭐⭐' },
-    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:5, nome:'Águas Fundas',    vidaIni:260, manaIni:260, golpesIni:4, est:'⭐⭐⭐⭐⭐' },
-    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:6, nome:'Fundo do Abismo', vidaIni:320, manaIni:320, golpesIni:4, est:'⭐⭐⭐⭐⭐⭐' },
+    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:1, nome:'Clareira',        vidaIni:100, manaIni:100, golpesIni:2, est:'⭐',         capVel:1.4, capSpawn:2200, capRaio:28, capFuga:false, capIniI:4, capIniP:3, manaRegen:0,  danoMult:1.0 },
+    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:2, nome:'Floresta Densa',  vidaIni:135, manaIni:135, golpesIni:3, est:'⭐⭐',       capVel:1.8, capSpawn:2000, capRaio:26, capFuga:false, capIniI:4, capIniP:3, manaRegen:0,  danoMult:1.0 },
+    { dim:1, dimNome:'Dimensão 1 — Floresta Verde', dimCor:'#2d5a1b', num:3, nome:'Pântano',         vidaIni:170, manaIni:170, golpesIni:4, est:'⭐⭐⭐',     capVel:2.3, capSpawn:1800, capRaio:24, capFuga:true,  capIniI:3, capIniP:3, manaRegen:6,  danoMult:1.0 },
+    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:4, nome:'Margem do Lago',  vidaIni:210, manaIni:210, golpesIni:4, est:'⭐⭐⭐⭐',   capVel:2.8, capSpawn:1600, capRaio:22, capFuga:true,  capIniI:3, capIniP:2, manaRegen:10, danoMult:1.1 },
+    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:5, nome:'Águas Fundas',    vidaIni:260, manaIni:260, golpesIni:4, est:'⭐⭐⭐⭐⭐', capVel:3.3, capSpawn:1400, capRaio:20, capFuga:true,  capIniI:3, capIniP:2, manaRegen:15, danoMult:1.2 },
+    { dim:2, dimNome:'Dimensão 2 — Lago Profundo',  dimCor:'#1a3a5c', num:6, nome:'Fundo do Abismo', vidaIni:320, manaIni:320, golpesIni:4, est:'⭐⭐⭐⭐⭐⭐',capVel:3.8, capSpawn:1200, capRaio:18, capFuga:true,  capIniI:2, capIniP:2, manaRegen:20, danoMult:1.3 },
   ];
 
   // =====================================================
@@ -1111,49 +1112,55 @@ canvas#campo {
   }
 
   function iniciarCaptura() {
+    var cfg   = MUNDOS[E.mundoIdx];
     telaCap   = document.getElementById('canvas-captura');
     pincelCap = telaCap.getContext('2d');
     capPers   = { x: 300, y: 110, vel: 3 };
     capCriat  = [];
     capAtivo  = true;
-    // popula o campo com insetos (grama) e peixes (lago)
-    for (var i = 0; i < 4; i++) criarInsetoNoCampo();
-    for (var j = 0; j < 3; j++) criarPeixeNoCampo();
+    // popula o campo com criaturas — quantidade varia por mundo
+    for (var i = 0; i < cfg.capIniI; i++) criarInsetoNoCampo();
+    for (var j = 0; j < cfg.capIniP; j++) criarPeixeNoCampo();
     if (capTimer) clearInterval(capTimer);
     capTimer = setInterval(function() {
       if (modoAtual !== 'captura') return;
       Math.random() > 0.5 ? criarInsetoNoCampo() : criarPeixeNoCampo();
-    }, 2200);
+    }, cfg.capSpawn);
     atualizarUICaptura();
     loopCaptura();
   }
 
   function criarInsetoNoCampo() {
+    var cfg   = MUNDOS[E.mundoIdx];
     var lista = PERS.filter(function(p) { return p.tipo === 'inseto'; });
     var esp   = lista[Math.floor(Math.random() * lista.length)];
+    var s     = cfg.capVel;
     capCriat.push({
       esp: esp, tipo: 'inseto',
       x:  Math.random() * 556 + 22,
       y:  Math.random() * (LAGO_Y - 60) + 22,
-      vx: (Math.random() - 0.5) * 1.4,
-      vy: (Math.random() - 0.5) * 1.4,
+      vx: (Math.random() - 0.5) * s,
+      vy: (Math.random() - 0.5) * s,
     });
   }
 
   function criarPeixeNoCampo() {
+    var cfg   = MUNDOS[E.mundoIdx];
     var lista = PERS.filter(function(p) { return p.tipo === 'peixe'; });
     var esp   = lista[Math.floor(Math.random() * lista.length)];
+    var s     = cfg.capVel * 0.9;
     capCriat.push({
       esp: esp, tipo: 'peixe',
       x:  Math.random() * 556 + 22,
       y:  LAGO_Y + 12 + Math.random() * (370 - LAGO_Y - 30),
-      vx: (Math.random() - 0.5) * 1.3,
-      vy: (Math.random() - 0.5) * 1.3,
+      vx: (Math.random() - 0.5) * s,
+      vy: (Math.random() - 0.5) * s,
     });
   }
 
   function loopCaptura() {
     if (!capAtivo || modoAtual !== 'captura') return;
+    var cfgCap = MUNDOS[E.mundoIdx];
 
     // velocidade reduzida dentro do lago
     var noLago = capPers.y > LAGO_Y;
@@ -1181,6 +1188,18 @@ canvas#campo {
     // move as criaturas e aplica limites de zona
     for (var ci = 0; ci < capCriat.length; ci++) {
       var c = capCriat[ci];
+
+      // fuga: mundo 3+ — criatura acelera para longe quando jogador chega perto
+      if (cfgCap.capFuga) {
+        var fdx = c.x - capPers.x, fdy = c.y - capPers.y;
+        var fdist = Math.sqrt(fdx * fdx + fdy * fdy);
+        if (fdist < 80 && fdist > 0) {
+          var fugarVel = cfgCap.capVel * 1.6;
+          c.vx = (fdx / fdist) * fugarVel;
+          c.vy = (fdy / fdist) * fugarVel;
+        }
+      }
+
       c.x += c.vx; c.y += c.vy;
       if (c.tipo === 'inseto') {
         // inseto fica na grama
@@ -1202,12 +1221,12 @@ canvas#campo {
       }
     }
 
-    // verifica capturas (jogador encostou na criatura)
+    // verifica capturas (jogador encostou na criatura) — raio de colisão escala por mundo
     var novidade = false;
     for (var ki = capCriat.length - 1; ki >= 0; ki--) {
       var kc = capCriat[ki];
       var kdx = capPers.x - kc.x, kdy = capPers.y - kc.y;
-      if (Math.sqrt(kdx*kdx + kdy*kdy) < 28) {
+      if (Math.sqrt(kdx*kdx + kdy*kdy) < cfgCap.capRaio) {
         if (!E.capMundo.has(kc.esp.nome)) { E.capMundo.add(kc.esp.nome); novidade = true; }
         capCriat.splice(ki, 1);
       }
@@ -2251,8 +2270,16 @@ canvas#campo {
   // ===== TURNO DO INIMIGO (NPC) =====
 
   function turnoInimigo() {
-    var pI   = PERS[iniPersIdx];
-    var max  = MUNDOS[E.mundoIdx].golpesIni; // limite de golpes conforme o mundo
+    var pI  = PERS[iniPersIdx];
+    var cfg = MUNDOS[E.mundoIdx];
+
+    // regeneração passiva de mana — mundos avançados atacam mais frequentemente
+    if (cfg.manaRegen > 0) {
+      combIni.mana = Math.min(combIni.maxMana, combIni.mana + cfg.manaRegen);
+      atualizarBarras();
+    }
+
+    var max  = cfg.golpesIni;
     var disp = pI.golpes.slice(0, max).filter(function(g) { return g.m <= combIni.mana; });
 
     if (disp.length === 0) {
@@ -2289,7 +2316,7 @@ canvas#campo {
     setTimeout(function() {
       projetilAtivo = null;
       combIni.mana -= g.m;
-      var danoFinal = g.d;
+      var danoFinal = Math.round(g.d * (cfg.danoMult || 1));
       var bloqueado = defesaAtiva;
       if (defesaAtiva) {
         danoFinal = Math.round(g.d * 0.5);
@@ -2316,7 +2343,7 @@ canvas#campo {
       // EFEITOS DE IMPACTO NO JOGADOR
       var corFx = pI.cor || '#ff5252';
       criarParticulas(POS_JOG.x, POS_JOG.y, corFx);
-      criarTextoFlutuante(POS_JOG.x, POS_JOG.y, '-' + g.d, '#ff5252');
+      criarTextoFlutuante(POS_JOG.x, POS_JOG.y, '-' + danoFinal, '#ff5252');
       dispararShake(g.d > 25 ? 12 : 6, g.d > 25 ? 20 : 10);
     }, 300);
 
