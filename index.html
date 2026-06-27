@@ -1560,6 +1560,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   var shakeIntensidade = 0;
   var particulas = [];
   var projetilAtivo = null;
+  var textosFlutuantes = [];
+  var estrelasBatalha = [];
 
   function dispararShake(intensidade, frames) {
     shakeIntensidade = intensidade;
@@ -1604,6 +1606,44 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     }
   }
 
+  function criarTextoFlutuante(x, y, txt, cor) {
+    textosFlutuantes.push({
+      x: x,
+      y: y - 24, // começa um pouco acima do personagem
+      txt: txt,
+      cor: cor || '#ff5252',
+      vida: 32,
+      maxVida: 32,
+      vy: -0.9
+    });
+  }
+
+  function atualizarEDesenharTextosFlutuantes(ctx) {
+    for (var i = textosFlutuantes.length - 1; i >= 0; i--) {
+      var tf = textosFlutuantes[i];
+      tf.y += tf.vy;
+      tf.vida--;
+      if (tf.vida <= 0) {
+        textosFlutuantes.splice(i, 1);
+        continue;
+      }
+      var alpha = tf.vida / tf.maxVida;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = 'bold 15px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // borda preta para legibilidade
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 3;
+      ctx.strokeText(tf.txt, tf.x, tf.y);
+      // texto
+      ctx.fillStyle = tf.cor;
+      ctx.fillText(tf.txt, tf.x, tf.y);
+      ctx.restore();
+    }
+  }
+
   function ehProjetil(g) {
     const iconesContato = ['⚔️', '🦷', '🏃', '🛡️', '🔴', '🦏', '😤', '💪', '🦵', '👊', '🦶', '🦟', '🐛', '🐜', '🐟', '🦈', '✂️', '🥊', '🥋', '🖐️', '👤'];
     return !iconesContato.includes(g.i);
@@ -1631,6 +1671,20 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
     faseBat = 'escolha'; animAtq = null; animPisc = null;
     projetilAtivo = null; particulas = []; shakeTempo = 0;
+    textosFlutuantes = [];
+    
+    // Gera as estrelas para o céu da batalha
+    estrelasBatalha = [];
+    for (var i = 0; i < 28; i++) {
+      estrelasBatalha.push({
+        x: Math.random() * 600,
+        y: Math.random() * 95, // céu (topo)
+        tamanho: Math.random() * 1.6 + 0.6,
+        fase: Math.random() * Math.PI * 2,
+        vel: Math.random() * 0.04 + 0.015
+      });
+    }
+    
     telaBat   = document.getElementById('campo');
     pincelBat = telaBat.getContext('2d');
 
@@ -1753,6 +1807,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
     // desenha as partículas
     atualizarEDesenharParticulas(pincelBat);
+    // desenha textos flutuantes
+    atualizarEDesenharTextosFlutuantes(pincelBat);
   }
 
   function desenharPers(ctx, p, cx, cy, offX, pisca, esc, ehIni) {
@@ -1824,6 +1880,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       // EFEITOS DE IMPACTO
       var corFx = pJ.cor || '#a8ff8c';
       criarParticulas(POS_INI.x, POS_INI.y, corFx);
+      criarTextoFlutuante(POS_INI.x, POS_INI.y, '-' + dano, '#ff5252');
       dispararShake(dano > 25 ? 12 : 6, dano > 25 ? 20 : 10);
     }, 300);
 
@@ -1859,6 +1916,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     combJog.mana = Math.min(combJog.maxMana, combJog.mana + 20);
     atualizarBarras();
     var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+    criarTextoFlutuante(POS_JOG.x, POS_JOG.y, '+20 💧', '#00b0ff');
     mostrarLog(pJ.nome + ' descansou e recuperou 20 de mana...');
     setTimeout(turnoInimigo, 900);
   }
@@ -1897,6 +1955,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       
       // EFEITOS DE IMPACTO SUPREMO
       criarParticulas(POS_INI.x, POS_INI.y, p.cor);
+      criarTextoFlutuante(POS_INI.x, POS_INI.y, '💥 -' + dano + ' CRÍTICO!', '#ffd700');
       dispararShake(20, 32);
     }, 300);
 
@@ -1935,6 +1994,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       // sem mana: descansa
       combIni.mana = Math.min(combIni.maxMana, combIni.mana + 20);
       atualizarBarras();
+      criarTextoFlutuante(POS_INI.x, POS_INI.y, '+20 💧', '#00b0ff');
       mostrarLog(pI.nome + ' descansou e recuperou forças...');
       setTimeout(function() { faseBat = 'escolha'; atualizarBotoes(); }, 800);
       return;
@@ -1970,6 +2030,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
       // EFEITOS DE IMPACTO NO JOGADOR
       var corFx = pI.cor || '#ff5252';
       criarParticulas(POS_JOG.x, POS_JOG.y, corFx);
+      criarTextoFlutuante(POS_JOG.x, POS_JOG.y, '-' + g.d, '#ff5252');
       dispararShake(g.d > 25 ? 12 : 6, g.d > 25 ? 20 : 10);
     }, 300);
 
