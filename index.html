@@ -168,7 +168,12 @@ body {
 .col-grid   { display: flex; flex-wrap: wrap; gap: 5px; min-height: 36px; align-items: center; }
 .card-cap   {
   background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-  padding: 4px 7px; border-radius: 5px; text-align: center;
+  padding: 4px 7px; border-radius: 5px; text-align: center; transition: all 0.1s;
+}
+.card-cap:active {
+  transform: scale(0.95);
+  background: rgba(255,255,255,0.18);
+  border-color: #00f0ff;
 }
 .cc-em { font-size: 17px; display: block; }
 .cc-nm { font-size: 7px; color: #aaa; }
@@ -240,11 +245,12 @@ canvas#canvas-captura {
   flex: 1; background: #0d1929; border: 2px dashed #2a4a7c; border-radius: 8px;
   padding: 12px; text-align: center; cursor: pointer; min-height: 68px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: border-color 0.15s;
+  transition: all 0.12s;
 }
 .fusao-slot.ativo { border-color: #9c27b0; border-style: solid; }
 .fusao-slot.cheio { border-style: solid; }
 .fusao-slot:hover { border-color: #7b1fa2; }
+.fusao-slot:active { transform: scale(0.96); background: #11223b; }
 .fs-em   { font-size: 28px; }
 .fs-nm   { font-size: 9px; color: #ce93d8; margin-top: 4px; }
 .fs-hint { font-size: 9px; color: #556; }
@@ -271,9 +277,10 @@ canvas#canvas-captura {
 .sel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; width: 600px; }
 .sel-card {
   background: #060e1c; border: 2px solid #00f0ff; border-radius: 8px;
-  padding: 9px 4px 7px; cursor: pointer; text-align: center; transition: all 0.15s;
+  padding: 9px 4px 7px; cursor: pointer; text-align: center; transition: all 0.12s;
 }
 .sel-card:hover  { transform: scale(1.04); }
+.sel-card:active { transform: scale(0.95); background: #0c1a30; border-color: #7dcfff; }
 .sel-card.ativo  { box-shadow: 0 0 14px rgba(170,196,255,0.4); }
 .sc-em { font-size: 28px; }
 .sc-nm { font-size: 7px; color: #aac4ff; margin-top: 3px; line-height: 1.3; }
