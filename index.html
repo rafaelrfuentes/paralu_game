@@ -11,6 +11,15 @@
 <title>Paralu — aventura criada por Rafa e Raul Fuentes</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nagoshiashumari/Rpg-Awesome@master/css/rpg-awesome.min.css">
 <style>
+@font-face {
+  font-family: 'OpenMoji';
+  src: url('https://cdn.jsdelivr.net/npm/openmoji@15.1.0/font/OpenMoji-Color.woff2') format('woff2');
+  font-display: swap;
+}
+/* OpenMoji aplicado em todos os elementos HTML que exibem emojis de criaturas */
+.sc-em, .fs-em, .fr-em, .cc-em, .ce-icone, .ana-emoji, .nv-emoji, .col-em {
+  font-family: 'OpenMoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html {
   overscroll-behavior: none;
@@ -1356,19 +1365,19 @@ canvas#campo {
 
     // florezinhas decorativas na grama (fillStyle opaco para emoji aparecer)
     ctx.fillStyle = '#ffffff';
-    ctx.font = '15px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    ctx.font = '15px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
     for (var fi = 0; fi < 10; fi++)
       ctx.fillText('🌼', (fi * 71 + 20) % 576 + 12, (fi * 43 + 18) % (LAGO_Y - 24) + 12);
 
     // árvores (obstáculos)
-    ctx.font = '40px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    ctx.font = '40px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (var ti = 0; ti < ARVORES.length; ti++)
       ctx.fillText('🌳', ARVORES[ti].x, ARVORES[ti].y);
 
     // criaturas — fillStyle opaco garante que o alpha 0.12 do texto do lago não vaze aqui
     ctx.fillStyle = '#ffffff';
-    ctx.font = '28px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    ctx.font = '28px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
     for (var cdi = 0; cdi < capCriat.length; cdi++)
       ctx.fillText(capCriat[cdi].esp.emoji, capCriat[cdi].x, capCriat[cdi].y);
 
@@ -2178,7 +2187,7 @@ canvas#campo {
       var px = projetilAtivo.x + (projetilAtivo.tx - projetilAtivo.x) * pt;
       var py = projetilAtivo.y + (projetilAtivo.ty - projetilAtivo.y) * pt;
       pincelBat.save();
-      pincelBat.font = '28px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+      pincelBat.font = '28px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
       pincelBat.textAlign = 'center'; pincelBat.textBaseline = 'middle';
       // sombra do projétil
       pincelBat.fillStyle = 'rgba(0,0,0,0.2)';
@@ -2227,13 +2236,13 @@ canvas#campo {
 
     if (p.ehFusao) {
       // fusão: dois emojis lado a lado
-      ctx.font = Math.round(44*esc) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+      ctx.font = Math.round(44*esc) + 'px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       var ems = Array.from(p.emoji); // separa os dois emojis corretamente
       ctx.fillText(ems[0] || '', x - Math.round(16*esc), y);
       ctx.fillText(ems[1] || '', x + Math.round(16*esc), y);
     } else {
-      ctx.font = Math.round(58*esc) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+      ctx.font = Math.round(58*esc) + 'px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(p.emoji, x, y);
     }
