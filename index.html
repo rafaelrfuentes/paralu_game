@@ -1068,7 +1068,7 @@ canvas#campo {
 
 
   // =====================================================
-  // OS 20 PERSONAGENS — 15 insetos + 5 peixes
+  // OS 21 PERSONAGENS — 15 insetos + 6 peixes (inclui Piranha)
   // Campos: emoji, nome, cien (nome científico), tipo, cor, golpes[4]
   // Cada golpe: n=nome, i=ícone, d=dano, m=mana, t=texto do ataque
   // =====================================================
@@ -1178,6 +1178,46 @@ canvas#campo {
   let modoAtual = null;
   // callback executado ao sair da tela de nível
   let aoSairNivel = null;
+
+  // =====================================================
+  // OPENMOJI SVG NO CANVAS — ícones consistentes entre OS/browsers
+  // =====================================================
+  var _emojiImgs = {};
+
+  function _emojiCodigo(emoji) {
+    var cps = [];
+    for (var i = 0; i < emoji.length; ) {
+      var cp = emoji.codePointAt(i);
+      if (cp !== 0x200D) cps.push(cp.toString(16).toUpperCase().padStart(4, '0'));
+      i += cp > 0xFFFF ? 2 : 1;
+    }
+    return cps.join('-');
+  }
+
+  function _carregarEmoji(emoji) {
+    var codigo = _emojiCodigo(emoji);
+    if (_emojiImgs[codigo] !== undefined) return;
+    _emojiImgs[codigo] = null;
+    var img = new Image();
+    img.onload = function() { _emojiImgs[codigo] = img; };
+    img.src = 'https://cdn.jsdelivr.net/npm/openmoji@15.1.0/color/svg/' + codigo + '.svg';
+  }
+
+  function _desenharEmoji(ctx, emoji, x, y, tamanho) {
+    var codigo = _emojiCodigo(emoji);
+    var img = _emojiImgs[codigo];
+    if (img) {
+      ctx.drawImage(img, x - tamanho / 2, y - tamanho / 2, tamanho, tamanho);
+      return;
+    }
+    // fallback: fillText enquanto SVG ainda carrega
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = tamanho + 'px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, x, y);
+    ctx.restore();
+  }
 
   // =====================================================
   // NAVEGAÇÃO ENTRE TELAS
@@ -1553,23 +1593,18 @@ canvas#campo {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('~ LAGO ~', 300, LAGO_Y + (H - LAGO_Y) / 2);
 
-    // florezinhas decorativas na grama (fillStyle opaco para emoji aparecer)
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '15px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    // florezinhas decorativas na grama
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (var fi = 0; fi < 10; fi++)
-      ctx.fillText('🌼', (fi * 71 + 20) % 576 + 12, (fi * 43 + 18) % (LAGO_Y - 24) + 12);
+      _desenharEmoji(ctx, '🌼', (fi * 71 + 20) % 576 + 12, (fi * 43 + 18) % (LAGO_Y - 24) + 12, 15);
 
     // árvores (obstáculos)
-    ctx.font = '40px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (var ti = 0; ti < ARVORES.length; ti++)
-      ctx.fillText('🌳', ARVORES[ti].x, ARVORES[ti].y);
+      _desenharEmoji(ctx, '🌳', ARVORES[ti].x, ARVORES[ti].y, 40);
 
-    // criaturas — fillStyle opaco garante que o alpha 0.12 do texto do lago não vaze aqui
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '28px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
+    // criaturas — drawImage não usa fillStyle, sem risco de alpha vazado
     for (var cdi = 0; cdi < capCriat.length; cdi++)
-      ctx.fillText(capCriat[cdi].esp.emoji, capCriat[cdi].x, capCriat[cdi].y);
+      _desenharEmoji(ctx, capCriat[cdi].esp.emoji, capCriat[cdi].x, capCriat[cdi].y, 28);
 
     // personagem (sprite pixel art do Ash)
     desenharAsh(ctx, capPers.x, capPers.y, capPers.dir);
@@ -1738,7 +1773,7 @@ canvas#campo {
       ehFusao:  true,
       emoji:    p1.emoji + p2.emoji,
       nome:     nm1 + '-' + nm2,
-      cien:     'Fusão especial do Raul!',
+      cien:     'Fusão especial de ' + (E.nomeTreinador || 'Raul') + '!',
       cor:      '#9c27b0',
       maxVida:  120,
       maxMana:  120,
@@ -2000,6 +2035,7 @@ canvas#campo {
       }
       setTimeout(proximoInseto, 1100);
     } else {
+      somErro();
       msg.className = 'ana-msg err';
       msg.textContent = '✗ Tente de novo!';
       setTimeout(function() {
@@ -2093,6 +2129,7 @@ canvas#campo {
       }
       setTimeout(proximaConta, 900);
     } else {
+      somErro();
       msg.className = 'def-msg err';
       msg.textContent = '✗ Era ' + defGabarito + '! Tente outra.';
       setTimeout(proximaConta, 1200);
@@ -2359,7 +2396,6 @@ canvas#campo {
 
     // estrelas: ciano, rosa, branco alternando por índice
     var coresStar = ['#00f0ff', '#ff2a85', '#ffffff'];
-    var agora = Date.now();
     estrelasBatalha.forEach(function(s, idx) {
       s.fase += s.vel;
       var alpha = 0.35 + Math.sin(s.fase) * 0.35;
@@ -2421,14 +2457,10 @@ canvas#campo {
       var px = projetilAtivo.x + (projetilAtivo.tx - projetilAtivo.x) * pt;
       var py = projetilAtivo.y + (projetilAtivo.ty - projetilAtivo.y) * pt;
       pincelBat.save();
-      pincelBat.font = '28px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
-      pincelBat.textAlign = 'center'; pincelBat.textBaseline = 'middle';
-      // sombra do projétil
-      pincelBat.fillStyle = 'rgba(0,0,0,0.2)';
-      pincelBat.fillText(projetilAtivo.emoji, px + 2, py + 2);
-      // corpo do projétil
-      pincelBat.fillStyle = '#ffffff';
-      pincelBat.fillText(projetilAtivo.emoji, px, py);
+      pincelBat.globalAlpha = 0.28;
+      _desenharEmoji(pincelBat, projetilAtivo.emoji, px + 2, py + 2, 28);
+      pincelBat.globalAlpha = 1;
+      _desenharEmoji(pincelBat, projetilAtivo.emoji, px, py, 28);
       pincelBat.restore();
     }
 
@@ -2490,16 +2522,12 @@ canvas#campo {
     }
 
     if (p.ehFusao) {
-      // fusão: dois emojis lado a lado
-      ctx.font = Math.round(44*esc) + 'px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      var ems = Array.from(p.emoji); // separa os dois emojis corretamente
-      ctx.fillText(ems[0] || '', x - Math.round(16*esc), y);
-      ctx.fillText(ems[1] || '', x + Math.round(16*esc), y);
+      var ems = Array.from(p.emoji);
+      var sz = Math.round(44*esc);
+      _desenharEmoji(ctx, ems[0] || '', x - Math.round(16*esc), y, sz);
+      _desenharEmoji(ctx, ems[1] || '', x + Math.round(16*esc), y, sz);
     } else {
-      ctx.font = Math.round(58*esc) + 'px "OpenMoji","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(p.emoji, x, y);
+      _desenharEmoji(ctx, p.emoji, x, y, Math.round(58*esc));
     }
 
     if (!derrotado) {
@@ -2512,6 +2540,29 @@ canvas#campo {
   }
 
   // ===== TURNO DO JOGADOR =====
+
+  function _resolverFimTurno() {
+    animAtq  = null;
+    animPisc = { alvo: 'inimigo', inicio: Date.now() };
+    setTimeout(function() {
+      animPisc = null;
+      if (combIni.vida <= 0) {
+        faseBat = 'fim';
+        var nomeExibir = E.nomeTreinador || 'Raul';
+        mostrarLog('🎉 ' + nomeExibir + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
+        if (nomeJog) {
+          E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
+          salvarProgresso();
+          aoSairNivel = proximoMundo;
+          setTimeout(function() { mostrarNivelUp(nomeJog, E.niveis[nomeJog]); }, 700);
+        } else {
+          setTimeout(mostrarGameOverVitoria, 700);
+        }
+        return;
+      }
+      setTimeout(turnoInimigo, 400);
+    }, 650);
+  }
 
   function usarGolpe(idx, ext) {
     if (faseBat !== 'escolha') return;
@@ -2555,31 +2606,7 @@ canvas#campo {
       dispararShake(dano > 25 ? 12 : 6, dano > 25 ? 20 : 10);
     }, 300);
 
-    setTimeout(function() {
-      animAtq  = null;
-      animPisc = { alvo: 'inimigo', inicio: Date.now() };
-      setTimeout(function() {
-        animPisc = null;
-        if (combIni.vida <= 0) {
-          faseBat = 'fim';
-          var pJn = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
-          var nomeExibir = E.nomeTreinador || 'Raul';
-          mostrarLog('🎉 ' + nomeExibir + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
-          // sobe de nível (somente se não for fusão)
-          if (nomeJog) {
-            E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
-            salvarProgresso();
-            var novoNv = E.niveis[nomeJog];
-            aoSairNivel = proximoMundo;  // após Continuar!, avança direto pro próximo mundo
-            setTimeout(function() { mostrarNivelUp(nomeJog, novoNv); }, 700);
-          } else {
-            setTimeout(mostrarGameOverVitoria, 700);
-          }
-          return;
-        }
-        setTimeout(turnoInimigo, 400);
-      }, 650);
-    }, 600);
+    setTimeout(_resolverFimTurno, 600);
   }
 
   function descansar() {
@@ -2634,29 +2661,7 @@ canvas#campo {
       dispararShake(20, 32);
     }, 300);
 
-    setTimeout(function() {
-      animAtq  = null;
-      animPisc = { alvo: 'inimigo', inicio: Date.now() };
-      setTimeout(function() {
-        animPisc = null;
-        if (combIni.vida <= 0) {
-          faseBat = 'fim';
-          var pJn = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
-          var nomeExibir = E.nomeTreinador || 'Raul';
-          mostrarLog('🎉 ' + nomeExibir + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
-          if (nomeJog) {
-            E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
-            salvarProgresso();
-            aoSairNivel = proximoMundo;
-            setTimeout(function() { mostrarNivelUp(nomeJog, E.niveis[nomeJog]); }, 700);
-          } else {
-            setTimeout(mostrarGameOverVitoria, 700);
-          }
-          return;
-        }
-        setTimeout(turnoInimigo, 400);
-      }, 650);
-    }, 600);
+    setTimeout(_resolverFimTurno, 600);
   }
 
   // ===== TURNO DO INIMIGO (NPC) =====
@@ -2924,6 +2929,10 @@ canvas#campo {
   // =====================================================
   // INÍCIO DO JOGO
   // =====================================================
+  // pré-carrega SVGs de todos os personagens para o Canvas (OpenMoji)
+  PERS.forEach(function(p) { _carregarEmoji(p.emoji); });
+  ['🌼', '🌳'].forEach(function(e) { _carregarEmoji(e); });
+
   mostrarEntrada();
 
 </script>
