@@ -551,6 +551,19 @@ canvas#campo {
 }
 #btn-fullscreen:hover { border-color: #4a7aa0; color: #aac4d8; }
 
+#btn-audio {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(48px, env(safe-area-inset-right));
+  z-index: 9999;
+  background: rgba(6,16,30,0.85); border: 1px solid #00f0ff44; color: #6a9ab8;
+  padding: 5px 9px; border-radius: 5px; cursor: pointer;
+  font-family: 'Press Start 2P', monospace; font-size: 15px; line-height: 1;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  touch-action: manipulation;
+}
+#btn-audio:hover { border-color: #4a7aa0; color: #aac4d8; }
+
 /* ===== NÍVEL ===== */
 #tela-nivel { gap: 16px; }
 .nivel-caixa {
@@ -576,6 +589,7 @@ canvas#campo {
 <body>
 
 <button id="btn-fullscreen" onclick="toggleFs()" title="Tela cheia">⛶</button>
+<button id="btn-audio" onclick="toggleAudioBgm()" title="Música do jogo">🔊</button>
 
 <!-- ====== ENTRADA ====== -->
 <div class="tela" id="tela-entrada" style="display:flex">
@@ -932,6 +946,7 @@ canvas#campo {
 
   // ===== AUDIO (Tone.js) — sons 8-bit gerados via síntese =====
   var _audioOk = false, _sfxMel, _sfxHit;
+  var _bgmSint, _bgmMutado = false, _bgmIniciada = false;
 
   function _iniciarAudio() {
     if (_audioOk) return;
@@ -949,8 +964,50 @@ canvas#campo {
         envelope: { attack: 0.001, decay: 0.07, sustain: 0, release: 0.04 },
         volume: -18
       }).toDestination();
+
+      iniciarMusicaFundo();
     });
   }
+
+  function iniciarMusicaFundo() {
+    if (_bgmIniciada) return;
+    _bgmIniciada = true;
+
+    // Onda triangular (suave) para a trilha sonora
+    _bgmSint = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.05, decay: 0.1, sustain: 0.4, release: 0.2 },
+      volume: -24
+    }).toDestination();
+
+    var notas = [
+      'C4', 'E4', 'G4', 'C5', 'E5', 'G5', 'E5', 'C5',
+      'A3', 'C4', 'E4', 'A4', 'C5', 'E5', 'C5', 'A4',
+      'F3', 'A3', 'C4', 'F4', 'A4', 'C5', 'A4', 'F4',
+      'G3', 'B3', 'D4', 'G4', 'B4', 'D5', 'B4', 'G4'
+    ];
+
+    var index = 0;
+    Tone.Transport.scheduleRepeat(function(time) {
+      if (_bgmMutado) return;
+      var nota = notas[index];
+      if (nota) _bgmSint.triggerAttackRelease(nota, '8n', time);
+      index = (index + 1) % notas.length;
+    }, '8n');
+
+    Tone.Transport.bpm.value = 110;
+    Tone.Transport.start();
+  }
+
+  function toggleAudioBgm() {
+    _bgmMutado = !_bgmMutado;
+    var btn = document.getElementById('btn-audio');
+    if (btn) btn.textContent = _bgmMutado ? '🔇' : '🔊';
+    if (!_bgmMutado && _audioOk && !_bgmIniciada) {
+      iniciarMusicaFundo();
+    }
+  }
+
   // AudioContext exige gesto do usuário antes de iniciar
   document.addEventListener('click',      _iniciarAudio, { once: true });
   document.addEventListener('touchstart', _iniciarAudio, { once: true });
@@ -2394,21 +2451,42 @@ canvas#campo {
       y += 18;
     }
 
+    // Configura o Glow Neon (se o personagem estiver vivo)
+    if (!derrotado) {
+      ctx.save();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = p.cor || '#00f0ff';
+    }
+
     // Voador Azul tem sprite próprio
     if (p.ehVoador) {
       if (ehIni) {
         ctx.save(); ctx.translate(x, 0); ctx.scale(-1, 1); ctx.translate(-x, 0);
         desenharVoador(ctx, x, y); ctx.restore();
       } else { desenharVoador(ctx, x, y); }
-      if (derrotado) ctx.restore();
+      if (!derrotado) ctx.restore(); // restaura o glow neon
+      if (derrotado) ctx.restore(); // restaura o alpha de derrotado
       return;
     }
-    // sombra (apenas se vivo)
+
+    // Restaura o glow neon temporariamente para desenhar a sombra de forma normal
+    if (!derrotado) {
+      ctx.restore();
+    }
+
+    // Sombra (apenas se vivo)
     if (!derrotado) {
       ctx.save();
       ctx.fillStyle = 'rgba(0,0,0,0.18)';
       ctx.beginPath(); ctx.ellipse(x+2, y+Math.round(30*esc), Math.round(26*esc), Math.round(7*esc), 0, 0, Math.PI*2); ctx.fill();
       ctx.restore();
+    }
+
+    // Reativa o Glow Neon para o emoji
+    if (!derrotado) {
+      ctx.save();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = p.cor || '#00f0ff';
     }
 
     if (p.ehFusao) {
@@ -2424,8 +2502,12 @@ canvas#campo {
       ctx.fillText(p.emoji, x, y);
     }
 
+    if (!derrotado) {
+      ctx.restore(); // restaura o glow neon do emoji
+    }
+
     if (derrotado) {
-      ctx.restore();
+      ctx.restore(); // restaura o alpha de derrotado
     }
   }
 
