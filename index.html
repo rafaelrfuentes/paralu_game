@@ -678,7 +678,7 @@ canvas#campo {
   <div class="mundo-acoes">
     <div class="btn-acao verde" onclick="mostrarCaptura()">
       <span class="ai"><i class="ra ra-leaf"></i></span><span class="an">Capturar</span>
-      <span class="ad" id="btn-cap-desc">Insetos e peixes</span>
+      <span class="ad" id="btn-cap-desc">Insetos e aquáticos</span>
     </div>
     <div class="btn-acao roxo" onclick="mostrarFusao()">
       <span class="ai"><i class="ra ra-crystals"></i></span><span class="an">Fusão</span>
@@ -715,7 +715,7 @@ canvas#campo {
   <canvas id="canvas-captura" width="600" height="380"></canvas>
   <div class="cap-info">
     <div class="cap-num" id="cap-num">0 capturas</div>
-    <div class="cap-stat" id="cap-stat">Insetos na grama 🌿 — Peixes no lago 💧</div>
+    <div class="cap-stat" id="cap-stat">Insetos na grama 🌿 — Criaturas no lago 💧</div>
   </div>
   <div class="colecao-mundo" id="cap-colecao" style="display:none">
     <div class="col-titulo">🎒 Capturadas</div>
@@ -1168,12 +1168,12 @@ canvas#campo {
       golpes:[{n:'Mordida Rápida',i:'🦷',d:11,m:8, t:'O Tubarão-branco mordeu num flash!'},{n:'Carga Devastadora',i:'🦈',d:18,m:16,t:'O Tubarão-branco investiu com fúria!'},{n:'Frenesi',i:'🩸',d:25,m:24,t:'O frenesi de sangue começou!'},{n:'Mandíbula Suprema',i:'🦷',d:36,m:36,t:'A mordida suprema dilacerou o oponente!'}] },
     { emoji:'🐡', nome:'Baiacu',          cien:'Tetraodon nigroviridis',  tipo:'peixe', cor:'#ffd600',
       golpes:[{n:'Inflar',i:'💨',d:9, m:7, t:'O Baiacu se inflou e espetou!'},{n:'Espinhos Venenosos',i:'🌵',d:16,m:14,t:'Os espinhos venenosos atacaram!'},{n:'Explosão Aquática',i:'💥',d:23,m:22,t:'O Baiacu explodiu em água!'},{n:'Veneno Total',i:'☠️',d:33,m:32,t:'Todo o veneno foi liberado!'}] },
-    { emoji:'🐟', nome:'Peixe-espada',    cien:'Xiphias gladius',         tipo:'peixe', cor:'#1e88e5',
-      golpes:[{n:'Espadada Rápida',i:'⚔️',d:12,m:9, t:'A espada cortou o ar!'},{n:'Mergulho Veloz',i:'💨',d:18,m:16,t:'O mergulho veloz atacou!'},{n:'Perfuração',i:'🗡️',d:25,m:24,t:'O inimigo foi perfurado!'},{n:'Tornado Aquático',i:'🌀',d:36,m:35,t:'Um tornado de água!'}] },
+    { emoji:'🦀', nome:'Caranguejo-azul',  cien:'Callinectes sapidus',     tipo:'peixe', cor:'#ef5350',
+      golpes:[{n:'Pinçada Rápida',i:'✂️',d:12,m:9, t:'O Caranguejo deu uma pinçada rápida!'},{n:'Carapaça Dura',i:'🛡️',d:18,m:16,t:'O Caranguejo se defendeu e contra-atacou!'},{n:'Pinças de Ferro',i:'⚔️',d:25,m:24,t:'As pinças afiadas apertaram o oponente!'},{n:'Super Pinça',i:'💥',d:36,m:35,t:'O golpe esmagador da super pinça!'}] },
     { emoji:'🪼', nome:'Água-viva',        cien:'Physalia physalis',       tipo:'peixe', cor:'#7b1fa2',
       golpes:[{n:'Choque Elétrico',i:'⚡',d:11,m:9, t:'O choque elétrico acertou!'},{n:'Tentáculo Venenoso',i:'☠️',d:17,m:15,t:'O tentáculo venenoso chicoteou!'},{n:'Descarga Total',i:'🔋',d:24,m:23,t:'A descarga elétrica foi liberada!'},{n:'Veneno das Profundezas',i:'⚡',d:35,m:34,t:'O veneno das profundezas atacou!'}] },
-    { emoji:'🐟', nome:'Piranha',         cien:'Pygocentrus nattereri',   tipo:'peixe', cor:'#ff5252',
-      golpes:[{n:'Mordida Rápida',i:'🦷',d:10,m:8, t:'A Piranha mordeu com suas presas afiadas!'},{n:'Bando de Caça',i:'🐟',d:17,m:15,t:'O bando de Piranhas atacou em grupo!'},{n:'Frenesi Vermelho',i:'🩸',d:24,m:23,t:'O cheiro de sangue aumentou a fúria da Piranha!'},{n:'Mandíbula Trituradora',i:'🦷',d:34,m:34,t:'As mandíbulas trituradoras morderam com força máxima!'}] },
+    { emoji:'🐙', nome:'Polvo-comum',      cien:'Octopus vulgaris',        tipo:'peixe', cor:'#ab47bc',
+      golpes:[{n:'Jato de Tinta',i:'⚫',d:10,m:8, t:'O Polvo lançou tinta e cegou o oponente!'},{n:'Abraço de Tentáculos',i:'🐙',d:17,m:15,t:'Os tentáculos envolveram o inimigo!'},{n:'Camuflagem',i:'👁️',d:24,m:23,t:'O Polvo atacou de surpresa da camuflagem!'},{n:'Fúria dos Tentáculos',i:'🌀',d:34,m:34,t:'Uma tempestade de chicotadas de tentáculos!'}] },
   ];
 
   // =====================================================
@@ -1338,7 +1338,7 @@ canvas#campo {
         card.innerHTML =
           '<span class="pdk-em sc-em">' + p.emoji + '</span>' +
           '<div class="pdk-nm">' + p.nome + '</div>' +
-          '<div class="pdk-tp">' + (p.tipo === 'inseto' ? '🦋 inseto' : '🐟 peixe') + '</div>' +
+          '<div class="pdk-tp">' + (p.tipo === 'inseto' ? '🦋 inseto' : '💧 aquático') + '</div>' +
           '<div class="pdk-nv">Nv ' + nv + '</div>';
       } else {
         card.innerHTML =
@@ -1369,7 +1369,7 @@ canvas#campo {
         '<div class="pdk-det-info">' +
           '<div class="pdk-det-nome">' + p.nome + '</div>' +
           '<div class="pdk-det-cien">' + p.cien + '</div>' +
-          '<div class="pdk-det-tipo">' + (p.tipo === 'inseto' ? '🦋 Inseto' : '🐟 Peixe') + '</div>' +
+          '<div class="pdk-det-tipo">' + (p.tipo === 'inseto' ? '🦋 Inseto' : '💧 Aquático') + '</div>' +
           '<div class="pdk-det-nv">Nível ' + nv + '</div>' +
         '</div>' +
       '</div>' +
@@ -1388,7 +1388,7 @@ canvas#campo {
       cfg.est + '  Inimigo: ' + cfg.vidaIni + ' vida';
     const n = E.capMundo.size;
     document.getElementById('btn-cap-desc').textContent =
-      n > 0 ? n + ' capturada' + (n > 1 ? 's' : '') : 'Insetos e peixes';
+      n > 0 ? n + ' capturada' + (n > 1 ? 's' : '') : 'Insetos e aquáticos';
     renderColecaoMundo();
   }
 
@@ -1753,7 +1753,7 @@ canvas#campo {
     var n = E.capMundo.size;
     document.getElementById('cap-num').textContent  = n + ' de ' + PERS.length + ' capturada' + (n !== 1 ? 's' : '');
     document.getElementById('cap-stat').textContent = n === 0
-      ? 'Insetos na grama 🌿 — Peixes no lago 💧'
+      ? 'Insetos na grama 🌿 — Criaturas no lago 💧'
       : 'bônus de +' + (n*5) + '❤️ +' + (n*5) + '💧 na batalha!';
     var colecao = document.getElementById('cap-colecao');
     var grid    = document.getElementById('cap-col-grid');
