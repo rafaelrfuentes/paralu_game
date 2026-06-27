@@ -626,6 +626,19 @@ canvas#campo {
 .pdk-det-cien { font-size: 8px; color: #445; font-style: italic; margin-top: 2px; }
 .pdk-det-tipo { font-size: 8px; margin-top: 4px; }
 .pdk-det-nv   { font-size: 9px; color: #ffd700; margin-top: 2px; }
+.pdk-det-ficha {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 10px;
+  margin: 10px 0; padding: 8px 10px;
+  background: #04080f; border-radius: 6px; border: 1px solid #00f0ff22;
+}
+.pdk-det-lbl { font-size: 7px; color: #557; white-space: nowrap; }
+.pdk-det-val { font-size: 7px; color: #b0cce0; line-height: 1.5; }
+.pdk-det-cur {
+  font-size: 8px; color: #a8ff8c; line-height: 1.7;
+  background: #03120a; border-left: 3px solid #5dda7d;
+  padding: 6px 10px; border-radius: 0 6px 6px 0; margin-bottom: 10px;
+}
+.pdk-det-cur::before { content: '💡 '; }
 </style>
 </head>
 <body>
@@ -1125,54 +1138,95 @@ canvas#campo {
 
 
   // =====================================================
-  // OS 21 PERSONAGENS — 15 insetos + 6 peixes (inclui Piranha)
-  // Campos: emoji, nome, cien (nome científico), tipo, cor, golpes[4]
-  // Cada golpe: n=nome, i=ícone, d=dano, m=mana, t=texto do ataque
+  // OS 21 PERSONAGENS — 15 insetos + 6 aquáticos
+  // Campos: emoji, nome, cien, tipo, cor, origem, dieta, tamanho, curiosidade, golpes[4]
   // =====================================================
   const PERS = [
     // ===== INSETOS =====
-    { emoji:'🦋', nome:'Borboleta-monarca',  cien:'Danaus plexippus',          tipo:'inseto', cor:'#ce93d8',
+    { emoji:'🦋', nome:'Borboleta-monarca',  cien:'Danaus plexippus',         tipo:'inseto', cor:'#ce93d8',
+      origem:'🌎 América do Norte e Central', dieta:'Néctar de flores (larva: folhas de algodão-de-seda)', tamanho:'9–10 cm de envergadura',
+      curiosidade:'Migra até 4.500 km por ano entre o Canadá e o México!',
       golpes:[{n:'Asas Coloridas',i:'✨',d:10,m:8, t:'A Borboleta confundiu com suas asas!'},{n:'Pólen Dourado',i:'🌸',d:16,m:15,t:'A Borboleta lançou nuvem de pólen!'},{n:'Veneno Monarca',i:'☠️',d:23,m:22,t:'A Borboleta liberou seu veneno!'},{n:'Tempestade',i:'🌪️',d:33,m:32,t:'Uma tempestade de escamas brilhantes!'}] },
-    { emoji:'🐝', nome:'Abelha-europeia',    cien:'Apis mellifera',             tipo:'inseto', cor:'#ffca28',
+    { emoji:'🐝', nome:'Abelha-europeia',    cien:'Apis mellifera',            tipo:'inseto', cor:'#ffca28',
+      origem:'🌍 Europa e África', dieta:'Néctar e pólen de flores', tamanho:'1,2–1,5 cm',
+      curiosidade:'Uma colmeia tem até 80.000 abelhas! Elas comunicam onde estão as flores dançando.',
       golpes:[{n:'Picada Rápida',i:'💛',d:10,m:8, t:'A Abelha picou rapidinho!'},{n:'Ferroada',i:'⚡',d:18,m:15,t:'A Abelha cravou o ferrão!'},{n:'Veneno',i:'🧪',d:23,m:23,t:'A Abelha injetou todo o veneno!'},{n:'Enxame Furioso',i:'🌪️',d:33,m:35,t:'O enxame inteiro atacou!'}] },
-    { emoji:'🐞', nome:'Joaninha',           cien:'Coccinella septempunctata',  tipo:'inseto', cor:'#ef5350',
+    { emoji:'🐞', nome:'Joaninha',           cien:'Coccinella septempunctata', tipo:'inseto', cor:'#ef5350',
+      origem:'🌍 Europa e Ásia', dieta:'Pulgões — come até 150 por dia!', tamanho:'0,5–0,8 cm',
+      curiosidade:'As pintinhas vermelhas avisam os pássaros que ela tem gosto horrível!',
       golpes:[{n:'Casco Duro',i:'🛡️',d:9, m:7, t:'A Joaninha bateu o casco!'},{n:'Mancha Venenosa',i:'🔴',d:15,m:14,t:'As manchas tóxicas atacaram!'},{n:'Spray Químico',i:'💨',d:21,m:20,t:'O spray defensivo foi lançado!'},{n:'Armadura Total',i:'⚔️',d:30,m:30,t:'O golpe supremo da armadura!'}] },
-    { emoji:'🦗', nome:'Gafanhoto-verde',    cien:'Tettigonia viridissima',     tipo:'inseto', cor:'#66bb6a',
+    { emoji:'🦗', nome:'Gafanhoto-verde',    cien:'Tettigonia viridissima',    tipo:'inseto', cor:'#66bb6a',
+      origem:'🌍🌏 Europa e Ásia', dieta:'Folhas, flores e pequenos insetos', tamanho:'3–4 cm',
+      curiosidade:'Faz seu canto esfregando as patas nas asas — não usa a voz!',
       golpes:[{n:'Salto Relâmpago',i:'🏃',d:11,m:8, t:'O Gafanhoto saltou veloz!'},{n:'Patas Gigantes',i:'🦵',d:17,m:15,t:'As patas traseiras chutaram!'},{n:'Estridulação',i:'🔊',d:21,m:21,t:'O barulho ensurdecedor atordoou!'},{n:'Enxame Verde',i:'🌿',d:32,m:33,t:'O enxame verde atacou junto!'}] },
-    { emoji:'🪲', nome:'Besouro-hércules',   cien:'Dynastes hercules',          tipo:'inseto', cor:'#8d6e63',
+    { emoji:'🪲', nome:'Besouro-hércules',   cien:'Dynastes hercules',         tipo:'inseto', cor:'#8d6e63',
+      origem:'🌎 Florestas tropicais da América Central e do Sul', dieta:'Frutas maduras e seiva de árvores', tamanho:'Até 17 cm — maior besouro do mundo!',
+      curiosidade:'Consegue carregar 850 vezes o próprio peso. É o recordista do reino animal!',
       golpes:[{n:'Chifrada',i:'🦏',d:12,m:9, t:'O chifre poderoso atacou!'},{n:'Pinça Esmagadora',i:'💢',d:19,m:17,t:'As mandíbulas esmagaram!'},{n:'Carga de Titã',i:'💪',d:25,m:25,t:'Uma carga devastadora!'},{n:'Força de Hércules',i:'🏋️',d:37,m:38,t:'A força lendária no golpe supremo!'}] },
-    { emoji:'🐛', nome:'Lagarta-da-couve',   cien:'Pieris brassicae',           tipo:'inseto', cor:'#aed581',
+    { emoji:'🐛', nome:'Lagarta-da-couve',   cien:'Pieris brassicae',          tipo:'inseto', cor:'#aed581',
+      origem:'🌍 Europa, Norte da África e Ásia', dieta:'Folhas de couve, brócolis e outras plantas', tamanho:'4,5 cm (larva) · 6 cm de envergadura (borboleta)',
+      curiosidade:'Dentro do casulo, o corpo da lagarta se dissolve completamente e reconstrói como borboleta!',
       golpes:[{n:'Fio de Seda',i:'🕸️',d:10,m:8, t:'O fio de seda pegajoso acertou!'},{n:'Bocadão',i:'😤',d:15,m:14,t:'A mordida enorme acertou!'},{n:'Casulo Explosivo',i:'💥',d:22,m:22,t:'O casulo explodiu no inimigo!'},{n:'Transformação',i:'🦋',d:33,m:35,t:'A borboleta gigante atacou!'}] },
-    { emoji:'🦟', nome:'Mosquito-da-dengue', cien:'Aedes aegypti',              tipo:'inseto', cor:'#78909c',
+    { emoji:'🦟', nome:'Mosquito-da-dengue', cien:'Aedes aegypti',             tipo:'inseto', cor:'#78909c',
+      origem:'🌍 África tropical — espalhado pelo mundo', dieta:'Fêmeas: sangue humano. Machos: néctar de flores', tamanho:'0,4–0,7 cm',
+      curiosidade:'Só a fêmea pica! Ela precisa de proteínas do sangue para fazer os ovos.',
       golpes:[{n:'Picada Veloz',i:'⚡',d:9, m:7, t:'O Mosquito picou rapidinho!'},{n:'Zumbido',i:'🔊',d:13,m:12,t:'O zumbido atordoou!'},{n:'Sugador',i:'🩸',d:21,m:20,t:'A energia vital foi sugada!'},{n:'Praga Furiosa',i:'☠️',d:29,m:30,t:'A praga devastadora chegou!'}] },
-    { emoji:'🪰', nome:'Mosca-doméstica',    cien:'Musca domestica',            tipo:'inseto', cor:'#90a4ae',
+    { emoji:'🪰', nome:'Mosca-doméstica',    cien:'Musca domestica',           tipo:'inseto', cor:'#90a4ae',
+      origem:'🌏 Ásia Central — espalhada por todos os continentes', dieta:'Matéria orgânica: restos de comida, lixo, fezes', tamanho:'0,6–0,7 cm',
+      curiosidade:'Prova a comida com as patas antes de comer! Tem 4.000 lentes em cada olho.',
       golpes:[{n:'Pouso Relâmpago',i:'⚡',d:9, m:7, t:'A Mosca atacou num flash!'},{n:'Zigue-Zague',i:'〰️',d:13,m:13,t:'O voo confundiu o inimigo!'},{n:'Visão Composta',i:'👁️',d:19,m:18,t:'Os olhos compostos guiaram!'},{n:'Nuvem de Moscas',i:'🌪️',d:28,m:30,t:'Milhares de moscas atacaram!'}] },
-    { emoji:'🐜', nome:'Formiga-saúva',      cien:'Atta sexdens',               tipo:'inseto', cor:'#a1887f',
+    { emoji:'🐜', nome:'Formiga-saúva',      cien:'Atta sexdens',              tipo:'inseto', cor:'#a1887f',
+      origem:'🇧🇷 Brasil e América do Sul', dieta:'Cultivam fungos em jardins subterrâneos com pedaços de folhas', tamanho:'0,6–1,4 cm',
+      curiosidade:'Pode carregar 50x o próprio peso. Um formigueiro pode ter mais de 8 milhões de formigas!',
       golpes:[{n:'Mandíbula',i:'🦷',d:10,m:8, t:'A mandíbula afiada mordeu!'},{n:'Ácido Fórmico',i:'🧪',d:17,m:14,t:'O ácido corrosivo foi lançado!'},{n:'Força da Colônia',i:'👥',d:23,m:22,t:'A colônia atacou em conjunto!'},{n:'Carregadora',i:'💪',d:34,m:35,t:'A força lendária jogou o inimigo!'}] },
-    { emoji:'🪳', nome:'Barata-americana',   cien:'Periplaneta americana',      tipo:'inseto', cor:'#558b2f',
+    { emoji:'🪳', nome:'Barata-americana',   cien:'Periplaneta americana',     tipo:'inseto', cor:'#558b2f',
+      origem:'🌍 África — espalhada pelo mundo inteiro', dieta:'Come quase tudo: comida, papel, couro e até lixo', tamanho:'3,4–5,3 cm',
+      curiosidade:'Consegue sobreviver uma semana sem a cabeça! Corre a até 5 km/h.',
       golpes:[{n:'Corrida Furtiva',i:'🏃',d:9, m:7, t:'A Barata atacou de surpresa!'},{n:'Antenas',i:'📡',d:14,m:13,t:'As antenas guiaram o ataque!'},{n:'Casco Invencível',i:'🛡️',d:21,m:20,t:'O contra-ataque foi forte!'},{n:'Sobrevivente',i:'💀',d:31,m:32,t:'O golpe final devastador!'}] },
-    { emoji:'🔵', nome:'Voador Azul',        cien:'Fictícius azulensis',        tipo:'inseto', cor:'#1e88e5', ehVoador:true,
+    { emoji:'🔵', nome:'Voador Azul',        cien:'Fictícius azulensis',       tipo:'inseto', cor:'#1e88e5', ehVoador:true,
+      origem:'🇧🇷 Floresta Amazônica — criatura mágica do Paralu!', dieta:'Flores azuis raríssimas e frutos da floresta profunda', tamanho:'8 cm',
+      curiosidade:'Existe só no universo do Paralu! Criado pelo Rafa e pelo Raul Fuentes.',
       golpes:[{n:'Mordida',i:'🦷',d:12,m:10,t:'As presas laranjas morderam!'},{n:'Golpe do Ar',i:'🌀',d:20,m:20,t:'O Voador voou alto e atacou!'},{n:'Raio de Energia',i:'⚡',d:27,m:26,t:'Um raio de energia azul!'},{n:'Chamado da Floresta',i:'🌿',d:36,m:35,t:'Todos os insetos atacaram juntos!'}] },
-    { emoji:'🕷️', nome:'Aranha-de-jardim',   cien:'Lycosa erythrognatha',       tipo:'inseto', cor:'#78909c',
+    { emoji:'🕷️', nome:'Aranha-de-jardim',   cien:'Lycosa erythrognatha',      tipo:'inseto', cor:'#78909c',
+      origem:'🇧🇷🇦🇷 América do Sul', dieta:'Insetos pequenos, grilos e besouros', tamanho:'2–3 cm',
+      curiosidade:'A fêmea carrega os filhotes nas costas por semanas depois que eles nascem!',
       golpes:[{n:'Teia Pegajosa',i:'🕸️',d:10,m:8, t:'A Aranha lançou teia pegajosa!'},{n:'Picada Rápida',i:'🦷',d:16,m:14,t:'A Aranha picou rapidamente!'},{n:'Veneno Cinzento',i:'🧪',d:22,m:21,t:'O veneno da Aranha começou a agir!'},{n:'Teia Esmagadora',i:'🕸️',d:32,m:32,t:'Uma teia gigante envolveu o inimigo!'}] },
-    { emoji:'🦂', nome:'Escorpião-amarelo',  cien:'Tityus serrulatus',          tipo:'inseto', cor:'#ffd54f',
+    { emoji:'🦂', nome:'Escorpião-amarelo',  cien:'Tityus serrulatus',         tipo:'inseto', cor:'#ffd54f',
+      origem:'🇧🇷 Brasil — principalmente MG, SP e GO', dieta:'Grilos, baratas, aranhas e outros insetos', tamanho:'6–7 cm',
+      curiosidade:'É o escorpião mais perigoso da América do Sul. Pode se reproduzir sem macho!',
       golpes:[{n:'Pinçada',i:'✂️',d:11,m:8, t:'O Escorpião atacou com suas pinças!'},{n:'Picada Traseira',i:'⚡',d:17,m:15,t:'A cauda do Escorpião desferiu um golpe!'},{n:'Veneno Amarelo',i:'🧪',d:24,m:23,t:'O veneno injetado queima o inimigo!'},{n:'Ferroada Letal',i:'☠️',d:35,m:35,t:'O golpe supremo da cauda do Escorpião!'}] },
-    { emoji:'💡', nome:'Vaga-lume',          cien:'Lampyris noctiluca',         tipo:'inseto', cor:'#d4e157',
+    { emoji:'💡', nome:'Vaga-lume',          cien:'Lampyris noctiluca',        tipo:'inseto', cor:'#d4e157',
+      origem:'🌍 Europa', dieta:'Lesmas e caracóis (larva). O adulto não come!', tamanho:'1–2,5 cm',
+      curiosidade:'Produz luz fria — 100% da energia vira luz! Qualquer lâmpada comum desperdiça calor.',
       golpes:[{n:'Piscar',i:'✨',d:9, m:7, t:'O Vaga-lume piscou sua lanterna!'},{n:'Brilho Noturno',i:'🌟',d:15,m:14,t:'Uma luz misteriosa envolveu o oponente!'},{n:'Flash de Luz',i:'⚡',d:21,m:20,t:'Um clarão ofuscou os olhos do inimigo!'},{n:'Explosão Solar',i:'💥',d:31,m:31,t:'Toda a energia luminosa explodiu!'}] },
-    { emoji:'🐌', nome:'Caracol-de-jardim',  cien:'Cornu aspersum',             tipo:'inseto', cor:'#a1887f',
+    { emoji:'🐌', nome:'Caracol-de-jardim',  cien:'Cornu aspersum',            tipo:'inseto', cor:'#a1887f',
+      origem:'🌍 Europa mediterrânea', dieta:'Folhas, frutas, flores e casca de árvore', tamanho:'3–4 cm',
+      curiosidade:'Pode dormir até 3 anos quando faz seca! Carrega a própria casa nas costas.',
       golpes:[{n:'Giro de Casco',i:'🛡️',d:9, m:7, t:'O Caracol girou no seu casco!'},{n:'Gosma Pegajosa',i:'💦',d:14,m:13,t:'A gosma reduziu a agilidade do inimigo!'},{n:'Carga Pesada',i:'🐌',d:21,m:20,t:'Uma investida lenta mas muito forte!'},{n:'Escudo de Pedra',i:'🛡️',d:30,m:30,t:'O casco supremo bloqueou e contra-atacou!'}] },
-    // ===== PEIXES =====
-    { emoji:'🐠', nome:'Peixe-palhaço',  cien:'Amphiprion ocellaris',    tipo:'peixe', cor:'#ff6d00',
+    // ===== AQUÁTICOS =====
+    { emoji:'🐠', nome:'Peixe-palhaço',      cien:'Amphiprion ocellaris',      tipo:'peixe', cor:'#ff6d00',
+      origem:'🌊 Oceano Indo-Pacífico — Austrália e Sudeste Asiático', dieta:'Algas, plâncton e pequenos crustáceos', tamanho:'8–11 cm',
+      curiosidade:'Todos nascem machos! O maior do grupo vira fêmea quando a fêmea da colônia morre.',
       golpes:[{n:'Toque de Anêmona',i:'🌸',d:10,m:8, t:'O veneno da anêmona acertou!'},{n:'Dança Venenosa',i:'💃',d:16,m:15,t:'A dança entre anêmonas atacou!'},{n:'Nuvem de Toxinas',i:'☁️',d:23,m:22,t:'Uma nuvem de toxinas!'},{n:'Fúria da Anêmona',i:'🌊',d:33,m:33,t:'Toda a fúria da anêmona explodiu!'}] },
-    { emoji:'🦈', nome:'Tubarão-branco',   cien:'Carcharodon carcharias',  tipo:'peixe', cor:'#e53935',
+    { emoji:'🦈', nome:'Tubarão-branco',      cien:'Carcharodon carcharias',    tipo:'peixe', cor:'#e53935',
+      origem:'🌊 Oceanos frios e temperados — todos os oceanos do mundo', dieta:'Focas, leões-marinhos, golfinhos e peixes grandes', tamanho:'Até 6 metros — maior peixe predador do mundo!',
+      curiosidade:'Tem até 300 dentes e vai trocando por toda a vida. Pode renovar 30.000 dentes!',
       golpes:[{n:'Mordida Rápida',i:'🦷',d:11,m:8, t:'O Tubarão-branco mordeu num flash!'},{n:'Carga Devastadora',i:'🦈',d:18,m:16,t:'O Tubarão-branco investiu com fúria!'},{n:'Frenesi',i:'🩸',d:25,m:24,t:'O frenesi de sangue começou!'},{n:'Mandíbula Suprema',i:'🦷',d:36,m:36,t:'A mordida suprema dilacerou o oponente!'}] },
-    { emoji:'🐡', nome:'Baiacu',          cien:'Tetraodon nigroviridis',  tipo:'peixe', cor:'#ffd600',
+    { emoji:'🐡', nome:'Baiacu',              cien:'Tetraodon nigroviridis',    tipo:'peixe', cor:'#ffd600',
+      origem:'🌊 Oceano Indo-Pacífico — rios e mares tropicais', dieta:'Algas, caramujos, mariscos e corais', tamanho:'17 cm',
+      curiosidade:'Seu veneno (tetrodotoxina) é 1.200x mais forte que o cianeto! Não existe antídoto.',
       golpes:[{n:'Inflar',i:'💨',d:9, m:7, t:'O Baiacu se inflou e espetou!'},{n:'Espinhos Venenosos',i:'🌵',d:16,m:14,t:'Os espinhos venenosos atacaram!'},{n:'Explosão Aquática',i:'💥',d:23,m:22,t:'O Baiacu explodiu em água!'},{n:'Veneno Total',i:'☠️',d:33,m:32,t:'Todo o veneno foi liberado!'}] },
-    { emoji:'🦀', nome:'Caranguejo-azul',  cien:'Callinectes sapidus',     tipo:'peixe', cor:'#ef5350',
+    { emoji:'🦀', nome:'Caranguejo-azul',     cien:'Callinectes sapidus',       tipo:'peixe', cor:'#ef5350',
+      origem:'🌊 Costa Atlântica — da América do Norte até o Brasil', dieta:'Moluscos, vermes, algas e peixes menores', tamanho:'20 cm de largura',
+      curiosidade:'"Callinectes" significa "belo nadador" em grego! Nada de lado e para frente.',
       golpes:[{n:'Pinçada Rápida',i:'✂️',d:12,m:9, t:'O Caranguejo deu uma pinçada rápida!'},{n:'Carapaça Dura',i:'🛡️',d:18,m:16,t:'O Caranguejo se defendeu e contra-atacou!'},{n:'Pinças de Ferro',i:'⚔️',d:25,m:24,t:'As pinças afiadas apertaram o oponente!'},{n:'Super Pinça',i:'💥',d:36,m:35,t:'O golpe esmagador da super pinça!'}] },
-    { emoji:'🪼', nome:'Água-viva',        cien:'Physalia physalis',       tipo:'peixe', cor:'#7b1fa2',
+    { emoji:'🪼', nome:'Água-viva',           cien:'Physalia physalis',         tipo:'peixe', cor:'#7b1fa2',
+      origem:'🌊 Oceanos Atlântico, Índico e Pacífico', dieta:'Peixes pequenos, camarões e crustáceos', tamanho:'Flutuador: 30 cm · Tentáculos: até 50 metros!',
+      curiosidade:'Não é uma criatura só — é uma colônia de vários animais vivendo juntos!',
       golpes:[{n:'Choque Elétrico',i:'⚡',d:11,m:9, t:'O choque elétrico acertou!'},{n:'Tentáculo Venenoso',i:'☠️',d:17,m:15,t:'O tentáculo venenoso chicoteou!'},{n:'Descarga Total',i:'🔋',d:24,m:23,t:'A descarga elétrica foi liberada!'},{n:'Veneno das Profundezas',i:'⚡',d:35,m:34,t:'O veneno das profundezas atacou!'}] },
-    { emoji:'🐙', nome:'Polvo-comum',      cien:'Octopus vulgaris',        tipo:'peixe', cor:'#ab47bc',
+    { emoji:'🐙', nome:'Polvo-comum',         cien:'Octopus vulgaris',          tipo:'peixe', cor:'#ab47bc',
+      origem:'🌊 Oceanos tropicais e subtropicais do mundo todo', dieta:'Caranguejos, lagostas, camarões e moluscos', tamanho:'25–60 cm',
+      curiosidade:'Tem 3 corações, sangue azul e 9 cérebros — um central e um em cada tentáculo!',
       golpes:[{n:'Jato de Tinta',i:'⚫',d:10,m:8, t:'O Polvo lançou tinta e cegou o oponente!'},{n:'Abraço de Tentáculos',i:'🐙',d:17,m:15,t:'Os tentáculos envolveram o inimigo!'},{n:'Camuflagem',i:'👁️',d:24,m:23,t:'O Polvo atacou de surpresa da camuflagem!'},{n:'Fúria dos Tentáculos',i:'🌀',d:34,m:34,t:'Uma tempestade de chicotadas de tentáculos!'}] },
   ];
 
@@ -1363,16 +1417,21 @@ canvas#campo {
              '<div class="gp-st">Dano ' + g.d + ' · Mana ' + g.m + '</div></div>';
     }).join('');
     detDiv.style.display = 'block';
+    var fichaHtml = '';
+    if (p.origem)    fichaHtml += '<div class="pdk-det-lbl">📍 Origem</div><div class="pdk-det-val">' + p.origem + '</div>';
+    if (p.dieta)     fichaHtml += '<div class="pdk-det-lbl">🍽️ Dieta</div><div class="pdk-det-val">' + p.dieta + '</div>';
+    if (p.tamanho)   fichaHtml += '<div class="pdk-det-lbl">📏 Tamanho</div><div class="pdk-det-val">' + p.tamanho + '</div>';
     detDiv.innerHTML =
       '<div class="pdk-det-header">' +
         '<div class="pdk-det-emoji sc-em">' + p.emoji + '</div>' +
         '<div class="pdk-det-info">' +
           '<div class="pdk-det-nome">' + p.nome + '</div>' +
           '<div class="pdk-det-cien">' + p.cien + '</div>' +
-          '<div class="pdk-det-tipo">' + (p.tipo === 'inseto' ? '🦋 Inseto' : '💧 Aquático') + '</div>' +
-          '<div class="pdk-det-nv">Nível ' + nv + '</div>' +
+          '<div class="pdk-det-tipo">' + (p.tipo === 'inseto' ? '🦋 Inseto' : '💧 Aquático') + '  ·  Nível ' + nv + '</div>' +
         '</div>' +
       '</div>' +
+      (fichaHtml ? '<div class="pdk-det-ficha">' + fichaHtml + '</div>' : '') +
+      (p.curiosidade ? '<div class="pdk-det-cur">' + p.curiosidade + '</div>' : '') +
       '<div class="sp-golpes pdk-golpes">' + golpesHtml + '</div>';
     setTimeout(function() { detDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
   }
