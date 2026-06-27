@@ -22,7 +22,7 @@ Cada um tem 4 golpes ordenados do mais fraco ao mais forte (último é o "especi
 | Tipo | Lista |
 |---|---|
 | Insetos 🐛 | Borboleta-monarca, Abelha-europeia, Joaninha, Gafanhoto-verde, Besouro-hércules, Lagarta-da-couve, Mosquito-da-dengue, Mosca-doméstica, Formiga-saúva, Barata-americana, Voador Azul (fictício), Aranha-de-jardim, Escorpião-amarelo, Vaga-lume, Caracol-de-jardim |
-| Peixes 🐟 | Peixe-palhaço, Piranha, Baiacu, Peixe-espada, Arraia |
+| Peixes 🐟 | Peixe-palhaço, Tubarão-branco, Baiacu, Peixe-espada, Água-viva |
 
 Formato de cada golpe: `{n: nome, i: ícone, d: dano base, m: custo de mana, t: texto narrativo}`.
 

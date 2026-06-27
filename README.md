@@ -69,10 +69,10 @@ Ao vencer a batalha, o jogador avança para o próximo mundo (e o personagem usa
 | Emoji | Nome popular | Nome científico |
 |---|---|---|
 | 🐠 | Peixe-palhaço | *Amphiprion ocellaris* |
-| 🦈 | Piranha | *Pygocentrus nattereri* |
+| 🦈 | Tubarão-branco | *Carcharodon carcharias* |
 | 🐡 | Baiacu | *Tetraodon nigroviridis* |
 | 🐟 | Peixe-espada | *Xiphias gladius* |
-| 🪼 | Arraia | *Potamotrygon motoro* |
+| 🪼 | Água-viva | *Physalia physalis* |
 
 ### Voador Azul — personagem especial
 
@@ -138,7 +138,7 @@ Módulo intermediário entre captura e batalha.
 - Jogador seleciona 2 criaturas diferentes capturadas no mundo atual
 - Resultado:
   - **Visual:** dois emojis lado a lado (ex: 🦋🐟)
-  - **Nome:** concatenação dos dois (ex: "Borboleta-Piranha")
+  - **Nome:** concatenação dos dois (ex: "Borboleta-Tubarão")
   - **Vida:** 120 (fixo)
   - **Mana:** 120 (fixo)
   - **Golpes:** 2 golpes do primeiro + 2 do segundo personagem (4 no total)
