@@ -1,0 +1,17 @@
+- generic [active] [ref=e1]:
+  - button "⛶" [ref=e2] [cursor=pointer]
+  - button "🔊" [ref=e3] [cursor=pointer]
+  - generic [ref=e4]:
+    - generic [ref=e5]: Paralu 🌿
+    - generic [ref=e6]: aventura criada por Rafa e Raul Fuentes
+    - generic [ref=e7]:
+      - generic [ref=e8]: "NOME DO TREINADOR:"
+      - textbox "NOME DO TREINADOR:" [ref=e9]:
+        - /placeholder: Raul
+        - text: Raul
+    - generic [ref=e10] [cursor=pointer]:
+      - generic [ref=e11]: 🗺️
+      - generic [ref=e12]: JOGAR
+      - generic [ref=e13]: Mundo 1 — Clareira ⭐
+    - generic [ref=e14]: 💾 SALVO
+  - text:          
