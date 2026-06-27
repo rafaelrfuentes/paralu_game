@@ -321,6 +321,15 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   .btn-desc    { padding: 5px 10px; font-size: 9px; }
   .btn-go      { padding: 5px 10px; font-size: 9px; }
 
+  /* -- ANAGRAMA -- */
+  #tela-anagrama { gap: 8px; }
+  .ana-emoji  { font-size: 36px; }
+  .ana-slot   { width: 24px; height: 32px; font-size: 14px; }
+  .ana-sep    { font-size: 14px; height: 32px; }
+  .ana-tile   { width: 28px; height: 36px; font-size: 16px; border-radius: 5px; }
+  .ana-msg    { font-size: 11px; }
+  #btn-esp    { padding: 5px 12px; font-size: 10px; }
+
   /* -- NÍVEL -- */
   #tela-nivel  { gap: 10px; }
   .nivel-caixa { padding: 14px 36px; }
@@ -329,6 +338,42 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   .nv-num      { font-size: 24px; margin-bottom: 6px; }
   .nv-stats    { font-size: 10px; line-height: 1.6; }
   .btn-continuar { padding: 8px 28px; font-size: 11px; }
+}
+
+/* ===== ANAGRAMA ===== */
+#tela-anagrama { gap: 14px; }
+.ana-emoji { font-size: 56px; }
+.ana-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.ana-slot {
+  display: inline-flex; width: 32px; height: 40px;
+  border-bottom: 3px solid #7dcfff; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: bold; color: #fff; text-transform: uppercase;
+  cursor: pointer; transition: all 0.12s;
+}
+.ana-slot.preenchido { background: rgba(125,207,255,0.1); border-color: #a8ff8c; color: #a8ff8c; border-radius: 4px 4px 0 0; }
+.ana-slot.preenchido:hover { background: rgba(255,82,82,0.15); border-color: #ff7070; }
+.ana-sep { font-size: 20px; color: #445; display: inline-flex; align-items: flex-end; height: 40px; padding: 0 3px 5px; }
+.ana-pool { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; min-height: 50px; }
+.ana-tile {
+  display: inline-flex; width: 36px; height: 44px; background: #0e2240; border: 2px solid #7dcfff;
+  border-radius: 7px; font-size: 22px; font-weight: bold; color: #7dcfff;
+  align-items: center; justify-content: center; cursor: pointer; text-transform: uppercase;
+  transition: all 0.1s; user-select: none; -webkit-user-select: none;
+}
+.ana-tile:active { background: #163a6a; border-color: #a8d8ff; transform: scale(0.93); }
+.ana-tile.usada { opacity: 0.15; pointer-events: none; }
+.ana-msg { font-size: 13px; letter-spacing: 2px; min-height: 22px; text-align: center; }
+.ana-msg.ok  { color: #a8ff8c; }
+.ana-msg.err { color: #ff7070; }
+#btn-esp {
+  background: #1a2a00; border: 2px solid #ffd700; color: #ffd700; border-radius: 8px;
+  padding: 8px 18px; font-family: monospace; font-size: 11px; cursor: pointer;
+  letter-spacing: 1px; animation: brilhar-esp 1.5s ease-in-out infinite;
+}
+#btn-esp:disabled { opacity: 0.35; animation: none; cursor: default; }
+@keyframes brilhar-esp {
+  0%,100% { box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+  50%      { box-shadow: 0 0 22px rgba(255,215,0,0.7); }
 }
 
 /* ===== BOTÃO TELA CHEIA ===== */
@@ -495,6 +540,19 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     </div>
     <div class="sp-golpes" id="sp-golpes"></div>
   </div>
+</div>
+
+<!-- ====== ANAGRAMA ====== -->
+<div class="tela" id="tela-anagrama">
+  <div class="topo">
+    <button class="btn-voltar" onclick="pularAnagrama()">→ Pular</button>
+    <span class="topo-label">🔤 DECIFRE O NOME!</span>
+    <span style="font-size:9px;color:#ffd700">⚡ acerte = golpe 2×</span>
+  </div>
+  <div class="ana-emoji" id="ana-emoji">🦋</div>
+  <div class="ana-slots" id="ana-slots"></div>
+  <div class="ana-pool"  id="ana-pool"></div>
+  <div class="ana-msg"   id="ana-msg"></div>
 </div>
 
 <!-- ====== BATALHA ====== -->
@@ -734,9 +792,7 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
 
   function confirmarBatalha() {
     if (selIdx === null) return;
-    modoAtual = 'batalha'; esconder();
-    document.getElementById('tela-batalha').style.display = 'flex';
-    iniciarBatalha();
+    mostrarAnagrama();
   }
 
   // exibe a tela de nível após vitória
@@ -1226,6 +1282,134 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
   }
 
   // =====================================================
+  // ANAGRAMA — mini game pré-batalha
+  // =====================================================
+  var anaPool          = [];    // [{letra, usada}]
+  var anaResposta      = [];    // [poolIdx | null] por posição de letra
+  var anaAlvo          = '';    // nome completo do personagem
+  var golpeEspecialDisp = false; // true se Raul acertou o anagrama
+
+  function mostrarAnagrama() {
+    modoAtual = 'anagrama'; esconder();
+    document.getElementById('tela-anagrama').style.display = 'flex';
+    document.getElementById('ana-msg').textContent = '';
+    document.getElementById('ana-msg').className = 'ana-msg';
+
+    var pJ = selIdx === 'fusao' ? E.fusao : PERS[selIdx];
+    anaAlvo = pJ.nome;
+    document.getElementById('ana-emoji').textContent = pJ.emoji;
+
+    // letras sem hífens/espaços, embaralhadas
+    var letras = anaAlvo.toLowerCase().replace(/[-\s]/g, '').split('');
+    for (var i = letras.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = letras[i]; letras[i] = letras[j]; letras[j] = tmp;
+    }
+    // garantir que não ficou igual ao original
+    var orig = anaAlvo.toLowerCase().replace(/[-\s]/g, '');
+    if (letras.join('') === orig && letras.length > 1) {
+      var t = letras[0]; letras[0] = letras[letras.length - 1]; letras[letras.length - 1] = t;
+    }
+
+    anaPool = letras.map(function(l) { return { letra: l, usada: false }; });
+    anaResposta = new Array(orig.length).fill(null);
+    renderAnagrama();
+  }
+
+  function renderAnagrama() {
+    // slots (hífens e espaços são separadores fixos)
+    var slotsDiv = document.getElementById('ana-slots');
+    slotsDiv.innerHTML = '';
+    var letraIdx = 0;
+    for (var i = 0; i < anaAlvo.length; i++) {
+      var ch = anaAlvo[i];
+      if (ch === '-' || ch === ' ') {
+        var sep = document.createElement('span');
+        sep.className = 'ana-sep';
+        sep.textContent = ch;
+        slotsDiv.appendChild(sep);
+      } else {
+        var slot = document.createElement('div');
+        var poolIdx = anaResposta[letraIdx];
+        if (poolIdx !== null) {
+          slot.className = 'ana-slot preenchido';
+          slot.textContent = anaPool[poolIdx].letra.toUpperCase();
+          (function(idx) { slot.onclick = function() { removerDoSlot(idx); }; })(letraIdx);
+        } else {
+          slot.className = 'ana-slot';
+        }
+        slotsDiv.appendChild(slot);
+        letraIdx++;
+      }
+    }
+
+    // pool de letras
+    var poolDiv = document.getElementById('ana-pool');
+    poolDiv.innerHTML = '';
+    anaPool.forEach(function(item, idx) {
+      var tile = document.createElement('div');
+      tile.className = 'ana-tile' + (item.usada ? ' usada' : '');
+      tile.textContent = item.letra.toUpperCase();
+      if (!item.usada) {
+        (function(i) { tile.onclick = function() { tocarTile(i); }; })(idx);
+      }
+      poolDiv.appendChild(tile);
+    });
+  }
+
+  function tocarTile(poolIdx) {
+    var slotIdx = anaResposta.indexOf(null);
+    if (slotIdx === -1) return;
+    anaPool[poolIdx].usada = true;
+    anaResposta[slotIdx] = poolIdx;
+    renderAnagrama();
+    if (anaResposta.indexOf(null) === -1) verificarAnagrama();
+  }
+
+  function removerDoSlot(slotIdx) {
+    var poolIdx = anaResposta[slotIdx];
+    if (poolIdx === null) return;
+    anaPool[poolIdx].usada = false;
+    anaResposta[slotIdx] = null;
+    document.getElementById('ana-msg').textContent = '';
+    document.getElementById('ana-msg').className = 'ana-msg';
+    renderAnagrama();
+  }
+
+  function verificarAnagrama() {
+    var resposta = anaResposta.map(function(pi) { return anaPool[pi].letra; }).join('');
+    var alvo = anaAlvo.toLowerCase().replace(/[-\s]/g, '');
+    var msg = document.getElementById('ana-msg');
+    if (resposta === alvo) {
+      golpeEspecialDisp = true;
+      msg.className = 'ana-msg ok';
+      msg.textContent = '✓ ACERTOU! Golpe especial liberado!';
+      setTimeout(function() {
+        modoAtual = 'batalha'; esconder();
+        document.getElementById('tela-batalha').style.display = 'flex';
+        iniciarBatalha();
+      }, 1000);
+    } else {
+      msg.className = 'ana-msg err';
+      msg.textContent = '✗ Tente de novo!';
+      setTimeout(function() {
+        anaPool.forEach(function(p) { p.usada = false; });
+        anaResposta = new Array(anaResposta.length).fill(null);
+        msg.textContent = '';
+        msg.className = 'ana-msg';
+        renderAnagrama();
+      }, 900);
+    }
+  }
+
+  function pularAnagrama() {
+    golpeEspecialDisp = false;
+    modoAtual = 'batalha'; esconder();
+    document.getElementById('tela-batalha').style.display = 'flex';
+    iniciarBatalha();
+  }
+
+  // =====================================================
   // BATALHA POR TURNOS
   // =====================================================
   var telaBat, pincelBat;
@@ -1270,6 +1454,14 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     document.getElementById('bat-info').textContent = inf.join(' | ');
 
     criarBotoesGolpe(pJ, nv);
+    // botão de golpe especial se Raul acertou o anagrama
+    if (golpeEspecialDisp) {
+      var btnEsp = document.createElement('button');
+      btnEsp.id = 'btn-esp';
+      btnEsp.textContent = '⚡ GOLPE ESPECIAL — dano 2×!';
+      btnEsp.onclick = usarGolpeEspecial;
+      document.getElementById('botoes').appendChild(btnEsp);
+    }
     document.getElementById('area-go').style.display  = 'none';
     document.getElementById('btn-desc').style.display = 'none';
     atualizarBarras(); atualizarBotoes();
@@ -1423,6 +1615,49 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     setTimeout(turnoInimigo, 900);
   }
 
+  function usarGolpeEspecial() {
+    if (faseBat !== 'escolha' || !golpeEspecialDisp) return;
+    golpeEspecialDisp = false;
+    var btnEsp = document.getElementById('btn-esp');
+    if (btnEsp) btnEsp.remove();
+
+    var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+    var g  = pJ.golpes[pJ.golpes.length - 1]; // golpe mais forte
+
+    faseBat = 'animando'; atualizarBotoes(); mostrarLog('...');
+    animAtq = { quem: 'jogador', inicio: Date.now() };
+
+    setTimeout(function() {
+      var dano = g.d * 2;
+      combIni.vida = Math.max(0, combIni.vida - dano);
+      atualizarBarras();
+      mostrarLog('⚡ GOLPE ESPECIAL! ' + g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
+    }, 300);
+
+    setTimeout(function() {
+      animAtq  = null;
+      animPisc = { alvo: 'inimigo', inicio: Date.now() };
+      setTimeout(function() {
+        animPisc = null;
+        if (combIni.vida <= 0) {
+          faseBat = 'fim';
+          var pJn = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+          mostrarLog('🎉 ' + pJn.nome + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
+          if (nomeJog) {
+            E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
+            salvarProgresso();
+            aoSairNivel = proximoMundo;
+            setTimeout(function() { mostrarNivelUp(nomeJog, E.niveis[nomeJog]); }, 700);
+          } else {
+            setTimeout(mostrarGameOverVitoria, 700);
+          }
+          return;
+        }
+        setTimeout(turnoInimigo, 400);
+      }, 650);
+    }, 600);
+  }
+
   // ===== TURNO DO INIMIGO (NPC) =====
 
   function turnoInimigo() {
@@ -1510,6 +1745,8 @@ canvas#campo { display: block; border-left: 2px solid #1a3a5c; border-right: 2px
     var temMana = pJ.golpes.some(function(g) { return g.m <= combJog.mana; });
     var desc    = document.getElementById('btn-desc');
     desc.style.display = pode && !temMana ? 'block' : 'none';
+    var esp = document.getElementById('btn-esp');
+    if (esp) esp.disabled = !pode;
   }
 
   function mostrarLog(txt) { document.getElementById('log').textContent = txt; }
