@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Paralu">
 <title>Paralu — aventura criada por Rafa e Raul Fuentes</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nagoshiashumari/Rpg-Awesome@master/css/rpg-awesome.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <style>
 @font-face {
   font-family: 'OpenMoji';
@@ -888,6 +889,52 @@ canvas#campo {
     if (wakeLock) { wakeLock.release(); wakeLock = null; }
   }
 
+  // ===== AUDIO (Tone.js) — sons 8-bit gerados via síntese =====
+  var _audioOk = false, _sfxMel, _sfxHit;
+
+  function _iniciarAudio() {
+    if (_audioOk) return;
+    _audioOk = true;
+    Tone.start().then(function() {
+      // onda quadrada = timbre chiptune
+      _sfxMel = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'square' },
+        envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 },
+        volume: -14
+      }).toDestination();
+      // ruído branco para impactos
+      _sfxHit = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.001, decay: 0.07, sustain: 0, release: 0.04 },
+        volume: -18
+      }).toDestination();
+    });
+  }
+  // AudioContext exige gesto do usuário antes de iniciar
+  document.addEventListener('click',      _iniciarAudio, { once: true });
+  document.addEventListener('touchstart', _iniciarAudio, { once: true });
+
+  function _mel(notas, dur, intervalo) {
+    if (!_sfxMel) return;
+    var t = Tone.now();
+    notas.forEach(function(n, i) { _sfxMel.triggerAttackRelease(n, dur, t + i * intervalo); });
+  }
+  function _hit(dur) { if (_sfxHit) _sfxHit.triggerAttackRelease(dur || '32n'); }
+
+  // sons exportados para uso nas funções do jogo
+  function somGolpe()          { _mel(['C5','G5'], '32n', 0.07); }
+  function somImpacto()        { _hit('32n'); }
+  function somDano()           { _hit('16n'); _mel(['E4','C4'], '16n', 0.06); }
+  function somDefesaBloqueou() { _hit('32n'); _mel(['G5','A5'], '16n', 0.07); }
+  function somErro()           { _mel(['C3','B2'], '16n', 0.08); }
+  function somCaptura()        { _mel(['C5','E5','G5','C6'], '16n', 0.09); }
+  function somFusao()          { _mel(['E5','G5','B5','D6','G6'], '32n', 0.06); }
+  function somNivelUp()        { _mel(['C5','E5','G5','C6','E6'], '8n', 0.13); }
+  function somVitoria()        { _mel(['C5','E5','G5','E5','G5','C6'], '8n', 0.12); }
+  function somDerrota()        { _mel(['A4','F4','D4','B3'], '8n', 0.15); }
+  function somSuperPoder()     { _mel(['C4','E4','G4','C5','E5','G5','C6'], '32n', 0.05); }
+  function somDefesaAtivada()  { _mel(['A5','E6'], '8n', 0.05); }
+
   // ===== FULLSCREEN =====
   function toggleFs() {
     var el = document.documentElement;
@@ -1104,6 +1151,7 @@ canvas#campo {
 
   // exibe a tela de nível após vitória
   function mostrarNivelUp(nomeP, nivelNovo) {
+    somNivelUp();
     esconder();
     document.getElementById('tela-nivel').style.display = 'flex';
     const p = PERS.find(function(x) { return x.nome === nomeP; });
@@ -1333,7 +1381,7 @@ canvas#campo {
         capCriat.splice(ki, 1);
       }
     }
-    if (novidade) atualizarUICaptura();
+    if (novidade) { somCaptura(); atualizarUICaptura(); }
 
     desenharCampoCap();
     requestAnimationFrame(loopCaptura);
@@ -1513,6 +1561,7 @@ canvas#campo {
 
   function realizarFusao() {
     if (!E.slot1 || !E.slot2 || E.slot1 === E.slot2) return;
+    somFusao();
     var p1 = PERS.find(function(x) { return x.nome === E.slot1; });
     var p2 = PERS.find(function(x) { return x.nome === E.slot2; });
     var nm1 = p1.nome.split('-')[0], nm2 = p2.nome.split('-')[0];
@@ -1893,6 +1942,7 @@ canvas#campo {
 
   function ativarDefesa() {
     if (faseBat !== 'escolha' || E.defesas <= 0) return;
+    somDefesaAtivada();
     E.defesas--;
     salvarProgresso();
     defesaAtiva = true;
@@ -2258,8 +2308,9 @@ canvas#campo {
     if (faseBat !== 'escolha') return;
     var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
     var g  = pJ.golpes[idx];
-    if (!g || combJog.mana < g.m) return;
+    if (!g || combJog.mana < g.m) { somErro(); return; }
 
+    somGolpe();
     faseBat = 'animando'; atualizarBotoes(); mostrarLog('...');
     
     var proj = ehProjetil(g);
@@ -2287,6 +2338,7 @@ canvas#campo {
       mostrarLog(g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
       
       // EFEITOS DE IMPACTO
+      somImpacto();
       var corFx = pJ.cor || '#a8ff8c';
       criarParticulas(POS_INI.x, POS_INI.y, corFx);
       criarTextoFlutuante(POS_INI.x, POS_INI.y, '-' + dano, '#ff5252');
@@ -2332,6 +2384,7 @@ canvas#campo {
 
   function usarGolpeEspecial() {
     if (faseBat !== 'escolha' || E.superpoderes <= 0) return;
+    somSuperPoder();
     var p = infoPoder(E.superpoderes); // captura antes de zerar
     E.superpoderes = 0;                // consome tudo de uma vez
     salvarProgresso();
@@ -2468,6 +2521,7 @@ canvas#campo {
       }
       
       // EFEITOS DE IMPACTO NO JOGADOR
+      if (bloqueado) { somDefesaBloqueou(); } else { somDano(); }
       var corFx = pI.cor || '#ff5252';
       criarParticulas(POS_JOG.x, POS_JOG.y, corFx);
       criarTextoFlutuante(POS_JOG.x, POS_JOG.y, '-' + danoFinal, '#ff5252');
@@ -2481,6 +2535,7 @@ canvas#campo {
         animPisc = null;
         if (combJog.vida <= 0) {
           faseBat = 'fim';
+          somDerrota();
           var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
           mostrarLog('💀 ' + pJ.nome + ' foi derrotado! Tente de novo!');
           atualizarBotoes();
@@ -2496,7 +2551,7 @@ canvas#campo {
   }
 
   function mostrarGameOverVitoria() {
-    faseBat = 'fim'; atualizarBotoes();
+    faseBat = 'fim'; somVitoria(); atualizarBotoes();
     var ago  = document.getElementById('area-go');
     var btnP = document.getElementById('btn-proximo');
     ago.style.display = 'flex';

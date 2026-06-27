@@ -137,6 +137,7 @@ Verificar antes de incluir qualquer CDN, fonte ou pacote:
 |---|---|---|
 | RPG Awesome | MIT | github.com/nagoshiashumari/Rpg-Awesome |
 | OpenMoji Color | CC BY-SA 4.0 | github.com/hfg-gmuend/openmoji |
+| Tone.js 14.8.49 | MIT | github.com/Tonejs/Tone.js |
 
 ## O que NÃO fazer
 
