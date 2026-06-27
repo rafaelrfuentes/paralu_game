@@ -204,16 +204,16 @@ canvas#canvas-captura {
     justify-content: flex-start;
     align-items: flex-start;
   }
-  body:has(#tela-captura[style*="display: flex"]),
-  body:has(#tela-captura[style*="display:flex"]) {
+  body:has(#tela-captura:not([style*="display: none"]):not([style*="display:none"])) {
     overflow: hidden !important;
   }
   #tela-captura[style*="display: flex"],
-  #tela-captura[style*="display:flex"] {
+  #tela-captura[style*="display:flex"],
+  #tela-captura:not([style*="display: none"]):not([style*="display:none"]) {
     display: grid !important;
     grid-template-areas: "topo topo" "cnvs dpad" "info dpad";
     grid-template-columns: 1fr 148px;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     width: 100%;
     height: 100vh;
     height: 100dvh;
@@ -597,10 +597,10 @@ canvas#campo {
 .btn-acao.ciano:hover { border-color: #80deea; box-shadow: 0 0 14px rgba(0,188,212,0.4); }
 .btn-acao.ciano .ra { color: #80deea; filter: drop-shadow(0 0 8px rgba(0,188,212,0.7)); }
 
-#tela-pokedex { gap: 10px; }
+#tela-pokedex { gap: 10px; overflow-y: auto; max-height: 100dvh; padding-bottom: 12px; }
 .pdk-contador { font-size: 10px; color: #7dcfff; letter-spacing: 2px; }
 .pdk-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 600px;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: min(600px, 100%);
 }
 .pdk-card {
   background: #060e1c; border: 2px solid #00f0ff44; border-radius: 8px;
@@ -609,6 +609,7 @@ canvas#campo {
 .pdk-card.descoberta { border-color: #00f0ff66; cursor: pointer; }
 .pdk-card.descoberta:hover { transform: scale(1.04); border-color: #00f0ff; }
 .pdk-card.descoberta:active { transform: scale(0.95); }
+.pdk-card.descoberta.selecionada { border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.5); }
 .pdk-card.nao-descoberta { opacity: 0.38; cursor: default; }
 .pdk-em { font-size: 26px; display: block; }
 .pdk-card.nao-descoberta .pdk-em { filter: grayscale(1) brightness(0.25); }
@@ -617,7 +618,7 @@ canvas#campo {
 .pdk-tp { font-size: 6px; color: #556; margin-top: 1px; }
 .pdk-nv { font-size: 6px; color: #ffd700; margin-top: 1px; }
 .pdk-detalhe {
-  width: 600px; background: #06101e; border: 2px solid #00f0ff;
+  width: min(600px, 100%); background: #06101e; border: 2px solid #00f0ff;
   border-radius: 10px; padding: 12px 16px;
 }
 .pdk-det-header { display: flex; align-items: flex-start; margin-bottom: 10px; gap: 12px; }
@@ -1332,9 +1333,10 @@ canvas#campo {
       var descoberta = E.descobertas.has(p.nome);
       var nv = E.niveis[p.nome] || 1;
       var card = document.createElement('div');
-      card.className = 'pdk-card ' + (descoberta ? 'descoberta' : 'nao-descoberta');
+      var selCls = (descoberta && i === selPersIdx) ? ' selecionada' : '';
+      card.className = 'pdk-card ' + (descoberta ? 'descoberta' : 'nao-descoberta') + selCls;
       if (descoberta) {
-        card.onclick = function() { renderPokedex(selPersIdx === i ? null : i); };
+        (function(idx) { card.onclick = function() { renderPokedex(selPersIdx === idx ? null : idx); }; })(i);
         card.innerHTML =
           '<span class="pdk-em sc-em">' + p.emoji + '</span>' +
           '<div class="pdk-nm">' + p.nome + '</div>' +
