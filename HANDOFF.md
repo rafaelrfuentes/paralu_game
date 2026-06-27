@@ -49,6 +49,25 @@ Exemplo — Borboleta-monarca:
 
 **Design:** ficha em grid compacto + curiosidade com destaque verde (borda esquerda) estilo museu de história natural.
 
+### 3. Remoção do efeito de listras (CRT scanlines)
+
+- Removido o pseudo-elemento `body::after` que simulava CRT scanlines, eliminando a textura de listras pretas e coloridas que prejudicava a visibilidade do jogo.
+
+### 4. Correção de layout Fullscreen/Landscape na captura
+
+- Removida a restrição `max-height` da media query da `#tela-captura` para habilitar o layout lateral (canvas à esquerda, D-pad à direita) em qualquer tela horizontal (incluindo desktops e notebooks em fullscreen).
+- Adicionado `min-height: 0` no canvas de captura e configurado `grid-template-rows: auto minmax(0, 1fr) auto` para quebrar a dependência circular da altura intrínseca (380px) do canvas em telas curtas, prevenindo estouros de grid.
+- Adicionado `overflow: hidden !important` condicionado a `body:has(#tela-captura)` em landscape para travar a tela e evitar qualquer rolagem vertical acidental.
+- Refatorado o seletor do grid para `#tela-captura:not([style*="display: none"])` para garantir ativação robusta cross-platform, independentemente de espaços na serialização do `display: flex`.
+
+### 5. Substituição de sprites genéricas por Caranguejo e Polvo
+
+- Substituídas as entradas que compartilhavam o emoji genérico `🐟` por emojis exclusivos:
+  - **Caranguejo-azul** (`🦀` - `Callinectes sapidus`), com golpes temáticos (*Pinçada Rápida*, *Carapaça Dura*, etc.).
+  - **Polvo-comum** (`🐙` - `Octopus vulgaris`), com golpes temáticos (*Jato de Tinta*, *Abraço de Tentáculos*, etc.).
+- Com isso, todas as 21 criaturas têm emojis 100% exclusivos (sem duplicidade).
+- Mantido `tipo: 'peixe'` no array `PERS` para compatibilidade com a física de colisão do lago no mini-game de captura, mas atualizados os labels da GUI de "peixes" para "aquáticos/criaturas".
+
 ---
 
 ## Stack de dependências (todas open-source)
