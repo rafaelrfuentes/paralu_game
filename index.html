@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Paralu">
 <title>Paralu — aventura criada por Rafa e Raul Fuentes</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nagoshiashumari/Rpg-Awesome@master/css/rpg-awesome.min.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html {
@@ -124,6 +125,16 @@ body {
 .btn-acao .ai { font-size: 26px; display: block; margin-bottom: 3px; }
 .btn-acao .an { font-size: 11px; letter-spacing: 1px; font-weight: bold; }
 .btn-acao .ad { font-size: 8px; color: #556; }
+/* RPG Awesome — tamanho e glow adaptados ao tema neon do jogo */
+.btn-acao .ra { font-size: 26px; }
+.btn-acao.verde .ra    { color: #a8ff8c; filter: drop-shadow(0 0 8px rgba(93,218,125,0.7)); }
+.btn-acao.roxo .ra     { color: #ce93d8; filter: drop-shadow(0 0 8px rgba(206,147,216,0.7)); }
+.btn-acao.vermelho .ra { color: #ff7070; filter: drop-shadow(0 0 8px rgba(255,82,82,0.7)); }
+.btn-acao.dourado .ra  { color: #ffd700; filter: drop-shadow(0 0 8px rgba(255,215,0,0.7)); }
+.btn-acao.azul .ra     { color: #90caf9; filter: drop-shadow(0 0 8px rgba(144,202,249,0.7)); }
+.topo-label .ra { font-size: 13px; vertical-align: middle; }
+.custo .ra { font-size: 9px; vertical-align: middle; }
+#btn-def .ra, #btn-esp .ra { font-size: 11px; vertical-align: middle; }
 .colecao-mundo {
   width: 600px; background: rgba(0,0,0,0.2); border: 2px solid #1a3a5c;
   border-radius: 8px; padding: 9px 12px;
@@ -339,6 +350,7 @@ canvas#campo {
   .mh-nome      { font-size: 12px; }
   .btn-acao     { padding: 8px 6px; }
   .btn-acao .ai { font-size: 20px; margin-bottom: 1px; }
+  .btn-acao .ra { font-size: 20px; }
   .colecao-mundo { padding: 6px 10px; }
   .col-titulo   { margin-bottom: 4px; }
 
@@ -565,25 +577,25 @@ canvas#campo {
   </div>
   <div class="mundo-acoes">
     <div class="btn-acao verde" onclick="mostrarCaptura()">
-      <span class="ai">🌿</span><span class="an">Capturar</span>
+      <span class="ai"><i class="ra ra-leaf"></i></span><span class="an">Capturar</span>
       <span class="ad" id="btn-cap-desc">Insetos e peixes</span>
     </div>
     <div class="btn-acao roxo" onclick="mostrarFusao()">
-      <span class="ai">⚗️</span><span class="an">Fusão</span>
+      <span class="ai"><i class="ra ra-crystals"></i></span><span class="an">Fusão</span>
       <span class="ad">Misture criaturas!</span>
     </div>
     <div class="btn-acao vermelho" onclick="mostrarSelecao()">
-      <span class="ai">⚔️</span><span class="an">Batalha!</span>
+      <span class="ai"><i class="ra ra-crossed-swords"></i></span><span class="an">Batalha!</span>
       <span class="ad">Escolha e lute!</span>
     </div>
   </div>
   <div class="mundo-extras">
     <div class="btn-acao dourado" onclick="mostrarSuperpoderes()">
-      <span class="ai">⚡</span><span class="an">Super Poderes</span>
+      <span class="ai"><i class="ra ra-lightning-bolt"></i></span><span class="an">Super Poderes</span>
       <span class="ad" id="btn-sp-desc">3 nomes = 1 poder</span>
     </div>
     <div class="btn-acao azul" onclick="mostrarDefesa()">
-      <span class="ai">🛡️</span><span class="an">Defesa Especial</span>
+      <span class="ai"><i class="ra ra-shield"></i></span><span class="an">Defesa Especial</span>
       <span class="ad" id="btn-def-desc">3 contas = 1 defesa</span>
     </div>
   </div>
@@ -597,7 +609,7 @@ canvas#campo {
 <div class="tela" id="tela-captura">
   <div class="topo">
     <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
-    <span class="topo-label">🌿 CAPTURAR CRIATURAS</span>
+    <span class="topo-label"><i class="ra ra-leaf"></i> CAPTURAR CRIATURAS</span>
     <span style="font-size:9px;color:#556">Setas do teclado ou botões abaixo</span>
   </div>
   <canvas id="canvas-captura" width="600" height="380"></canvas>
@@ -628,7 +640,7 @@ canvas#campo {
 <div class="tela" id="tela-fusao">
   <div class="topo">
     <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
-    <span class="topo-label">⚗️ MÁQUINA DE FUSÃO</span>
+    <span class="topo-label"><i class="ra ra-crystals"></i> MÁQUINA DE FUSÃO</span>
     <span style="font-size:9px;color:#9c27b0">Misture 2 criaturas!</span>
   </div>
   <div class="fusao-painel">
@@ -657,7 +669,7 @@ canvas#campo {
 <div class="tela" id="tela-selecao">
   <div class="topo">
     <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
-    <span class="topo-label">⚔️ ESCOLHA SUA CRIATURA</span>
+    <span class="topo-label"><i class="ra ra-crossed-swords"></i> ESCOLHA SUA CRIATURA</span>
     <span style="font-size:9px;color:#a8ff8c" id="sel-bonus-txt"></span>
   </div>
   <div class="sel-grid" id="sel-grid"></div>
@@ -677,7 +689,7 @@ canvas#campo {
 <div class="tela" id="tela-anagrama">
   <div class="topo">
     <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
-    <span class="topo-label">⚡ SUPER PODERES</span>
+    <span class="topo-label"><i class="ra ra-lightning-bolt"></i> SUPER PODERES</span>
     <span style="font-size:9px;color:#ffd700" id="ana-sp-count">⚡ 0 poderes</span>
   </div>
   <div style="font-size:10px;color:#7dcfff;letter-spacing:2px" id="ana-progresso">0 / 3 nomes</div>
@@ -691,7 +703,7 @@ canvas#campo {
 <div class="tela" id="tela-defesa">
   <div class="topo">
     <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
-    <span class="topo-label">🛡️ DEFESA ESPECIAL</span>
+    <span class="topo-label"><i class="ra ra-shield"></i> DEFESA ESPECIAL</span>
     <span style="font-size:9px;color:#90caf9" id="def-sp-count">🛡️ 0 defesas</span>
   </div>
   <div style="font-size:10px;color:#7dcfff;letter-spacing:2px" id="def-progresso">0 / 3 contas</div>
@@ -1619,7 +1631,7 @@ canvas#campo {
   function textoBotaoPoder(n) {
     var p = infoPoder(n);
     if (!p) return '';
-    return p.ico + ' ' + p.nome + ' — dano ' + p.mult + '×!';
+    return '<i class="ra ra-lightning-bolt"></i> ' + p.ico + ' ' + p.nome + ' — dano ' + p.mult + '×!';
   }
   var anaPool     = [];    // [{letra, usada}]
   var anaResposta = [];    // [poolIdx | null] por posição de letra
@@ -1878,9 +1890,9 @@ canvas#campo {
     var btnDef = document.getElementById('btn-def');
     if (btnDef) {
       if (E.defesas > 0) {
-        btnDef.textContent = '🛡️ DEFESA ATIVA! (' + E.defesas + ' restante' + (E.defesas !== 1 ? 's' : '') + ')';
+        btnDef.innerHTML = '<i class="ra ra-shield"></i> DEFESA ATIVA! (' + E.defesas + ' restante' + (E.defesas !== 1 ? 's' : '') + ')';
       } else {
-        btnDef.textContent = '🛡️ DEFESA ATIVA!';
+        btnDef.innerHTML = '<i class="ra ra-shield"></i> DEFESA ATIVA!';
       }
       btnDef.classList.add('ativa');
       btnDef.disabled = true;
@@ -2055,7 +2067,7 @@ canvas#campo {
     if (E.defesas > 0) {
       var btnDef = document.createElement('button');
       btnDef.id = 'btn-def';
-      btnDef.textContent = '🛡️ DEFENDER — dano -50%!' + (E.defesas > 1 ? ' (' + E.defesas + ' usos)' : '');
+      btnDef.innerHTML = '<i class="ra ra-shield"></i> DEFENDER — dano -50%!' + (E.defesas > 1 ? ' (' + E.defesas + ' usos)' : '');
       btnDef.onclick = ativarDefesa;
       document.getElementById('botoes').appendChild(btnDef);
     }
@@ -2063,7 +2075,7 @@ canvas#campo {
     if (E.superpoderes > 0) {
       var btnEsp = document.createElement('button');
       btnEsp.id = 'btn-esp';
-      btnEsp.textContent = textoBotaoPoder(E.superpoderes);
+      btnEsp.innerHTML = textoBotaoPoder(E.superpoderes);
       var pCor = infoPoder(E.superpoderes);
       if (pCor) btnEsp.style.borderColor = pCor.cor;
       btnEsp.onclick = usarGolpeEspecial;
@@ -2080,15 +2092,26 @@ canvas#campo {
     loopBatalha();
   }
 
+  // ícones de tier por posição do golpe no array (0=fraco … 3=ultimate)
+  var GOLPE_TIER_ICO = [
+    '<i class="ra ra-sword"></i>',
+    '<i class="ra ra-crossed-swords"></i>',
+    '<i class="ra ra-lightning-bolt"></i>',
+    '<i class="ra ra-skull"></i>'
+  ];
+
   function criarBotoesGolpe(pJ, nv) {
     var div = document.getElementById('botoes');
     div.innerHTML = '';
     pJ.golpes.forEach(function(g, i) {
       // último golpe recebe bônus de dano por nível
       var ext = (i === pJ.golpes.length - 1 && nv > 1) ? (nv - 1) * 3 : 0;
+      var tier = GOLPE_TIER_ICO[Math.min(i, GOLPE_TIER_ICO.length - 1)];
       var btn = document.createElement('button');
       btn.className = 'btn-golpe'; btn.id = 'bg' + i;
-      btn.innerHTML = g.i + ' ' + g.n + '<span class="custo">💥' + (g.d+ext) + ' | 💧' + g.m + '</span>';
+      btn.innerHTML = tier + ' ' + g.i + ' ' + g.n +
+        '<span class="custo"><i class="ra ra-fire"></i>' + (g.d+ext) +
+        ' | <i class="ra ra-droplet"></i>' + g.m + '</span>';
       (function(ii, ee) { btn.onclick = function() { usarGolpe(ii, ee); }; })(i, ext);
       div.appendChild(btn);
     });
@@ -2421,7 +2444,7 @@ canvas#campo {
         if (E.defesas > 0) {
           var btnDefNovo = document.createElement('button');
           btnDefNovo.id = 'btn-def';
-          btnDefNovo.textContent = '🛡️ DEFENDER — dano -50%!' + (E.defesas > 1 ? ' (' + E.defesas + ' usos)' : '');
+          btnDefNovo.innerHTML = '<i class="ra ra-shield"></i> DEFENDER — dano -50%!' + (E.defesas > 1 ? ' (' + E.defesas + ' usos)' : '');
           btnDefNovo.onclick = ativarDefesa;
           document.getElementById('botoes').appendChild(btnDefNovo);
         }
