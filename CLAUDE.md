@@ -136,6 +136,7 @@ Verificar antes de incluir qualquer CDN, fonte ou pacote:
 | Biblioteca | Licença | Fonte |
 |---|---|---|
 | RPG Awesome | MIT | github.com/nagoshiashumari/Rpg-Awesome |
+| Press Start 2P | OFL 1.1 | fonts.google.com/specimen/Press+Start+2P (entregue via Google Fonts CDN gratuito, sem conta) |
 | OpenMoji Color | CC BY-SA 4.0 | github.com/hfg-gmuend/openmoji |
 | Tone.js 14.8.49 | MIT | github.com/Tonejs/Tone.js |
 

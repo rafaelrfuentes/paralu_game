@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#08101e">
+<meta name="theme-color" content="#040914">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Paralu">
 <title>Paralu — aventura criada por Rafa e Raul Fuentes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nagoshiashumari/Rpg-Awesome@master/css/rpg-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <style>
@@ -16,6 +19,18 @@
   font-family: 'OpenMoji';
   src: url('https://cdn.jsdelivr.net/npm/openmoji@15.1.0/font/OpenMoji-Color.woff2') format('woff2');
   font-display: swap;
+}
+/* CRT scanlines — simula tela de tubo arcade */
+body::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.22) 50%),
+              linear-gradient(90deg, rgba(255,0,0,0.04), rgba(0,255,0,0.02), rgba(0,0,255,0.04));
+  background-size: 100% 4px, 3px 100%;
+  pointer-events: none;
+  z-index: 9999;
 }
 /* OpenMoji aplicado em todos os elementos HTML que exibem emojis de criaturas */
 .sc-em, .fs-em, .fr-em, .cc-em, .ce-icone, .ana-emoji, .nv-emoji, .col-em {
@@ -32,17 +47,17 @@ html {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #060e1c;
+  background: #040914;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1a3a5c;
+  background: #00f0ff44;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a7aa0;
+  background: #00f0ffaa;
 }
 body {
-  background: #08101e; font-family: monospace; color: white;
+  background: #040914; font-family: 'Press Start 2P', monospace; font-size: 9px; color: white;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex; flex-direction: column;
@@ -60,9 +75,9 @@ body {
 }
 .tela { display: none; flex-direction: column; align-items: center; gap: 10px; }
 .btn-voltar {
-  background: none; border: 1px solid #1a3a5c; color: #6a9ab8;
+  background: none; border: 1px solid #00f0ff44; color: #6a9ab8;
   padding: 5px 12px; border-radius: 5px; cursor: pointer;
-  font-family: monospace; font-size: 11px; letter-spacing: 1px;
+  font-family: 'Press Start 2P', monospace; font-size: 11px; letter-spacing: 1px;
 }
 .btn-voltar:hover { border-color: #4a7aa0; color: #aac4d8; }
 .topo { width: 600px; display: flex; justify-content: space-between; align-items: center; }
@@ -72,15 +87,15 @@ body {
 #tela-entrada { gap: 18px; }
 .titulo { font-size: 46px; color: #a8ff8c; letter-spacing: 5px; animation: brilhar 2.2s ease-in-out infinite; }
 @keyframes brilhar {
-  0%,100% { text-shadow: 0 0 20px #7dff9b, 0 0 45px #3dba5d; }
-  50%      { text-shadow: 0 0 35px #c8ffb0, 0 0 80px #5dda7d; }
+  0%,100% { text-shadow: 0 0 8px #00f0ff, 0 0 24px #00f0ff, 0 0 48px #ff2a85; }
+  50%      { text-shadow: 0 0 12px #ff2a85, 0 0 30px #ff2a85, 0 0 60px #00f0ff; }
 }
 .sub { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #445; }
 .cartao-entrada {
-  background: #060e1c; border: 2px solid #1a3a5c; border-radius: 14px;
+  background: #060e1c; border: 2px solid #00f0ff; border-radius: 14px;
   padding: 24px 60px; display: flex; flex-direction: column;
   align-items: center; gap: 14px; cursor: pointer; transition: all 0.15s;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 0 10px rgba(0,240,255,0.25), inset 0 0 8px rgba(0,240,255,0.08);
 }
 .cartao-entrada:hover { border-color: #5dda7d; background: #07140e; transform: scale(1.03); box-shadow: 0 0 20px rgba(93,218,125,0.25); }
 .ce-icone  { font-size: 44px; }
@@ -89,11 +104,11 @@ body {
 
 /* ===== MAPA ===== */
 #mapa-dims { display: flex; flex-direction: column; gap: 10px; width: 600px; }
-.dim-bloco { background: #06101e; border: 2px solid #1a3a5c; border-radius: 10px; padding: 12px; }
+.dim-bloco { background: #06101e; border: 2px solid #00f0ff; border-radius: 10px; padding: 12px; }
 .dim-titulo { font-size: 10px; letter-spacing: 2px; color: #7dcfff; margin-bottom: 10px; text-transform: uppercase; }
 .dim-mundos { display: flex; gap: 10px; }
 .mundo-card {
-  flex: 1; background: #08182e; border: 2px solid #1a3a5c; border-radius: 8px;
+  flex: 1; background: #08182e; border: 2px solid #00f0ff; border-radius: 8px;
   padding: 10px 6px; text-align: center; transition: all 0.15s;
 }
 .mundo-card.disponivel { cursor: pointer; }
@@ -108,7 +123,7 @@ body {
 
 /* ===== DENTRO DO MUNDO ===== */
 .mundo-header {
-  width: 600px; background: #06101e; border: 2px solid #1a3a5c;
+  width: 600px; background: #06101e; border: 2px solid #00f0ff;
   border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
 }
 .mh-nome { font-size: 14px; color: #a8ff8c; font-weight: bold; }
@@ -116,7 +131,7 @@ body {
 .mundo-acoes { display: flex; gap: 10px; width: 600px; }
 .btn-acao {
   flex: 1; padding: 14px 8px; border-radius: 9px; border: 2px solid;
-  font-family: monospace; font-size: 10px; cursor: pointer; text-align: center;
+  font-family: 'Press Start 2P', monospace; font-size: 10px; cursor: pointer; text-align: center;
   line-height: 1.7; transition: all 0.15s; background: #06101e;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
@@ -146,7 +161,7 @@ body {
 .custo .ra { font-size: 9px; vertical-align: middle; }
 #btn-def .ra, #btn-esp .ra { font-size: 11px; vertical-align: middle; }
 .colecao-mundo {
-  width: 600px; background: rgba(0,0,0,0.2); border: 2px solid #1a3a5c;
+  width: 600px; background: rgba(0,0,0,0.2); border: 2px solid #00f0ff;
   border-radius: 8px; padding: 9px 12px;
 }
 .col-titulo { font-size: 8px; letter-spacing: 2px; color: #7dcfff; margin-bottom: 7px; text-transform: uppercase; }
@@ -161,14 +176,14 @@ body {
 
 /* ===== CAPTURA ===== */
 canvas#canvas-captura {
-  border: 3px solid #5a7d2a; border-radius: 8px;
+  border: 3px solid #00f0ff; box-shadow: 0 0 12px rgba(0,240,255,0.3); border-radius: 8px;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 .cap-info {
-  width: 600px; background: #06101e; border: 2px solid #1a3a5c;
+  width: 600px; background: #06101e; border: 2px solid #00f0ff;
   border-radius: 8px; padding: 7px 14px; display: flex; align-items: center; gap: 8px;
 }
 .cap-num  { font-size: 11px; color: #7dcfff; min-width: 75px; }
@@ -177,11 +192,11 @@ canvas#canvas-captura {
 .dpad-row { display: flex; gap: 6px; }
 .dpad-btn {
   width: 60px; height: 60px; font-size: 24px;
-  background: #0d2035; border: 2px solid #1a3a5c; border-radius: 12px;
+  background: #0d2035; border: 2px solid #00f0ff; border-radius: 12px;
   color: #7dcfff; cursor: pointer; user-select: none; -webkit-user-select: none;
   display: flex; align-items: center; justify-content: center; touch-action: none;
 }
-.dpad-btn:active, .dpad-btn.pressionado { background: #1a3a5c; border-color: #7dcfff; }
+.dpad-btn:active, .dpad-btn.pressionado { background: #0a1f35; border-color: #00f0ff; box-shadow: 0 0 8px rgba(0,240,255,0.4); }
 .dpad-centro { width: 60px; height: 60px; }
 
 /* ===== LANDSCAPE MOBILE (captura) ===== */
@@ -219,7 +234,7 @@ canvas#canvas-captura {
 }
 
 /* ===== FUSÃO ===== */
-.fusao-painel { width: 600px; background: #06101e; border: 2px solid #9c27b0; border-radius: 10px; padding: 14px; }
+.fusao-painel { width: 600px; background: #06101e; border: 2px solid #ff2a85; border-radius: 10px; padding: 14px; box-shadow: 0 0 10px rgba(255,42,133,0.25), inset 0 0 8px rgba(255,42,133,0.15); }
 .fusao-slots { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .fusao-slot {
   flex: 1; background: #0d1929; border: 2px dashed #2a4a7c; border-radius: 8px;
@@ -238,7 +253,7 @@ canvas#canvas-captura {
 .fusao-disp { display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; }
 .btn-fundir {
   width: 100%; padding: 10px; background: #7b1fa2; border: none; border-radius: 7px;
-  color: white; font-family: monospace; font-size: 12px; font-weight: bold;
+  color: white; font-family: 'Press Start 2P', monospace; font-size: 12px; font-weight: bold;
   cursor: pointer; letter-spacing: 2px; margin-top: 10px; transition: all 0.15s;
 }
 .btn-fundir:hover:not(:disabled) { background: #9c27b0; box-shadow: 0 0 14px rgba(156,39,176,0.5); }
@@ -255,7 +270,7 @@ canvas#canvas-captura {
 /* ===== SELEÇÃO ===== */
 .sel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; width: 600px; }
 .sel-card {
-  background: #060e1c; border: 2px solid #1a3a5c; border-radius: 8px;
+  background: #060e1c; border: 2px solid #00f0ff; border-radius: 8px;
   padding: 9px 4px 7px; cursor: pointer; text-align: center; transition: all 0.15s;
 }
 .sel-card:hover  { transform: scale(1.04); }
@@ -264,26 +279,26 @@ canvas#canvas-captura {
 .sc-nm { font-size: 7px; color: #aac4ff; margin-top: 3px; line-height: 1.3; }
 .sc-nv { font-size: 8px; color: #ffd700; margin-top: 2px; }
 .sel-preview {
-  width: 600px; background: #06101e; border: 2px solid #2a4a7c;
+  width: 600px; background: #06101e; border: 2px solid #00f0ff;
   border-radius: 10px; padding: 12px 16px; display: none;
 }
 .sp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .sp-nome   { font-size: 14px; font-weight: bold; color: #aac4ff; }
 .sp-cien   { font-size: 8px; color: #445; font-style: italic; margin-top: 2px; }
 .sp-golpes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-.gp-card { background: #0a1929; border: 1px solid #1a3a5c; border-radius: 6px; padding: 6px 9px; }
+.gp-card { background: #0a1929; border: 1px solid #00f0ff44; border-radius: 6px; padding: 6px 9px; }
 .gp-nm   { font-size: 10px; color: #dce8f5; }
 .gp-st   { font-size: 8px; color: #6cb0e8; margin-top: 2px; }
 .btn-bat {
   background: #b71c1c; color: white; border: 2px solid #ff5252; border-radius: 7px;
-  padding: 8px 16px; font-family: monospace; font-size: 11px; font-weight: bold;
+  padding: 8px 16px; font-family: 'Press Start 2P', monospace; font-size: 11px; font-weight: bold;
   cursor: pointer; transition: all 0.15s;
 }
 .btn-bat:hover { background: #e53935; }
 
 /* ===== BATALHA ===== */
 #tela-batalha { gap: 0; }
-.painel { width: 600px; padding: 8px 14px; background: #06101e; border: 2px solid #1a3a5c; }
+.painel { width: 600px; padding: 8px 14px; background: #06101e; border: 2px solid #00f0ff; box-shadow: 0 0 10px rgba(0,240,255,0.25), inset 0 0 8px rgba(0,240,255,0.15); }
 .painel-ini { border-radius: 10px 10px 0 0; border-bottom: none; }
 .painel-jog { border-top: none; }
 .painel-nome { font-size: 10px; letter-spacing: 2px; color: #7dcfff; margin-bottom: 4px; text-transform: uppercase; }
@@ -292,7 +307,7 @@ canvas#canvas-captura {
 .trilha {
   flex: 1; height: 10px; background: #08111d; border-radius: 5px; overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
-  border: 1px solid #1a3a5c;
+  border: 1px solid #00f0ff44;
 }
 .preench { height: 100%; border-radius: 5px; transition: width 0.35s; }
 .preench.vida  { background: linear-gradient(90deg, #2e7d32, #4caf50); }
@@ -300,33 +315,33 @@ canvas#canvas-captura {
 .preench.mana  { background: linear-gradient(90deg, #1565c0, #2196f3); }
 .valor-barra { font-size: 9px; color: #9cb4c8; width: 55px; text-align: right; flex-shrink: 0; }
 canvas#campo {
-  display: block; border-left: 2px solid #1a3a5c; border-right: 2px solid #1a3a5c;
+  display: block; border-left: 2px solid #00f0ff; border-right: 2px solid #00f0ff;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
-.area-acao { width: 600px; background: #06101e; border: 2px solid #1a3a5c; border-top: 1px solid #0d2035; border-radius: 0 0 10px 10px; }
+.area-acao { width: 600px; background: #06101e; border: 2px solid #00f0ff; border-top: 1px solid #0d2035; border-radius: 0 0 10px 10px; }
 #log { padding: 7px 14px; font-size: 11px; color: #dce8f5; min-height: 30px; border-bottom: 1px solid #0d2035; }
 .botoes { display: flex; flex-wrap: wrap; }
 .btn-golpe {
   width: 50%; padding: 8px 7px; background: #060e1c; border: none;
-  border-right: 1px solid #1a3a5c; border-top: 1px solid #0d2035;
-  color: #dce8f5; font-family: monospace; font-size: 10px;
+  border-right: 1px solid #00f0ff22; border-top: 1px solid #00f0ff22;
+  color: #dce8f5; font-family: 'Press Start 2P', monospace; font-size: 10px;
   cursor: pointer; text-align: left; line-height: 1.5; transition: background 0.1s;
 }
 .btn-golpe:nth-child(even) { border-right: none; }
-.btn-golpe:hover:not(:disabled) { background: #0d1e30; }
+.btn-golpe:hover:not(:disabled) { background: #06101e; border-color: #00f0ff; box-shadow: inset 0 0 8px rgba(0,240,255,0.15); }
 .btn-golpe:disabled { opacity: 0.3; cursor: not-allowed; }
 .custo { font-size: 8px; color: #6cb0e8; display: block; }
 .btn-desc {
   width: 100%; padding: 8px 14px; background: #060e1c; border: none;
-  border-top: 1px solid #0d2035; color: #9cb4c8;
-  font-family: monospace; font-size: 10px; cursor: pointer; text-align: left;
+  border-top: 1px solid #00f0ff22; color: #9cb4c8;
+  font-family: 'Press Start 2P', monospace; font-size: 10px; cursor: pointer; text-align: left;
 }
 .btn-desc:hover { background: #0d1e30; }
 .area-go { padding: 8px 14px; display: none; gap: 8px; flex-wrap: wrap; border-top: 1px solid #0d2035; }
-.btn-go { padding: 7px 14px; border-radius: 6px; font-family: monospace; font-size: 10px; cursor: pointer; letter-spacing: 1px; border: 1px solid; }
+.btn-go { padding: 7px 14px; border-radius: 6px; font-family: 'Press Start 2P', monospace; font-size: 10px; cursor: pointer; letter-spacing: 1px; border: 1px solid; }
 .go-v { background: #1b3a1e; border-color: #5dda7d; color: #81c784; }
 .go-a { background: #1a2030; border-color: #4a6a8a; color: #9cb4c8; }
 
@@ -457,7 +472,7 @@ canvas#campo {
   background: #0e2240; border: 2px solid #2196f3;
   border-radius: 8px; color: #90caf9; cursor: pointer;
   touch-action: manipulation; transition: all 0.1s;
-  font-family: monospace;
+  font-family: 'Press Start 2P', monospace;
 }
 .def-tecla:active { background: #163a6a; transform: scale(0.93); }
 .def-tecla.apagar { border-color: #ff7070; color: #ff7070; font-size: 18px; }
@@ -468,7 +483,7 @@ canvas#campo {
 .def-msg.err { color: #ff7070; }
 #btn-def {
   background: #001a33; border: 2px solid #2196f3; color: #90caf9;
-  border-radius: 8px; padding: 8px 18px; font-family: monospace;
+  border-radius: 8px; padding: 8px 18px; font-family: 'Press Start 2P', monospace;
   font-size: 11px; cursor: pointer; letter-spacing: 1px;
   animation: brilhar-def 1.5s ease-in-out infinite;
 }
@@ -506,7 +521,7 @@ canvas#campo {
 .ana-msg.err { color: #ff7070; }
 #btn-esp {
   background: #1a2a00; border: 2px solid #ffd700; color: #ffd700; border-radius: 8px;
-  padding: 8px 18px; font-family: monospace; font-size: 11px; cursor: pointer;
+  padding: 8px 18px; font-family: 'Press Start 2P', monospace; font-size: 11px; cursor: pointer;
   letter-spacing: 1px; animation: brilhar-esp 1.5s ease-in-out infinite;
 }
 #btn-esp:disabled { opacity: 0.35; animation: none; cursor: default; }
@@ -521,9 +536,9 @@ canvas#campo {
   top: max(8px, env(safe-area-inset-top));
   right: max(8px, env(safe-area-inset-right));
   z-index: 9999;
-  background: rgba(6,16,30,0.85); border: 1px solid #1a3a5c; color: #6a9ab8;
+  background: rgba(6,16,30,0.85); border: 1px solid #00f0ff44; color: #6a9ab8;
   padding: 5px 9px; border-radius: 5px; cursor: pointer;
-  font-family: monospace; font-size: 15px; line-height: 1;
+  font-family: 'Press Start 2P', monospace; font-size: 15px; line-height: 1;
   backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   touch-action: manipulation;
 }
@@ -541,10 +556,14 @@ canvas#campo {
 .nv-stats  { font-size: 12px; color: #a8ff8c; line-height: 2.1; }
 .btn-continuar {
   background: #ffd700; color: #1a1200; border: none; border-radius: 8px;
-  padding: 12px 40px; font-family: monospace; font-size: 13px; font-weight: bold;
+  padding: 12px 40px; font-family: 'Press Start 2P', monospace; font-size: 13px; font-weight: bold;
   cursor: pointer; letter-spacing: 2px; transition: all 0.15s;
 }
 .btn-continuar:hover { background: #ffee58; box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+@keyframes pular {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.1); }
+}
 </style>
 </head>
 <body>
@@ -555,6 +574,10 @@ canvas#campo {
 <div class="tela" id="tela-entrada" style="display:flex">
   <div class="titulo">Paralu 🌿</div>
   <div class="sub">aventura criada por Rafa e Raul Fuentes</div>
+  <div style="display:flex; flex-direction:column; align-items:center; gap:6px; margin: 4px 0;">
+    <label for="nome-jogador" style="font-size:8px; color:#7dcfff; letter-spacing:1px;">NOME DO TREINADOR:</label>
+    <input type="text" id="nome-jogador" maxlength="10" placeholder="Raul" oninput="salvarNomeJogador()" style="background:#060e1c; border:2px solid #1a3a5c; color:#fff; font-family:'Press Start 2P', monospace; font-size:8px; padding:6px; text-align:center; border-radius:6px; outline:none; width:150px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  </div>
   <div class="cartao-entrada" onclick="mostrarMapa()">
     <div class="ce-icone">🗺️</div>
     <div class="ce-titulo">JOGAR</div>
@@ -786,11 +809,22 @@ canvas#campo {
 <div class="tela" id="tela-nivel">
   <div class="nivel-caixa">
     <div class="nv-emoji" id="nv-emoji">🌟</div>
-    <div class="nv-titulo">Subiu de Nível!</div>
+    <div class="nv-titulo" id="nv-titulo">Subiu de Nível!</div>
     <div class="nv-num"   id="nv-num">Nível 2</div>
     <div class="nv-stats" id="nv-stats"></div>
   </div>
   <button class="btn-continuar" onclick="continuarNivel()">▶ Continuar!</button>
+</div>
+
+<!-- ====== VITÓRIA FINAL ====== -->
+<div class="tela" id="tela-vitoria-final" style="gap: 16px;">
+  <div class="nivel-caixa" style="border-color: #5dda7d; box-shadow: 0 0 40px rgba(93,218,125,0.4); max-width: 500px; width: 100%;">
+    <div class="nv-emoji" id="vit-emoji" style="font-size: 80px; animation: pular 1.2s ease-in-out infinite; display: inline-block;">🏆</div>
+    <div class="titulo" style="font-size: 26px; color: #a8ff8c;">PARABÉNS!</div>
+    <div class="sub" id="vit-mensagem" style="color: #fff; font-size: 11px; line-height: 1.8; margin-top: 10px;">Raul, você é o Campeão do Paralu!</div>
+    <div class="nv-stats" id="vit-detalhes" style="color: #7dcfff; font-size: 9px; line-height: 1.6; margin-top: 14px;">Você venceu todos os 6 mundos!</div>
+  </div>
+  <button class="btn-continuar" onclick="voltarAoInicioAposZerar()" style="background: #5dda7d; color: #040914;">🎮 Voltar ao Início</button>
 </div>
 
 <script>
@@ -1051,6 +1085,7 @@ canvas#campo {
     slot2:       null,        // nome no slot 2
     superpoderes: 0,          // poderes acumulados (3 nomes corretos = 1 poder)
     defesas:      0,          // defesas acumuladas (3 contas corretas = 1 defesa)
+    nomeTreinador: 'Raul',    // nome do jogador (treinador)
   };
   // começa todos os personagens no nível 1
   PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
@@ -1091,12 +1126,20 @@ canvas#campo {
   function mostrarEntrada() {
     modoAtual = null; pararCaptura(); esconder();
     document.getElementById('tela-entrada').style.display = 'flex';
+    var inputNome = document.getElementById('nome-jogador');
+    if (inputNome) inputNome.value = E.nomeTreinador || 'Raul';
     const cfg = MUNDOS[E.mundoIdx];
     document.getElementById('info-entrada').textContent =
       'Mundo ' + cfg.num + ' — ' + cfg.nome + '  ' + cfg.est;
     var btnRec = document.getElementById('btn-recomecar');
     if (btnRec) btnRec.style.display =
       (E.concluidos.length > 0 || E.mundoIdx > 0) ? 'block' : 'none';
+  }
+
+  function salvarNomeJogador() {
+    var val = document.getElementById('nome-jogador').value.trim();
+    E.nomeTreinador = val || 'Raul';
+    salvarProgresso();
   }
 
   function mostrarMapa() {
@@ -1154,6 +1197,9 @@ canvas#campo {
     somNivelUp();
     esconder();
     document.getElementById('tela-nivel').style.display = 'flex';
+    var nomeExibir = E.nomeTreinador || 'Raul';
+    var elTitulo = document.getElementById('nv-titulo');
+    if (elTitulo) elTitulo.textContent = nomeExibir + ', seu ' + nomeP + ' subiu de nível!';
     const p = PERS.find(function(x) { return x.nome === nomeP; });
     document.getElementById('nv-emoji').textContent = p ? p.emoji : '🌟';
     document.getElementById('nv-num').textContent   = 'Nível ' + nivelNovo;
@@ -1175,11 +1221,43 @@ canvas#campo {
   function proximoMundo() {
     if (!E.concluidos.includes(E.mundoIdx)) E.concluidos.push(E.mundoIdx);
     var prox = E.mundoIdx + 1;
-    if (prox >= MUNDOS.length) { salvarProgresso(); mostrarEntrada(); return; }
+    if (prox >= MUNDOS.length) { 
+      zerarJogoCompleto(); 
+      return; 
+    }
     E.capMundo = new Set();
     E.fusao    = null;
     mostrarMundo(prox);
     salvarProgresso();
+  }
+
+  function zerarJogoCompleto() {
+    somVitoria();
+    modoAtual = 'vitoria_final';
+    esconder();
+    var elVit = document.getElementById('tela-vitoria-final');
+    if (elVit) elVit.style.display = 'flex';
+    
+    var nomeExibir = E.nomeTreinador || 'Raul';
+    document.getElementById('vit-mensagem').textContent = nomeExibir + ', você venceu todos os 6 mundos!';
+    
+    var totalNiveis = 0;
+    PERS.forEach(function(p) { totalNiveis += (E.niveis[p.nome] || 1); });
+    document.getElementById('vit-detalhes').innerHTML = 
+      'Derrotou o Fundo do Abismo!<br>' +
+      'Nível total das suas criaturas: ' + totalNiveis + '<br>' +
+      'Você é o Campeão! 🏆';
+      
+    // Reseta mundoIdx após zerar para que o botão Jogar no menu inicial
+    // ou o mapa permitam reiniciar
+    E.mundoIdx = 0;
+    E.capMundo = new Set();
+    E.fusao = null;
+    salvarProgresso();
+  }
+
+  function voltarAoInicioAposZerar() {
+    mostrarEntrada();
   }
 
   // =====================================================
@@ -1224,7 +1302,7 @@ canvas#campo {
   // MINI GAME DE CAPTURA
   // =====================================================
   var telaCap, pincelCap;
-  var capPers   = { x: 300, y: 110, vel: 3 };
+  var capPers   = { x: 300, y: 110, vel: 3, dir: 'frente' };
   var capCriat  = [];
   var capTeclas = {};
   var capTimer  = null;
@@ -1262,7 +1340,7 @@ canvas#campo {
     var cfg   = MUNDOS[E.mundoIdx];
     telaCap   = document.getElementById('canvas-captura');
     pincelCap = telaCap.getContext('2d');
-    capPers   = { x: 300, y: 110, vel: 3 };
+    capPers   = { x: 300, y: 110, vel: 3, dir: 'frente' };
     capCriat  = [];
     capAtivo  = true;
     // popula o campo com criaturas — quantidade varia por mundo
@@ -1313,10 +1391,10 @@ canvas#campo {
     var noLago = capPers.y > LAGO_Y;
     var vel    = capPers.vel * (noLago ? 0.55 : 1);
 
-    if (capTeclas['ArrowUp'])    capPers.y -= vel;
-    if (capTeclas['ArrowDown'])  capPers.y += vel;
-    if (capTeclas['ArrowLeft'])  capPers.x -= vel;
-    if (capTeclas['ArrowRight']) capPers.x += vel;
+    if (capTeclas['ArrowUp'])    { capPers.y -= vel; capPers.dir = 'costas'; }
+    if (capTeclas['ArrowDown'])  { capPers.y += vel; capPers.dir = 'frente'; }
+    if (capTeclas['ArrowLeft'])  { capPers.x -= vel; capPers.dir = 'esquerda'; }
+    if (capTeclas['ArrowRight']) { capPers.x += vel; capPers.dir = 'direita'; }
     capPers.x = Math.max(16, Math.min(584, capPers.x));
     capPers.y = Math.max(16, Math.min(364, capPers.y));
 
@@ -1430,7 +1508,7 @@ canvas#campo {
       ctx.fillText(capCriat[cdi].esp.emoji, capCriat[cdi].x, capCriat[cdi].y);
 
     // personagem (sprite pixel art do Ash)
-    desenharAsh(ctx, capPers.x, capPers.y);
+    desenharAsh(ctx, capPers.x, capPers.y, capPers.dir);
 
     // dica visual quando está na água
     if (capPers.y > LAGO_Y) {
@@ -1478,14 +1556,40 @@ canvas#campo {
     });
   }
 
-  // sprite pixel art do Ash — 2px por quadradinho
-  function desenharAsh(ctx, cx, cy) {
-    var sp = [
+  // sprite pixel art do Ash — 2px por quadradinho (agora com suporte a direções)
+  function desenharAsh(ctx, cx, cy, dir) {
+    dir = dir || 'frente';
+    if (dir === 'esquerda') {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(-1, 1);
+      desenharAsh(ctx, 0, 0, 'direita');
+      ctx.restore();
+      return;
+    }
+    
+    var spfrente = [
       "...rrrrrr...","..rrrrrrrr..","..rrrrwwrrrr.","rrrrrrrrrrrr",
       "kkppppppppkk",".pppkppkppp.",".pppppppppp.","..pppppppp..",
       "..cccccccc..","..cccccccccc",".cccwwwwcccc",".cccccccccc.",
       "..cccccccc..","...aaaaaa...","...aa..aa...","...kk..kk..."
     ];
+    
+    var spcostas = [
+      "...rrrrrr...","..rrrrrrrr..","..rrrrrrrr..","rrrrrrrrrrrr",
+      "kkkkkkkkkkkk","kkkkkkkkkkkk","kkkkkkkkkkkk","..kkkkkkkk..",
+      "..cccccccc..","..cccccccccc",".cccccccccc.",".cccccccccc.",
+      "..cccccccc..","...aaaaaa...","...aa..aa...","...kk..kk..."
+    ];
+    
+    var spdireita = [
+      "....rrrrrr..","...rrrrrrrr.","...rrrrwwwww","...rrrrrrrr.",
+      "...kkpppppk.","...kkppkppp.","...kkpppppp.","....kppppp..",
+      "....cccccc..","....ccccccc.","...ccwwwwcc.","...cccccccc.",
+      "....cccccc..","....aaaaaa..","....aa..aa..","....kk..kk.."
+    ];
+    
+    var sp = dir === 'costas' ? spcostas : (dir === 'direita' ? spdireita : spfrente);
     var cr = {r:'#d72b1f',w:'#ffffff',k:'#1a1a1a',p:'#f5c896',c:'#2c5fb3',a:'#233c75'};
     var px = 2, ox = Math.round(cx - 6*px), oy = Math.round(cy - 8*px);
     for (var l = 0; l < sp.length; l++) {
@@ -2111,8 +2215,9 @@ canvas#campo {
     telaBat   = document.getElementById('campo');
     pincelBat = telaBat.getContext('2d');
 
+    var nomeExibir = E.nomeTreinador || 'Raul';
     document.getElementById('nome-ini').textContent = '⚔ ' + pI.emoji + ' ' + pI.nome;
-    document.getElementById('nome-jog').textContent = '🎮 ' + pJ.emoji + ' ' + pJ.nome +
+    document.getElementById('nome-jog').textContent = '🎮 ' + pJ.emoji + ' ' + nomeExibir + ' (' + pJ.nome + ')' +
       (nomeJog ? '  [Nv.' + nv + ']' : '  [Fusão]');
 
     var inf = [];
@@ -2145,8 +2250,8 @@ canvas#campo {
     atualizarBarras(); atualizarBotoes();
 
     var msg = (bonus > 0 || bonNv > 0)
-      ? pJ.nome + ' está mais forte! Vida: ' + maxV + '  Mana: ' + maxM
-      : 'A batalha começou! Escolha um golpe!';
+      ? nomeExibir + ', seu ' + pJ.nome + ' está mais forte! Vida: ' + maxV + '  Mana: ' + maxM
+      : 'A batalha começou! Vamos lá, ' + nomeExibir + '!';
     mostrarLog(msg);
     loopBatalha();
   }
@@ -2185,8 +2290,23 @@ canvas#campo {
   function desenharBatalha() {
     var W = 600, H = 256;
     var grad = pincelBat.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#07102a'); grad.addColorStop(1, '#1a2855');
+    grad.addColorStop(0, '#040914'); grad.addColorStop(1, '#0a152d');
     pincelBat.fillStyle = grad; pincelBat.fillRect(0, 0, W, H);
+
+    // estrelas: ciano, rosa, branco alternando por índice
+    var coresStar = ['#00f0ff', '#ff2a85', '#ffffff'];
+    var agora = Date.now();
+    estrelasBatalha.forEach(function(s, idx) {
+      s.fase += s.vel;
+      var alpha = 0.35 + Math.sin(s.fase) * 0.35;
+      pincelBat.save();
+      pincelBat.globalAlpha = alpha;
+      pincelBat.fillStyle = coresStar[idx % 3];
+      pincelBat.beginPath();
+      pincelBat.arc(s.x, s.y, s.tamanho, 0, Math.PI * 2);
+      pincelBat.fill();
+      pincelBat.restore();
+    });
 
     pincelBat.save();
     // tremor de tela (Screen Shake)
@@ -2204,8 +2324,8 @@ canvas#campo {
       pincelBat.fillStyle = g;
       pincelBat.beginPath(); pincelBat.ellipse(cx, cy+2, rx, ry, 0, 0, Math.PI*2); pincelBat.fill();
     }
-    plat(440, 155, 82, 16, '#4a7c59', '#1b5e20');
-    plat(148, 220, 110, 20, '#388e3c', '#1b5e20');
+    plat(440, 155, 82, 16, '#00b8d4', '#003b4a');
+    plat(148, 220, 110, 20, '#c2185b', '#4a0020');
 
     // calcula deslocamentos da animação de ataque
     var offJ = 0, offI = 0;
@@ -2335,7 +2455,8 @@ canvas#campo {
       var dano = g.d + (ext || 0);
       combIni.vida = Math.max(0, combIni.vida - dano);
       atualizarBarras();
-      mostrarLog(g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
+      var nomeExibir = E.nomeTreinador || 'Raul';
+      mostrarLog(nomeExibir + ' comandou: ' + g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
       
       // EFEITOS DE IMPACTO
       somImpacto();
@@ -2353,7 +2474,8 @@ canvas#campo {
         if (combIni.vida <= 0) {
           faseBat = 'fim';
           var pJn = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
-          mostrarLog('🎉 ' + pJn.nome + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
+          var nomeExibir = E.nomeTreinador || 'Raul';
+          mostrarLog('🎉 ' + nomeExibir + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
           // sobe de nível (somente se não for fusão)
           if (nomeJog) {
             E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
@@ -2378,7 +2500,8 @@ canvas#campo {
     atualizarBarras();
     var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
     criarTextoFlutuante(POS_JOG.x, POS_JOG.y, '+20 💧', '#00b0ff');
-    mostrarLog(pJ.nome + ' descansou e recuperou 20 de mana...');
+    var nomeExibir = E.nomeTreinador || 'Raul';
+    mostrarLog(nomeExibir + ' descansou ' + pJ.nome + ' e recuperou 20 de mana...');
     setTimeout(turnoInimigo, 900);
   }
 
@@ -2413,7 +2536,8 @@ canvas#campo {
       var dano = Math.round(g.d * p.mult);
       combIni.vida = Math.max(0, combIni.vida - dano);
       atualizarBarras();
-      mostrarLog(p.ico + ' ' + p.nome + '! ' + g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
+      var nomeExibir = E.nomeTreinador || 'Raul';
+      mostrarLog(nomeExibir + ' liberou ' + p.ico + ' ' + p.nome + '! ' + g.t + ' ' + PERS[iniPersIdx].nome + ' perdeu ' + dano + ' de vida!');
       
       // EFEITOS DE IMPACTO SUPREMO
       criarParticulas(POS_INI.x, POS_INI.y, p.cor);
@@ -2429,7 +2553,8 @@ canvas#campo {
         if (combIni.vida <= 0) {
           faseBat = 'fim';
           var pJn = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
-          mostrarLog('🎉 ' + pJn.nome + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
+          var nomeExibir = E.nomeTreinador || 'Raul';
+          mostrarLog('🎉 ' + nomeExibir + ' venceu! ' + PERS[iniPersIdx].nome + ' foi derrotado!');
           if (nomeJog) {
             E.niveis[nomeJog] = (E.niveis[nomeJog] || 1) + 1;
             salvarProgresso();
@@ -2514,10 +2639,11 @@ canvas#campo {
       combJog.vida = Math.max(0, combJog.vida - danoFinal);
       atualizarBarras();
       var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
+      var nomeExibir = E.nomeTreinador || 'Raul';
       if (bloqueado) {
-        mostrarLog('🛡️ DEFESA! ' + g.t + ' ' + pJ.nome + ' perdeu só ' + danoFinal + ' de vida! (bloqueou 50%)');
+        mostrarLog('🛡️ DEFESA! ' + g.t + ' O ' + pJ.nome + ' de ' + nomeExibir + ' perdeu só ' + danoFinal + ' de vida! (bloqueou 50%)');
       } else {
-        mostrarLog(g.t + ' ' + pJ.nome + ' perdeu ' + danoFinal + ' de vida!');
+        mostrarLog(g.t + ' O ' + pJ.nome + ' de ' + nomeExibir + ' perdeu ' + danoFinal + ' de vida!');
       }
       
       // EFEITOS DE IMPACTO NO JOGADOR
@@ -2537,7 +2663,8 @@ canvas#campo {
           faseBat = 'fim';
           somDerrota();
           var pJ = E.jogIdx === 'fusao' ? E.fusao : PERS[E.jogIdx];
-          mostrarLog('💀 ' + pJ.nome + ' foi derrotado! Tente de novo!');
+          var nomeExibir = E.nomeTreinador || 'Raul';
+          mostrarLog('💀 O ' + pJ.nome + ' de ' + nomeExibir + ' foi derrotado! Tente de novo!');
           atualizarBotoes();
           var ago = document.getElementById('area-go');
           ago.style.display = 'flex';
@@ -2557,7 +2684,7 @@ canvas#campo {
     ago.style.display = 'flex';
     if (E.mundoIdx + 1 >= MUNDOS.length) {
       btnP.textContent = '🏆 Você completou todos os mundos!';
-      btnP.onclick     = mostrarEntrada;
+      btnP.onclick     = zerarJogoCompleto;
     } else {
       btnP.textContent = '✨ Próximo Mundo!';
       btnP.onclick     = proximoMundo;
@@ -2657,7 +2784,8 @@ canvas#campo {
       concluidos:  E.concluidos,
       niveis:      E.niveis,
       superpoderes: E.superpoderes,
-      defesas:      E.defesas
+      defesas:      E.defesas,
+      nomeTreinador: E.nomeTreinador
     };
     localStorage.setItem('paralu_progresso', JSON.stringify(dados));
     // pisca o indicador de save
@@ -2687,6 +2815,8 @@ canvas#campo {
         E.superpoderes = dados.superpoderes;
       if (typeof dados.defesas === 'number')
         E.defesas = dados.defesas;
+      if (typeof dados.nomeTreinador === 'string')
+        E.nomeTreinador = dados.nomeTreinador;
     } catch(e) {}
   }
 
@@ -2697,6 +2827,7 @@ canvas#campo {
     E.concluidos  = [];
     E.superpoderes = 0;
     E.defesas      = 0;
+    E.nomeTreinador = 'Raul';
     PERS.forEach(function(p) { E.niveis[p.nome] = 1; });
     mostrarEntrada();
   }
