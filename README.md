@@ -165,12 +165,13 @@ Módulo intermediário entre captura e batalha.
 - Cada um tem **barra de vida** (verde, fica vermelha abaixo de 25%) e **barra de mana** (azul)
 - Jogador escolhe entre os 4 golpes (botões na parte inferior)
 - Quando sem mana, aparece botão **Descansar** (+20 mana, mas passa o turno)
-- Inimigo é controlado por IA simples: escolhe golpes aleatórios dentro do limite do mundo
+- Inimigo é controlado por IA de Combate: possui 70% de chance de priorizar o golpe disponível que causa maior dano (dentre os que ele consegue pagar com sua mana atual), e 30% de chance de escolher qualquer outro aleatório.
 - Animações (Game Juice):
   - **Ataques Físicos vs Projétil**: Golpes com ícones de impacto físico (como `⚔️`, `🦷`, `💪`) fazem o atacante deslizar fisicamente até o defensor. Golpes de energia, veneno ou som (como `⚡`, `🧪`, `🔊`) disparam o ícone do golpe como projétil voador no Canvas.
   - **Screen Shake (Tremor de Tela)**: Tremores no cenário proporcional ao dano causado (super tremor no Golpe Especial).
   - **Partículas de Dano**: Explosão de partículas coloridas saindo do alvo atingido, correspondente à paleta de cores da criatura atacante.
   - **Piscar de Dano**: O alvo pisca intermitentemente após receber o impacto.
+  - **Visual de Nocaute**: Ao ter sua vida reduzida a 0, o sprite da criatura desmaia (afunda 18px na plataforma, perde a sombra projetada e reduz a opacidade para 35%).
 
 ### Combinação de bônus
 
