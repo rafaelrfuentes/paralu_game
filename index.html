@@ -194,7 +194,7 @@ canvas#canvas-captura {
 .dpad-centro { width: 60px; height: 60px; }
 
 /* ===== LANDSCAPE MOBILE (captura) ===== */
-@media (orientation: landscape) and (max-height: 768px) {
+@media (orientation: landscape) {
   body {
     padding: 0 max(6px, env(safe-area-inset-right));
     padding-left: max(6px, env(safe-area-inset-left));
@@ -1376,6 +1376,7 @@ canvas#campo {
         '</div>' +
       '</div>' +
       '<div class="sp-golpes pdk-golpes">' + golpesHtml + '</div>';
+    setTimeout(function() { detDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
   }
 
   function mostrarMundo(idx) {
