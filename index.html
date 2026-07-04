@@ -1724,9 +1724,14 @@ canvas#campo {
 
       c.x += c.vx; c.y += c.vy;
       if (c.tipo === 'inseto') {
-        // inseto fica na grama
-        if (c.x < 16 || c.x > 584) c.vx *= -1;
-        if (c.y < 16 || c.y > LAGO_Y - 20) c.vy *= -1;
+        // inseto fica na grama — reflete a velocidade E trava a posição
+        // dentro da zona (a fuga pode mandar a velocidade pra fora da
+        // zona a cada frame, então só refletir vx/vy não basta: sem o
+        // clamp de posição o inseto atravessa a borda e entra na água).
+        if (c.x < 16)  { c.x = 16;  c.vx *= -1; }
+        if (c.x > 584) { c.x = 584; c.vx *= -1; }
+        if (c.y < 16)         { c.y = 16;         c.vy *= -1; }
+        if (c.y > LAGO_Y - 20) { c.y = LAGO_Y - 20; c.vy *= -1; }
         // inseto desvia das árvores
         for (var ai = 0; ai < ARVORES.length; ai++) {
           var av = ARVORES[ai];
@@ -1737,9 +1742,12 @@ canvas#campo {
           }
         }
       } else {
-        // peixe fica no lago
-        if (c.x < 16 || c.x > 584) c.vx *= -1;
-        if (c.y < LAGO_Y + 10 || c.y > 370) c.vy *= -1;
+        // peixe fica no lago — mesmo raciocínio: clampar posição além
+        // de refletir a velocidade, pra fuga não empurrar o peixe pra terra.
+        if (c.x < 16)  { c.x = 16;  c.vx *= -1; }
+        if (c.x > 584) { c.x = 584; c.vx *= -1; }
+        if (c.y < LAGO_Y + 10) { c.y = LAGO_Y + 10; c.vy *= -1; }
+        if (c.y > 370)          { c.y = 370;          c.vy *= -1; }
       }
     }
 
