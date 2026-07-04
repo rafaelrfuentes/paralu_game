@@ -135,6 +135,9 @@ body {
 .btn-acao.dourado:hover { border-color: #ffe566; box-shadow: 0 0 14px rgba(255,215,0,0.4); }
 .btn-acao.azul     { border-color: #2196f3; color: #90caf9; }
 .btn-acao.azul:hover { border-color: #90caf9; box-shadow: 0 0 14px rgba(33,150,243,0.4); }
+.btn-acao.laranja  { border-color: #ff9800; color: #ffcc80; }
+.btn-acao.laranja:hover { border-color: #ffcc80; box-shadow: 0 0 14px rgba(255,152,0,0.4); }
+.btn-acao.laranja .ra  { color: #ff9800; filter: drop-shadow(0 0 8px rgba(255,152,0,0.7)); }
 .mundo-extras { display: flex; gap: 10px; width: 600px; }
 .btn-acao .ai { font-size: 26px; display: block; margin-bottom: 3px; }
 .btn-acao .an { font-size: 11px; letter-spacing: 1px; font-weight: bold; }
@@ -193,6 +196,19 @@ canvas#canvas-captura {
 .dpad-btn:active, .dpad-btn.pressionado { background: #0a1f35; border-color: #00f0ff; box-shadow: 0 0 8px rgba(0,240,255,0.4); }
 .dpad-centro { width: 60px; height: 60px; }
 
+/* ===== COMBATE DE RUA (beat 'em up) ===== */
+canvas#canvas-brawl {
+  border: 3px solid #ff9800; box-shadow: 0 0 12px rgba(255,152,0,0.3); border-radius: 8px;
+  image-rendering: -moz-crisp-edges; image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+}
+.brawl-controles { display: flex; align-items: center; gap: 26px; margin-top: 12px; }
+.atk-btn {
+  width: 70px; height: 70px; border-radius: 50%; font-size: 30px;
+  background: #2a0d0d; border: 2px solid #ff5252; color: #ffab91;
+}
+.atk-btn:active, .atk-btn.pressionado { background: #3a1010; box-shadow: 0 0 10px rgba(255,82,82,0.5); }
+
 /* ===== LANDSCAPE MOBILE (captura) ===== */
 @media (orientation: landscape) {
   body:has(#tela-captura:not([style*="display: none"]):not([style*="display:none"])) {
@@ -229,6 +245,36 @@ canvas#canvas-captura {
   .dpad-row    { gap: 4px; }
   .dpad-btn    { width: 44px; height: 44px; font-size: 20px; border-radius: 8px; }
   .dpad-centro { width: 44px; height: 44px; }
+}
+
+/* ===== LANDSCAPE MOBILE (combate de rua) ===== */
+@media (orientation: landscape) {
+  body:has(#tela-brawl:not([style*="display: none"]):not([style*="display:none"])) {
+    padding: 0 max(6px, env(safe-area-inset-right));
+    padding-left: max(6px, env(safe-area-inset-left));
+    height: 100vh; height: 100dvh; min-height: 0;
+    justify-content: flex-start; align-items: flex-start;
+    overflow: hidden !important;
+  }
+  #tela-brawl[style*="display: flex"],
+  #tela-brawl[style*="display:flex"],
+  #tela-brawl:not([style*="display: none"]):not([style*="display:none"]) {
+    display: grid !important;
+    grid-template-areas: "topo topo" "cnvs dpad" "jog dpad" "fim fim";
+    grid-template-columns: 1fr 170px;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    width: 100%; height: 100vh; height: 100dvh;
+    gap: 4px; padding: 4px 0; align-items: start;
+    overflow: hidden !important;
+  }
+  #tela-brawl > .topo             { grid-area: topo; width: 100%; }
+  #tela-brawl > canvas            { grid-area: cnvs; height: 100%; width: auto; aspect-ratio: 600/380; max-width: 100%; min-height: 0; border-radius: 4px; }
+  #tela-brawl > .painel-jog       { grid-area: jog; width: 100%; padding: 4px 8px; }
+  #tela-brawl > .painel-ini       { display: none !important; }
+  #tela-brawl > .brawl-controles  { grid-area: dpad; margin: 0; align-self: center; justify-self: center; flex-direction: column; }
+  #tela-brawl > #brawl-fim        { grid-area: fim; width: 100%; }
+  .brawl-controles { gap: 10px; }
+  .atk-btn         { width: 52px; height: 52px; font-size: 22px; }
 }
 
 /* ===== FUSÃO ===== */
@@ -697,9 +743,13 @@ canvas#campo {
       <span class="ai"><i class="ra ra-crystals"></i></span><span class="an">Fusão</span>
       <span class="ad">Misture criaturas!</span>
     </div>
-    <div class="btn-acao vermelho" onclick="mostrarSelecao()">
+    <div class="btn-acao vermelho" onclick="mostrarSelecao('batalha')">
       <span class="ai"><i class="ra ra-crossed-swords"></i></span><span class="an">Batalha!</span>
       <span class="ad">Escolha e lute!</span>
+    </div>
+    <div class="btn-acao laranja" onclick="mostrarSelecao('brawl')">
+      <span class="ai">👊</span><span class="an">Combate de Rua</span>
+      <span class="ad">Estilo Cadillacs!</span>
     </div>
   </div>
   <div class="mundo-extras">
@@ -792,7 +842,7 @@ canvas#campo {
         <div class="sp-nome" id="sp-nome"></div>
         <div class="sp-cien" id="sp-cien"></div>
       </div>
-      <button class="btn-bat" onclick="confirmarBatalha()">⚔️ Batalhar!</button>
+      <button class="btn-bat" id="btn-confirmar-sel" onclick="confirmarBatalha()">⚔️ Batalhar!</button>
     </div>
     <div class="sp-golpes" id="sp-golpes"></div>
   </div>
@@ -882,6 +932,49 @@ canvas#campo {
       <button class="btn-go go-a" onclick="voltarMundo()">↩ Tentar de novo</button>
       <button class="btn-go go-a" onclick="mostrarMapa()">🗺️ Mapa</button>
     </div>
+  </div>
+</div>
+
+<!-- ====== COMBATE DE RUA (BEAT 'EM UP) ====== -->
+<div class="tela" id="tela-brawl">
+  <div class="topo" style="padding-bottom:5px">
+    <button class="btn-voltar" onclick="voltarMundo()">← Mundo</button>
+    <span style="font-size:10px;color:#ff9800;letter-spacing:2px">👊 COMBATE DE RUA</span>
+    <span style="font-size:9px;color:#a8ff8c" id="brawl-info"></span>
+  </div>
+  <div class="painel painel-ini" id="brawl-painel-chefe" style="display:none">
+    <div class="painel-nome" id="brawl-nome-chefe">Chefe</div>
+    <div class="barra-linha">
+      <span class="barra-label">VIDA</span>
+      <div class="trilha"><div class="preench vida" id="brawl-bv-chefe" style="width:100%"></div></div>
+    </div>
+  </div>
+  <canvas id="canvas-brawl" width="600" height="380"></canvas>
+  <div class="painel painel-jog">
+    <div class="painel-nome" id="brawl-nome-heroi">Herói</div>
+    <div class="barra-linha">
+      <span class="barra-label">VIDA</span>
+      <div class="trilha"><div class="preench vida" id="brawl-bv-heroi" style="width:100%"></div></div>
+      <span class="valor-barra" id="brawl-bv-heroi-txt">100/100</span>
+    </div>
+    <div style="font-size:9px;color:#7dcfff" id="brawl-score">Pontos: 0 · Onda 1/3</div>
+  </div>
+  <div class="brawl-controles">
+    <div class="dpad" id="dpad-brawl">
+      <div class="dpad-row"><div class="dpad-btn" id="brawl-cima">▲</div></div>
+      <div class="dpad-row">
+        <div class="dpad-btn" id="brawl-esq">◀</div>
+        <div class="dpad-centro"></div>
+        <div class="dpad-btn" id="brawl-dir">▶</div>
+      </div>
+      <div class="dpad-row"><div class="dpad-btn" id="brawl-baixo">▼</div></div>
+    </div>
+    <div class="dpad-btn atk-btn" id="brawl-soco">👊</div>
+  </div>
+  <div class="area-go" id="brawl-fim" style="display:none">
+    <div id="brawl-fim-msg" style="width:100%;text-align:center;font-size:11px;padding:6px 0"></div>
+    <button class="btn-go go-v" onclick="reiniciarBrawl()">🔁 Tentar de novo</button>
+    <button class="btn-go go-a" onclick="voltarMundo()">↩ Mundo</button>
   </div>
 </div>
 
@@ -1340,7 +1433,7 @@ canvas#campo {
   }
 
   function mostrarEntrada() {
-    modoAtual = null; pararCaptura(); esconder();
+    modoAtual = null; pararCaptura(); pararBrawl(); esconder();
     document.getElementById('tela-entrada').style.display = 'flex';
     var inputNome = document.getElementById('nome-jogador');
     if (inputNome) inputNome.value = E.nomeTreinador || 'Raul';
@@ -1359,14 +1452,14 @@ canvas#campo {
   }
 
   function mostrarMapa() {
-    modoAtual = null; pararCaptura(); esconder();
+    modoAtual = null; pararCaptura(); pararBrawl(); esconder();
     document.getElementById('tela-mapa').style.display = 'flex';
     renderMapa();
   }
 
   // abre a tela de ações de um mundo específico
   function mostrarPokedex() {
-    modoAtual = null; pararCaptura(); esconder();
+    modoAtual = null; pararCaptura(); pararBrawl(); esconder();
     document.getElementById('tela-pokedex').style.display = 'flex';
     renderPokedex(null);
   }
@@ -1452,7 +1545,7 @@ canvas#campo {
   }
 
   // volta para a tela do mundo atual
-  function voltarMundo() { pararCaptura(); mostrarMundo(E.mundoIdx); }
+  function voltarMundo() { pararCaptura(); pararBrawl(); mostrarMundo(E.mundoIdx); }
 
   function mostrarCaptura() {
     modoAtual = 'captura'; esconder();
@@ -1461,19 +1554,32 @@ canvas#campo {
   }
 
   function mostrarFusao() {
-    modoAtual = 'fusao'; pararCaptura(); esconder();
+    modoAtual = 'fusao'; pararCaptura(); pararBrawl(); esconder();
     document.getElementById('tela-fusao').style.display = 'flex';
     iniciarFusao();
   }
 
-  function mostrarSelecao() {
-    modoAtual = 'selecao'; pararCaptura(); esconder();
+  // destino define o que acontece ao confirmar a escolha na tela de seleção:
+  // 'batalha' (padrão) leva à luta por turnos; 'brawl' leva ao combate de rua.
+  var selDestino = 'batalha';
+
+  function mostrarSelecao(destino) {
+    modoAtual = 'selecao'; pararCaptura(); pararBrawl(); esconder();
+    selDestino = destino === 'brawl' ? 'brawl' : 'batalha';
+    var btnConfirmar = document.getElementById('btn-confirmar-sel');
+    if (btnConfirmar) btnConfirmar.textContent = selDestino === 'brawl' ? '👊 Lutar de Rua!' : '⚔️ Batalhar!';
     document.getElementById('tela-selecao').style.display = 'flex';
     iniciarSelecao();
   }
 
   function confirmarBatalha() {
     if (selIdx === null) return;
+    if (selDestino === 'brawl') {
+      modoAtual = 'brawl'; esconder();
+      document.getElementById('tela-brawl').style.display = 'flex';
+      iniciarBrawl();
+      return;
+    }
     modoAtual = 'batalha'; esconder();
     document.getElementById('tela-batalha').style.display = 'flex';
     iniciarBatalha();
@@ -1604,15 +1710,17 @@ canvas#campo {
 
   document.addEventListener('keydown', function(e) {
     capTeclas[e.key] = true;
-    if (modoAtual === 'captura' && e.key.startsWith('Arrow')) e.preventDefault();
+    if ((modoAtual === 'captura' || modoAtual === 'brawl') && e.key.startsWith('Arrow')) e.preventDefault();
+    if (modoAtual === 'brawl' && e.key === ' ') e.preventDefault(); // espaço = soco, não pode rolar a página
   });
   document.addEventListener('keyup', function(e) { capTeclas[e.key] = false; });
 
-  // D-pad touch/mouse
-  (function() {
-    var mapa = { 'btn-cima': 'ArrowUp', 'btn-baixo': 'ArrowDown', 'btn-esq': 'ArrowLeft', 'btn-dir': 'ArrowRight' };
+  // D-pad touch/mouse (reaproveitado pela captura E pelo combate de rua —
+  // ambos usam o mesmo objeto capTeclas, nunca ativos ao mesmo tempo)
+  function _ligarDpadTouch(mapa) {
     Object.keys(mapa).forEach(function(id) {
       var el = document.getElementById(id);
+      if (!el) return;
       var tecla = mapa[id];
       function pressionar(e) { e.preventDefault(); capTeclas[tecla] = true;  el.classList.add('pressionado'); }
       function soltar(e)     { e.preventDefault(); capTeclas[tecla] = false; el.classList.remove('pressionado'); }
@@ -1623,7 +1731,9 @@ canvas#campo {
       el.addEventListener('mouseup',     soltar);
       el.addEventListener('mouseleave',  soltar);
     });
-  })();
+  }
+  _ligarDpadTouch({ 'btn-cima': 'ArrowUp', 'btn-baixo': 'ArrowDown', 'btn-esq': 'ArrowLeft', 'btn-dir': 'ArrowRight' });
+  _ligarDpadTouch({ 'brawl-cima': 'ArrowUp', 'brawl-baixo': 'ArrowDown', 'brawl-esq': 'ArrowLeft', 'brawl-dir': 'ArrowRight', 'brawl-soco': 'soco' });
 
   function pararCaptura() {
     capAtivo = false;
@@ -2058,6 +2168,315 @@ canvas#campo {
         '<div class="gp-st">💥 ' + (g.d + ext) + ' | 💧 ' + g.m + '</div>';
       gDiv.appendChild(d);
     });
+  }
+
+  // =====================================================
+  // COMBATE DE RUA — beat 'em up com scroll lateral,
+  // estilo Cadillacs and Dinosaurs. Reaproveita o personagem
+  // escolhido em iniciarSelecao() como herói e sorteia inimigos
+  // entre as demais 20 criaturas. Fase = 3 ondas de "capangas" +
+  // 1 chefe (aranha na Floresta, tubarão no Lago).
+  // =====================================================
+  var telaBrawl, pincelBrawl;
+  var brawlAtivo = false;
+  var BR = null; // estado da fase de combate de rua em andamento
+
+  var BRAWL_MUNDO_LEN  = 2600;         // comprimento total da fase, em "px de mundo"
+  var BRAWL_CHAO_TOPO  = 250, BRAWL_CHAO_BASE = 350; // faixa vertical onde os personagens andam
+  var BRAWL_CHEFE_X    = BRAWL_MUNDO_LEN - 140;      // ponto da fase onde o chefe é enfrentado
+
+  // aranha na Dimensão 1 (Floresta), tubarão na Dimensão 2 (Lago) — reforça o tema de cada mundo
+  function _brawlChefeDoMundo(cfg) {
+    var nome = cfg.dim === 1 ? 'Aranha-de-jardim' : 'Tubarão-branco';
+    return PERS.find(function(p) { return p.nome === nome; }) || PERS[0];
+  }
+
+  function iniciarBrawl() {
+    var cfg = MUNDOS[E.mundoIdx];
+    telaBrawl   = document.getElementById('canvas-brawl');
+    pincelBrawl = telaBrawl.getContext('2d');
+
+    var pHeroi      = selIdx === 'fusao' ? E.fusao : PERS[selIdx];
+    var nvHeroi      = selIdx === 'fusao' ? 1 : (E.niveis[pHeroi.nome] || 1);
+    var vidaMaxHeroi = 60 + nvHeroi * 8 + cfg.dim * 5;
+    var poolInimigos = PERS.filter(function(p) { return p.nome !== pHeroi.nome; });
+    var chefe        = _brawlChefeDoMundo(cfg);
+    // evita que o chefe escolhido também apareça como capanga comum
+    poolInimigos = poolInimigos.filter(function(p) { return p.nome !== chefe.nome; });
+
+    BR = {
+      cfg: cfg,
+      camX: 0,
+      heroi: {
+        p: pHeroi, x: 60, y: 300, dir: 1,
+        vida: vidaMaxHeroi, vidaMax: vidaMaxHeroi,
+        atkTimer: 0, atkCooldown: 0, invuln: 0,
+      },
+      inimigos: [],
+      pool: poolInimigos,
+      chefe: chefe,
+      ondasTotal: 3,
+      ondaAtual: 0,
+      ondaGatilhos: [420, 1150, 1900],
+      ondaDisparada: [false, false, false],
+      chefeSpawnado: false,
+      chefeDerrotado: false,
+      score: 0,
+      estado: 'jogando', // 'jogando' | 'vitoria' | 'derrota'
+    };
+    particulas = []; textosFlutuantes = []; shakeTempo = 0;
+
+    document.getElementById('brawl-nome-heroi').textContent = pHeroi.emoji + ' ' + pHeroi.nome;
+    document.getElementById('brawl-painel-chefe').style.display = 'none';
+    document.getElementById('brawl-fim').style.display = 'none';
+    atualizarHUDBrawl();
+    brawlAtivo = true;
+    loopBrawl();
+  }
+
+  function reiniciarBrawl() {
+    document.getElementById('brawl-fim').style.display = 'none';
+    iniciarBrawl();
+  }
+
+  function pararBrawl() {
+    brawlAtivo = false;
+  }
+
+  function atualizarHUDBrawl() {
+    var pctH = Math.max(0, BR.heroi.vida / BR.heroi.vidaMax * 100);
+    var elBarraH = document.getElementById('brawl-bv-heroi');
+    elBarraH.style.width = pctH + '%';
+    elBarraH.className = 'preench vida' + (pctH < 30 ? ' perigo' : '');
+    document.getElementById('brawl-bv-heroi-txt').textContent =
+      Math.ceil(Math.max(0, BR.heroi.vida)) + '/' + BR.heroi.vidaMax;
+
+    var ondaTxt = BR.chefeSpawnado ? 'Enfrentando o chefe!' :
+      ('Onda ' + Math.min(BR.ondaAtual, BR.ondasTotal) + '/' + BR.ondasTotal);
+    document.getElementById('brawl-score').textContent = 'Pontos: ' + BR.score + ' · ' + ondaTxt;
+
+    var chefeEnt = BR.inimigos.find(function(e) { return e.tipo === 'chefe'; });
+    if (chefeEnt) {
+      var pctC = Math.max(0, chefeEnt.vida / chefeEnt.vidaMax * 100);
+      document.getElementById('brawl-bv-chefe').style.width = pctC + '%';
+    }
+  }
+
+  function _brawlSpawnOnda(idxOnda) {
+    var qtd = 3;
+    var baseX = BR.heroi.x + 640; // nasce fora da tela, à direita da câmera
+    for (var i = 0; i < qtd; i++) {
+      var esp = BR.pool[Math.floor(Math.random() * BR.pool.length)];
+      BR.inimigos.push({
+        esp: esp, tipo: 'grunt',
+        x: baseX + i * 46,
+        y: BRAWL_CHAO_TOPO + Math.random() * (BRAWL_CHAO_BASE - BRAWL_CHAO_TOPO),
+        dir: -1, vida: 2, vidaMax: 2,
+        atkCooldown: 90 + i * 30,
+        dano: 6 + BR.cfg.dim * 2,
+      });
+    }
+  }
+
+  function _brawlSpawnChefe() {
+    var vidaChefe = 16 + BR.cfg.dim * 6;
+    BR.inimigos.push({
+      esp: BR.chefe, tipo: 'chefe',
+      x: BRAWL_CHEFE_X + 40, y: (BRAWL_CHAO_TOPO + BRAWL_CHAO_BASE) / 2,
+      dir: -1, vida: vidaChefe, vidaMax: vidaChefe,
+      atkCooldown: 60, dano: 10 + BR.cfg.dim * 3,
+    });
+    BR.chefeSpawnado = true;
+    document.getElementById('brawl-painel-chefe').style.display = 'block';
+    document.getElementById('brawl-nome-chefe').textContent = BR.chefe.emoji + ' ' + BR.chefe.nome;
+  }
+
+  function loopBrawl() {
+    if (!brawlAtivo || modoAtual !== 'brawl') return;
+    if (BR.estado === 'jogando') atualizarBrawl();
+    desenharBrawl();
+    requestAnimationFrame(loopBrawl);
+  }
+
+  function atualizarBrawl() {
+    var h = BR.heroi;
+    var vel = 3.2;
+
+    var movX = 0, movY = 0;
+    if (capTeclas['ArrowLeft'])  { movX = -1; h.dir = -1; }
+    if (capTeclas['ArrowRight']) { movX = 1;  h.dir = 1; }
+    if (capTeclas['ArrowUp'])    movY = -1;
+    if (capTeclas['ArrowDown'])  movY = 1;
+
+    h.x = Math.max(30, Math.min(BRAWL_MUNDO_LEN - 30, h.x + movX * vel));
+    h.y = Math.max(BRAWL_CHAO_TOPO, Math.min(BRAWL_CHAO_BASE, h.y + movY * vel));
+
+    if (h.atkCooldown > 0) h.atkCooldown--;
+    if (h.atkTimer > 0)    h.atkTimer--;
+    if (h.invuln > 0)      h.invuln--;
+
+    // soco: tecla de espaço/x no teclado ou botão 👊 no toque
+    var pediuSoco = capTeclas['soco'] || capTeclas[' '] || capTeclas['x'] || capTeclas['X'];
+    if (pediuSoco && h.atkCooldown <= 0) {
+      h.atkTimer = 14; h.atkCooldown = 32;
+      somGolpe();
+      var alcance = 56;
+      for (var i = BR.inimigos.length - 1; i >= 0; i--) {
+        var e = BR.inimigos[i];
+        var dx = e.x - h.x, dy = e.y - h.y;
+        var naFrente = h.dir > 0 ? dx > -8 : dx < 8;
+        if (naFrente && Math.abs(dx) < alcance && Math.abs(dy) < 42) {
+          e.vida--;
+          criarParticulas(e.x - BR.camX, e.y, e.esp.cor);
+          criarTextoFlutuante(e.x - BR.camX, e.y, '💥', '#ffd700');
+          dispararShake(3, 4);
+          if (e.vida <= 0) {
+            BR.score += (e.tipo === 'chefe' ? 100 : 10);
+            if (e.tipo === 'chefe') BR.chefeDerrotado = true;
+            BR.inimigos.splice(i, 1);
+          }
+        }
+      }
+    }
+
+    // câmera acompanha o herói, travada nos limites da fase
+    BR.camX = Math.max(0, Math.min(BRAWL_MUNDO_LEN - 600, h.x - 200));
+
+    // dispara cada onda quando o herói avança o suficiente na fase
+    for (var w = 0; w < BR.ondaGatilhos.length; w++) {
+      if (!BR.ondaDisparada[w] && h.x > BR.ondaGatilhos[w]) {
+        BR.ondaDisparada[w] = true;
+        BR.ondaAtual = w + 1;
+        _brawlSpawnOnda(w);
+      }
+    }
+    // chefe só aparece depois que todas as ondas foram derrotadas e o herói chega perto do fim
+    var todasOndasLimpas = BR.ondaDisparada.every(function(v) { return v; }) &&
+      BR.inimigos.filter(function(e) { return e.tipo === 'grunt'; }).length === 0;
+    if (!BR.chefeSpawnado && todasOndasLimpas && h.x > BRAWL_CHEFE_X - 260) {
+      _brawlSpawnChefe();
+    }
+
+    // IA dos inimigos: perseguem o herói e batem por contato
+    for (var j = 0; j < BR.inimigos.length; j++) {
+      var ei = BR.inimigos[j];
+      var edx = h.x - ei.x, edy = h.y - ei.y;
+      var edist = Math.sqrt(edx * edx + edy * edy);
+      var velInimigo = ei.tipo === 'chefe' ? 1.6 : 1.15;
+      if (edist > 40) {
+        ei.x += (edx / edist) * velInimigo;
+        ei.y += (edy / edist) * velInimigo;
+      }
+      ei.dir = edx >= 0 ? 1 : -1;
+      if (ei.atkCooldown > 0) ei.atkCooldown--;
+      if (edist < 36 && ei.atkCooldown <= 0 && h.invuln <= 0) {
+        ei.atkCooldown = ei.tipo === 'chefe' ? 70 : 100;
+        h.vida = Math.max(0, h.vida - ei.dano);
+        h.invuln = 40;
+        somDano();
+        dispararShake(5, 6);
+        criarTextoFlutuante(h.x - BR.camX, h.y, '-' + ei.dano, '#ff5252');
+      }
+    }
+
+    atualizarHUDBrawl();
+
+    if (h.vida <= 0) _brawlFim(false);
+    else if (BR.chefeSpawnado && BR.chefeDerrotado) _brawlFim(true);
+  }
+
+  function _brawlFim(vitoria) {
+    BR.estado = vitoria ? 'vitoria' : 'derrota';
+    brawlAtivo = false;
+    if (vitoria) {
+      somVitoria();
+      if (selIdx !== 'fusao') {
+        E.niveis[BR.heroi.p.nome] = (E.niveis[BR.heroi.p.nome] || 1) + 1;
+        salvarProgresso();
+      }
+    } else {
+      somDerrota();
+    }
+    desenharBrawl();
+    document.getElementById('brawl-fim-msg').textContent = vitoria ?
+      '🏆 Vitória! ' + BR.heroi.p.nome + ' derrotou ' + BR.chefe.nome + '! +' + BR.score + ' pontos' :
+      '💀 ' + BR.heroi.p.nome + ' foi derrotado... Tente de novo!';
+    document.getElementById('brawl-fim').style.display = 'flex';
+  }
+
+  function desenharBrawl() {
+    var ctx = pincelBrawl, W = 600, H = 380;
+    var cfg = BR.cfg;
+
+    var grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, cfg.dimCor);
+    grad.addColorStop(1, '#050a12');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+    ctx.save();
+    if (shakeTempo > 0) {
+      ctx.translate((Math.random() - 0.5) * shakeIntensidade, (Math.random() - 0.5) * shakeIntensidade);
+      shakeTempo--;
+    }
+
+    // chão escurecido + linhas de "parallax" que se movem com a câmera
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(0, BRAWL_CHAO_BASE + 10, W, H - BRAWL_CHAO_BASE - 10);
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    var desloc = BR.camX % 60;
+    for (var lx = -desloc; lx < W; lx += 60) {
+      ctx.beginPath(); ctx.moveTo(lx, BRAWL_CHAO_TOPO - 10); ctx.lineTo(lx, H); ctx.stroke();
+    }
+
+    // barra de progresso até o chefe
+    var progresso = Math.min(1, BR.heroi.x / BRAWL_CHEFE_X);
+    ctx.fillStyle = 'rgba(0,240,255,0.15)'; ctx.fillRect(10, 10, 120, 6);
+    ctx.fillStyle = '#00f0ff';             ctx.fillRect(10, 10, 120 * progresso, 6);
+
+    // desenha inimigos + herói ordenados por profundidade (y)
+    var todos = BR.inimigos.map(function(e) { return { ent: e, ehHeroi: false }; });
+    todos.push({ ent: BR.heroi, ehHeroi: true });
+    todos.sort(function(a, b) { return a.ent.y - b.ent.y; });
+    todos.forEach(function(item) {
+      var sx = item.ent.x - BR.camX, sy = item.ent.y;
+      if (sx < -40 || sx > 640) return;
+      _brawlDesenharEntidade(ctx, item.ent, sx, sy, item.ehHeroi);
+    });
+
+    atualizarEDesenharParticulas(ctx);
+    atualizarEDesenharTextosFlutuantes(ctx);
+    ctx.restore();
+  }
+
+  function _brawlDesenharEntidade(ctx, e, x, y, ehHeroi) {
+    var esc = e.tipo === 'chefe' ? 1.5 : 1;
+    // pisca enquanto invulnerável após levar dano (só o herói tem invuln)
+    if (ehHeroi && e.invuln > 0 && Math.floor(Date.now() / 80) % 2 === 0) return;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(x, y + 26 * esc, 22 * esc, 7 * esc, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // avanço visual do soco na direção que o herói está olhando
+    var offAtk = 0;
+    if (ehHeroi && e.atkTimer > 0) {
+      offAtk = Math.sin((e.atkTimer / 14) * Math.PI) * 16 * e.dir;
+    }
+
+    var emojiP = ehHeroi ? e.p : e.esp;
+    ctx.save();
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = emojiP.cor || '#00f0ff';
+    if (e.dir < 0) { ctx.translate(x, 0); ctx.scale(-1, 1); ctx.translate(-x, 0); }
+    _desenharEmoji(ctx, emojiP.emoji, x + offAtk, y, Math.round(50 * esc));
+    ctx.restore();
+
+    if (e.tipo === 'grunt') {
+      var pct = e.vida / e.vidaMax;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x - 16, y - 38, 32, 4);
+      ctx.fillStyle = pct > 0.5 ? '#4caf50' : '#f44336'; ctx.fillRect(x - 16, y - 38, 32 * pct, 4);
+    }
   }
 
   // =====================================================
