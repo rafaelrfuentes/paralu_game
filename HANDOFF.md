@@ -1,17 +1,82 @@
 # Handoff — Paralu
 
-Última sessão: **2026-06-27**
+Última sessão: **2026-07-05**
 
 ## Estado atual
 
 - **URL pública:** https://rafaelrfuentes.github.io/paralu_game/
 - **Repo:** https://github.com/rafaelrfuentes/paralu_game (público)
 - **Local:** `~/code/paralu_game/`
-- **Branch main:** commit `53d8062`
+- **Branch main:** commit `2c17438` (não inclui o fix mais recente — ver pendência abaixo)
+- **Branch agy-dev-paralu:** commit `1e3c2b6` (à frente da main, aguardando merge)
 
 ---
 
-## O que foi feito nesta sessão
+## ⚠️ Pendência: aguardando validação do usuário pra mesclar na main
+
+Commit `1e3c2b6` em `agy-dev-paralu` (fixes do Combate de Rua, ver seção da sessão
+2026-07-05 abaixo) **ainda não foi mesclado na main**. Perguntei ao usuário "posso
+mesclar?" e a sessão foi encerrada antes da resposta. Próxima sessão: confirmar
+com o usuário e rodar `git checkout main && git merge agy-dev-paralu && git push`,
+depois voltar para `agy-dev-paralu`.
+
+---
+
+## Sessão 2026-07-05 — Novo modo "Combate de Rua" (beat 'em up) + fixes
+
+### 1. Novo modo de jogo: Combate de Rua
+
+Beat 'em up estilo *Cadillacs and Dinosaurs* (arcade Capcom), reaproveitando os
+sprites/emoji dos 21 personagens existentes como heróis jogáveis. Acessível pelo
+botão 👊 na tela do mundo, usa a mesma tela de seleção de personagem da batalha
+(botão de confirmar muda o texto conforme o destino).
+
+- Tela nova `#tela-brawl`: canvas 600×380 com scroll lateral, D-pad + botão de
+  soco (touch/teclado), painel de vida do herói e do chefe.
+- 3 ondas de capangas (personagens aleatórios do elenco, exceto o herói e o
+  chefe) + luta contra chefe único por mundo (Aranha-de-jardim nos mundos da
+  dimensão 1, Tubarão-branco nos da dimensão 2).
+- Reaproveita `_desenharEmoji`, partículas, texto flutuante e screen-shake já
+  existentes no jogo — sem duplicar renderização.
+- Commit `2c17438` (mesclado na main na hora, a pedido do usuário).
+
+### 2. Fix: inimigos não atacavam + jogo "bugava" depois do chefe
+
+Usuário reportou dois bugs no modo novo. Investigação com Playwright (ambiente
+isolado fora do repo, ver nota abaixo) revelou duas causas reais:
+
+- **Zona morta na IA**: inimigo parava de perseguir a 40px de distância mas só
+  atacava a menos de 36px — ficava parado pra sempre sem nunca acertar o herói.
+  Corrigido: distância de parada reduzida pra 26px (dentro do alcance de ataque).
+- **Câmera sem trava**: a câmera seguia o herói livremente, então um jogador
+  andando pra frente (comportamento natural) sempre deixava os inimigos (mais
+  lentos) pra trás — sem combate real, exatamente como "inimigos não atacam".
+  Corrigido: adicionado `BR.travado` — tela trava (sem scroll, herói preso na
+  área visível) durante cada onda de capangas e durante a luta do chefe, como
+  nos beat 'em up clássicos de arcade. Destrava quando os capangas da onda
+  atual caem.
+- Bônus: zera `capTeclas` de movimento/soco ao iniciar o combate de rua, pra
+  evitar estado de tecla residual entre transições de tela.
+- Testado via Playwright: ciclo completo onda→onda→chefe→vitória→"Tentar de
+  novo"→voltar ao mundo, sem erros JS. Não foi possível reproduzir um crash
+  explícito após matar o chefe mesmo antes do fix — hipótese é que era
+  percepção/efeito colateral do bug de câmera (combate trivial demais fazia
+  a vitória parecer "quebrada").
+- Commit `1e3c2b6` em `agy-dev-paralu`, **ainda não mesclado na main** (ver
+  pendência no topo do arquivo).
+
+### Nota técnica: ambiente de teste Playwright
+
+Instalado inteiramente fora do repo (pasta de sessão do agente, não em
+`~/code/paralu_game/`) pra respeitar a regra de "sem dependências/build step"
+do projeto. Scripts usam `page.evaluate()` pra chamar funções do jogo
+diretamente (`mostrarMapa()`, `confirmarBatalha()`, inspecionar `window.BR`) —
+padrão rápido e eficaz pra testar este jogo em Canvas sem automação de UI
+completa. Útil reaproveitar esse padrão em sessões futuras de debug.
+
+---
+
+## O que foi feito na sessão 2026-06-27
 
 ### 1. Pokédex de criaturas — implementação completa
 
