@@ -2207,6 +2207,7 @@ canvas#campo {
     BR = {
       cfg: cfg,
       camX: 0,
+      travado: false, // tela travada (sem scroll) enquanto há inimigos vivos na onda/chefe atual
       heroi: {
         p: pHeroi, x: 60, y: 300, dir: 1,
         vida: vidaMaxHeroi, vidaMax: vidaMaxHeroi,
@@ -2225,6 +2226,9 @@ canvas#campo {
       estado: 'jogando', // 'jogando' | 'vitoria' | 'derrota'
     };
     particulas = []; textosFlutuantes = []; shakeTempo = 0;
+    // zera teclas/toques que possam ter ficado "presas" de uma tela anterior
+    capTeclas['ArrowUp'] = capTeclas['ArrowDown'] = capTeclas['ArrowLeft'] = capTeclas['ArrowRight'] = false;
+    capTeclas['soco'] = capTeclas[' '] = capTeclas['x'] = capTeclas['X'] = false;
 
     document.getElementById('brawl-nome-heroi').textContent = pHeroi.emoji + ' ' + pHeroi.nome;
     document.getElementById('brawl-painel-chefe').style.display = 'none';
@@ -2252,7 +2256,7 @@ canvas#campo {
       Math.ceil(Math.max(0, BR.heroi.vida)) + '/' + BR.heroi.vidaMax;
 
     var ondaTxt = BR.chefeSpawnado ? 'Enfrentando o chefe!' :
-      ('Onda ' + Math.min(BR.ondaAtual, BR.ondasTotal) + '/' + BR.ondasTotal);
+      ('Onda ' + Math.min(BR.ondaAtual, BR.ondasTotal) + '/' + BR.ondasTotal + (BR.travado ? ' — derrote todos!' : ''));
     document.getElementById('brawl-score').textContent = 'Pontos: ' + BR.score + ' · ' + ondaTxt;
 
     var chefeEnt = BR.inimigos.find(function(e) { return e.tipo === 'chefe'; });
@@ -2276,6 +2280,9 @@ canvas#campo {
         dano: 6 + BR.cfg.dim * 2,
       });
     }
+    // trava a tela (sem scroll) até a onda ser derrotada — igual aos beat 'em up
+    // clássicos: sem isso o herói sempre foge andando e os inimigos nunca alcançam.
+    BR.travado = true;
   }
 
   function _brawlSpawnChefe() {
@@ -2287,6 +2294,7 @@ canvas#campo {
       atkCooldown: 60, dano: 10 + BR.cfg.dim * 3,
     });
     BR.chefeSpawnado = true;
+    BR.travado = true; // luta contra o chefe também trava a tela até o fim da fase
     document.getElementById('brawl-painel-chefe').style.display = 'block';
     document.getElementById('brawl-nome-chefe').textContent = BR.chefe.emoji + ' ' + BR.chefe.nome;
   }
@@ -2310,6 +2318,12 @@ canvas#campo {
 
     h.x = Math.max(30, Math.min(BRAWL_MUNDO_LEN - 30, h.x + movX * vel));
     h.y = Math.max(BRAWL_CHAO_TOPO, Math.min(BRAWL_CHAO_BASE, h.y + movY * vel));
+    // com a tela travada (onda/chefe ativos), o herói fica preso na área visível
+    // atual — sem isso ele sempre corre na frente dos inimigos, que são mais
+    // lentos, e eles nunca alcançam pra atacar.
+    if (BR.travado) {
+      h.x = Math.max(BR.camX + 24, Math.min(BR.camX + 576, h.x));
+    }
 
     if (h.atkCooldown > 0) h.atkCooldown--;
     if (h.atkTimer > 0)    h.atkTimer--;
@@ -2339,8 +2353,10 @@ canvas#campo {
       }
     }
 
-    // câmera acompanha o herói, travada nos limites da fase
-    BR.camX = Math.max(0, Math.min(BRAWL_MUNDO_LEN - 600, h.x - 200));
+    // câmera só acompanha o herói quando a tela não está travada por uma onda/chefe
+    if (!BR.travado) {
+      BR.camX = Math.max(0, Math.min(BRAWL_MUNDO_LEN - 600, h.x - 200));
+    }
 
     // dispara cada onda quando o herói avança o suficiente na fase
     for (var w = 0; w < BR.ondaGatilhos.length; w++) {
@@ -2350,9 +2366,13 @@ canvas#campo {
         _brawlSpawnOnda(w);
       }
     }
+    // destrava a tela assim que todos os capangas da onda atual caem
+    var restamCapangas = BR.inimigos.filter(function(e) { return e.tipo === 'grunt'; }).length;
+    if (BR.travado && !BR.chefeSpawnado && restamCapangas === 0 && BR.ondaAtual > 0) {
+      BR.travado = false;
+    }
     // chefe só aparece depois que todas as ondas foram derrotadas e o herói chega perto do fim
-    var todasOndasLimpas = BR.ondaDisparada.every(function(v) { return v; }) &&
-      BR.inimigos.filter(function(e) { return e.tipo === 'grunt'; }).length === 0;
+    var todasOndasLimpas = BR.ondaDisparada.every(function(v) { return v; }) && restamCapangas === 0;
     if (!BR.chefeSpawnado && todasOndasLimpas && h.x > BRAWL_CHEFE_X - 260) {
       _brawlSpawnChefe();
     }
@@ -2363,7 +2383,9 @@ canvas#campo {
       var edx = h.x - ei.x, edy = h.y - ei.y;
       var edist = Math.sqrt(edx * edx + edy * edy);
       var velInimigo = ei.tipo === 'chefe' ? 1.6 : 1.15;
-      if (edist > 40) {
+      // zona de parada tem que ficar DENTRO do alcance de ataque (36px), senão o
+      // inimigo trava a uma distância onde nunca consegue golpear (bug do "não ataca").
+      if (edist > 26) {
         ei.x += (edx / edist) * velInimigo;
         ei.y += (edy / edist) * velInimigo;
       }
