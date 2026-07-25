@@ -1,24 +1,13 @@
 # Handoff — Paralu
 
-Última sessão: **2026-07-05**
+Última sessão: **2026-07-25**
 
 ## Estado atual
 
 - **URL pública:** https://rafaelrfuentes.github.io/paralu_game/
 - **Repo:** https://github.com/rafaelrfuentes/paralu_game (público)
 - **Local:** `~/code/paralu_game/`
-- **Branch main:** commit `2c17438` (não inclui o fix mais recente — ver pendência abaixo)
-- **Branch agy-dev-paralu:** commit `1e3c2b6` (à frente da main, aguardando merge)
-
----
-
-## ⚠️ Pendência: aguardando validação do usuário pra mesclar na main
-
-Commit `1e3c2b6` em `agy-dev-paralu` (fixes do Combate de Rua, ver seção da sessão
-2026-07-05 abaixo) **ainda não foi mesclado na main**. Perguntei ao usuário "posso
-mesclar?" e a sessão foi encerrada antes da resposta. Próxima sessão: confirmar
-com o usuário e rodar `git checkout main && git merge agy-dev-paralu && git push`,
-depois voltar para `agy-dev-paralu`.
+- **Branch main:** commit `f3cd056` (sincronizada com agy-dev-paralu, sem pendências)
 
 ---
 
