@@ -20,3 +20,7 @@ logs/
 *.jpg
 *.png
 *.jpeg
+
+# Workspaces temporárias de sessão (doutrina: ops/meta/file-lifecycle-policy.md)
+_tmpcc_*/
+_tmpcc_*
