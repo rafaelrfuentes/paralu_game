@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # CLAUDE.md — paralu_game
 
 Doutrina específica deste projeto. Lê junto com o `~/.claude/CLAUDE.md` global.
