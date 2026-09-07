@@ -1,7 +1,7 @@
 <!-- memoria-projeto:inicio -->
 ## Memória do projeto (gerado — não editar aqui; fonte: ~/.claude/projects/C--Users-rafae-code-paralu_game/memory/)
 
-Gerado por `ops/gen_project_memory.py` em 2026-09-06; qualquer harness lê este arquivo no turno 1.
+Gerado por `ops/gen_project_memory.py` a partir do MEMORY.md da fonte; qualquer harness lê este arquivo no turno 1.
 
 # Memory index — C--Users-rafae-code-paralu_game
 
